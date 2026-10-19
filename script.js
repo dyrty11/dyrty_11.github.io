@@ -27,14 +27,15 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('a[href$=".html"]').forEach(link => {
         link.addEventListener('click', function(e) {
             const href = this.getAttribute('href');
-            if (href.startsWith('#') || this.target === '_blank') return;
+            // Пропускаем внешние ссылки, якоря и ссылки проектов
+            if (href.startsWith('#') || this.target === '_blank' || href === 'voidforge.html') return;
             e.preventDefault(); 
             document.body.classList.add('page-exit');
             setTimeout(() => { window.location.href = href; }, 300);
         });
     });
 
-    // --- 3. Загрузка и рендеринг проектов (с защитой от XSS) ---
+    // --- 3. Загрузка и рендеринг проектов ---
     const projectsGrid = document.getElementById('projectsGrid');
     if (projectsGrid) {
         const icons = {
@@ -52,9 +53,13 @@ document.addEventListener('DOMContentLoaded', () => {
             { "title": "Магазин одежды", "category": "website", "description": "E-commerce платформа.", "tags": ["React"], "type": "link", "link": "https://example.com", "buttonText": "Перейти на сайт", "icon": "shopping-bag", "color": "#8b5cf6" }
         ];
 
+        // ИСПРАВЛЕННАЯ ФУНКЦИЯ (теперь разрешает любые локальные страницы)
         function sanitizeURL(url) {
-            if (typeof url === 'string' && (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('files/'))) {
-                return url;
+            if (typeof url === 'string') {
+                const lowerUrl = url.toLowerCase().trim();
+                if (!lowerUrl.startsWith('javascript:') && !lowerUrl.startsWith('data:')) {
+                    return url;
+                }
             }
             return '#';
         }
@@ -144,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 4. Обработка формы контактов и валидация файлов ---
+    // --- 4. Обработка формы контактов ---
     const contactForm = document.getElementById('contactForm');
     const fileInput = document.getElementById('fileInput');
     const fileName = document.getElementById('fileName');
@@ -154,43 +159,28 @@ document.addEventListener('DOMContentLoaded', () => {
             if (this.files && this.files.length > 0) {
                 const file = this.files[0];
                 const allowedTypes = ['application/pdf', 'application/zip', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/png', 'image/jpeg'];
-                const maxSize = 5 * 1024 * 1024; // 5MB
+                const maxSize = 5 * 1024 * 1024;
 
                 if (!allowedTypes.includes(file.type)) {
                     alert('Ошибка: Недопустимый тип файла.');
-                    this.value = ''; 
-                    fileName.textContent = 'Файл не выбран';
-                    fileName.style.color = 'var(--text-muted)';
-                    return;
+                    this.value = ''; fileName.textContent = 'Файл не выбран'; return;
                 }
-
                 if (file.size > maxSize) {
                     alert('Ошибка: Файл больше 5MB.');
-                    this.value = '';
-                    fileName.textContent = 'Файл не выбран';
-                    fileName.style.color = 'var(--text-muted)';
-                    return;
+                    this.value = ''; fileName.textContent = 'Файл не выбран'; return;
                 }
-
                 fileName.textContent = file.name;
-                fileName.style.color = 'var(--primary)';
-                fileName.style.fontWeight = '500';
             } else {
                 fileName.textContent = 'Файл не выбран';
-                fileName.style.color = 'var(--text-muted)';
-                fileName.style.fontWeight = 'normal';
             }
         });
     }
 
-    // Отправка формы через Formspree (AJAX)
     if (contactForm) {
         contactForm.addEventListener('submit', async function(e) {
             e.preventDefault(); 
-            
             const submitBtn = this.querySelector('.submit-btn');
             const originalText = submitBtn.textContent;
-            
             submitBtn.disabled = true;
             submitBtn.textContent = 'Отправка...';
 
@@ -206,11 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (response.ok) {
                     alert('Сообщение успешно отправлено! Я свяжусь с вами.');
                     this.reset();
-                    if (fileName) {
-                        fileName.textContent = 'Файл не выбран';
-                        fileName.style.color = 'var(--text-muted)';
-                        fileName.style.fontWeight = 'normal';
-                    }
+                    if (fileName) fileName.textContent = 'Файл не выбран';
                 } else {
                     alert('Ошибка при отправке. Пожалуйста, попробуйте позже.');
                 }
