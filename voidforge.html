@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⬡ VoidForge — Генератор Сайтов</title>
+    <style>
+        :root {
+            --bg: #0b0b0f;
+            --surface: #13131a;
+            --surface2: #1a1a24;
+            --border: #222233;
+            --primary: #a78bfa;
+            --primary2: #7c3aed;
+            --accent: #06b6d4;
+            --text: #e2e8f0;
+            --text2: #94a3b8;
+            --success: #10b981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            background-image:
+                radial-gradient(ellipse at 15% 20%, rgba(167, 139, 250, 0.04) 0%, transparent 55%),
+                radial-gradient(ellipse at 85% 75%, rgba(6, 182, 212, 0.04) 0%, transparent 55%),
+                radial-gradient(ellipse at 50% 50%, rgba(124, 58, 237, 0.02) 0%, transparent 70%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text);
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+            background-size: 50px 50px;
+            mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+            -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 780px;
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 40px 32px;
+            border: 1px solid var(--border);
+            box-shadow:
+                0 4px 6px -1px rgba(0, 0, 0, 0.3),
+                0 20px 40px -10px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(10px);
+        }
+
+        .hex-decoration {
+            position: absolute;
+            top: -30px;
+            right: -30px;
+            width: 80px;
+            height: 80px;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.3;
+        }
+        .hex-decoration::before {
+            content: '⬡';
+            font-size: 70px;
+            color: var(--primary);
+            filter: blur(15px);
+            position: absolute;
+            animation: hexFloat 6s ease-in-out infinite;
+        }
+        @keyframes hexFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.2; }
+            50% { transform: translateY(-20px) rotate(15deg); opacity: 0.5; }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+            position: relative;
+            z-index: 1;
+        }
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 4px;
+        }
+        .logo-icon {
+            font-size: 38px;
+            filter: drop-shadow(0 0 20px rgba(167, 139, 250, 0.5));
+            animation: logoGlow 2s ease-in-out infinite;
+        }
+        @keyframes logoGlow {
+            0%, 100% { filter: drop-shadow(0 0 20px rgba(167, 139, 250, 0.5)); }
+            50% { filter: drop-shadow(0 0 35px rgba(167, 139, 250, 0.9)); }
+        }
+        .header h1 {
+            font-size: 2em;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -1px;
+        }
+        .header h1 span { color: var(--primary); }
+        .header .subtitle {
+            color: var(--text2);
+            font-size: 0.8em;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 400;
+            margin-top: 4px;
+        }
+
+        .section {
+            background: var(--surface2);
+            border-radius: 14px;
+            padding: 20px 22px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+        .section:hover {
+            border-color: rgba(167, 139, 250, 0.3);
+            box-shadow: 0 0 30px rgba(167, 139, 250, 0.04);
+        }
+        .section-title {
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--primary);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-title .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 2px;
+            background: var(--primary);
+            animation: dotPulse 2s ease-in-out infinite;
+        }
+        @keyframes dotPulse {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.3); }
+        }
+
+        input[type="file"] { display: none; }
+        
+        .file-upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 10px;
+            padding: 22px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            background: rgba(0, 0, 0, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+        .file-upload-area::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(167, 139, 250, 0.05), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .file-upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(167, 139, 250, 0.04);
+        }
+        .file-upload-area:hover::after { opacity: 1; }
+        .file-upload-area .upload-icon {
+            font-size: 32px;
+            display: block;
+            margin-bottom: 6px;
+            position: relative;
+            z-index: 1;
+        }
+        .file-upload-area .upload-text {
+            font-size: 0.8em;
+            color: var(--text2);
+            position: relative;
+            z-index: 1;
+        }
+        .file-upload-area .file-name {
+            font-size: 0.7em;
+            color: var(--primary);
+            margin-top: 6px;
+            font-weight: 500;
+            word-break: break-all;
+            position: relative;
+            z-index: 1;
+        }
+
+        .preview-row {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .preview-mini {
+            flex: 1;
+            min-width: 130px;
+            background: var(--surface2);
+            border-radius: 10px;
+            padding: 14px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+        .preview-mini img {
+            max-width: 100%;
+            max-height: 85px;
+            border-radius: 6px;
+            object-fit: cover;
+        }
+        .preview-mini .no-preview {
+            color: var(--text2);
+            font-size: 0.7em;
+            padding: 14px 0;
+            opacity: 0.5;
+        }
+        .preview-mini .mini-label {
+            font-size: 0.65em;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--text2);
+            margin-bottom: 6px;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+            position: relative;
+            z-index: 1;
+        }
+        .btn {
+            padding: 12px 22px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.85em;
+            cursor: pointer;
+            letter-spacing: 0.3px;
+            transition: all 0.25s ease;
+            text-transform: uppercase;
+            font-family: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        .btn:hover::after { opacity: 1; }
+        
+        .btn-generate {
+            flex: 1;
+            min-width: 180px;
+            background: var(--primary2);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+            letter-spacing: 1px;
+        }
+        .btn-generate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(124, 58, 237, 0.55);
+        }
+        .btn-generate:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(124, 58, 237, 0.3);
+        }
+        
+        .btn-download {
+            background: var(--surface2);
+            color: #fff;
+            border: 1px solid var(--border);
+            display: none;
+            align-items: center;
+            gap: 6px;
+            justify-content: center;
+        }
+        .btn-download.visible { display: flex; }
+        .btn-download:hover {
+            border-color: var(--success);
+            color: var(--success);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+        }
+        
+        .btn-preview {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+            display: none;
+        }
+        .btn-preview.visible { display: inline-flex; }
+        .btn-preview:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.2);
+        }
+
+        .generated-info {
+            display: none;
+            margin-top: 14px;
+            padding: 14px 18px;
+            background: rgba(16, 185, 129, 0.06);
+            border-radius: 10px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            text-align: center;
+            color: var(--success);
+            font-weight: 500;
+            font-size: 0.8em;
+            letter-spacing: 0.5px;
+            position: relative;
+            z-index: 1;
+        }
+        .generated-info.visible {
+            display: block;
+            animation: slideUp 0.4s ease;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 2px;
+            background: var(--text2);
+            margin-right: 6px;
+        }
+        .status-dot.ready {
+            background: var(--success);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
+        }
+
+        .filename-hint {
+            display: inline-block;
+            background: rgba(167, 139, 250, 0.1);
+            color: var(--primary);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.9em;
+            letter-spacing: 0;
+            text-transform: none;
+        }
+
+        /* --- ОПТИМИЗАЦИЯ ПОД МОБИЛЬНЫЕ --- */
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            .container { padding: 25px 18px; border-radius: 16px; }
+            .header h1 { font-size: 1.6em; }
+            .logo-icon { font-size: 32px; }
+            .section { padding: 16px; }
+            .file-upload-area { padding: 18px; }
+            .btn-row { flex-direction: column; }
+            .btn { width: 100%; padding: 14px; font-size: 0.9em; }
+            .preview-row { flex-direction: column; gap: 10px; }
+            .preview-mini { min-width: 100%; }
+            .hex-decoration { display: none; }
+        }
+        @media (max-width: 380px) {
+            .container { padding: 20px 12px; }
+            .header h1 { font-size: 1.4em; }
+            .section-title { font-size: 0.7em; letter-spacing: 1px; }
+            .file-upload-area .upload-icon { font-size: 26px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="hex-decoration"></div>
+
+        <div class="header">
+            <div class="logo">
+                <span class="logo-icon">⬡</span>
+                <h1>Void<span>Forge</span></h1>
+            </div>
+            <p class="subtitle">Генератор сайтов</p>
+        </div>
+
+        <!-- Изображение -->
+        <div class="section">
+            <div class="section-title">
+                <span class="dot"></span> Изображение
+            </div>
+            <div class="file-upload-area" id="imageDropZone" onclick="document.getElementById('imageInput').click()">
+                <span class="upload-icon">🖼️</span>
+                <span class="upload-text">Перетащите или нажмите</span>
+                <span class="file-name" id="imageFileName">Не выбрано</span>
+            </div>
+            <input type="file" id="imageInput" accept="image/*">
+        </div>
+
+        <!-- Аудио -->
+        <div class="section">
+            <div class="section-title">
+                <span class="dot"></span> Аудио
+            </div>
+            <div class="file-upload-area" id="audioDropZone" onclick="document.getElementById('audioInput').click()">
+                <span class="upload-icon">🎧</span>
+                <span class="upload-text">Перетащите или нажмите</span>
+                <span class="file-name" id="audioFileName">Не выбрано</span>
+            </div>
+            <input type="file" id="audioInput" accept="audio/*">
+        </div>
+
+        <!-- Превью -->
+        <div class="preview-row">
+            <div class="preview-mini">
+                <div class="mini-label">Превью</div>
+                <img id="imagePreview" src="" alt="" style="display:none;">
+                <div class="no-preview" id="noImagePreview">—</div>
+            </div>
+            <div class="preview-mini">
+                <div class="mini-label">Статус</div>
+                <div style="padding:10px 0;">
+                    <span id="audioStatus" style="font-size:0.75em;color:var(--text2);">
+                        <span class="status-dot"></span>Ожидание
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Кнопки -->
+        <div class="btn-row">
+            <button class="btn btn-generate" id="btnGenerate" onclick="generateSite()">
+                ⚡ Сгенерировать
+            </button>
+            <button class="btn btn-download" id="btnDownload" onclick="downloadSite()">
+                ⬇ Скачать
+            </button>
+            <button class="btn btn-preview" id="btnPreview" onclick="previewSite()">
+                ◉ Предпросмотр
+            </button>
+        </div>
+
+        <div class="generated-info" id="generatedInfo">
+            ✓ Сайт готов! Файл сохранится как <span class="filename-hint">index.html</span>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            let imageBase64 = null;
+            let imageMime = null;
+            let audioBase64 = null;
+            let audioMime = null;
+            let generatedHTML = null;
+
+            const imageInput = document.getElementById('imageInput');
+            const audioInput = document.getElementById('audioInput');
+            const imageFileName = document.getElementById('imageFileName');
+            const audioFileName = document.getElementById('audioFileName');
+            const imagePreview = document.getElementById('imagePreview');
+            const noImagePreview = document.getElementById('noImagePreview');
+            const audioStatus = document.getElementById('audioStatus');
+            const btnDownload = document.getElementById('btnDownload');
+            const btnPreview = document.getElementById('btnPreview');
+            const generatedInfo = document.getElementById('generatedInfo');
+
+            function setupDragDrop(zone, input, handler) {
+                zone.addEventListener('dragover', e => {
+                    e.preventDefault();
+                    zone.style.borderColor = 'var(--primary)';
+                    zone.style.background = 'rgba(167,139,250,0.06)';
+                });
+                zone.addEventListener('dragleave', () => {
+                    zone.style.borderColor = 'var(--border)';
+                    zone.style.background = 'rgba(0,0,0,0.25)';
+                });
+                zone.addEventListener('drop', e => {
+                    e.preventDefault();
+                    zone.style.borderColor = 'var(--border)';
+                    zone.style.background = 'rgba(0,0,0,0.25)';
+                    const f = e.dataTransfer.files[0];
+                    if (f) handler(f);
+                });
+                input.addEventListener('change', function() {
+                    if (this.files[0]) handler(this.files[0]);
+                });
+            }
+
+            function handleImage(file) {
+                if (!file.type.startsWith('image/')) return;
+                imageMime = file.type;
+                imageFileName.textContent = file.name;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imageBase64 = e.target.result.split(',')[1];
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                    noImagePreview.style.display = 'none';
+                    resetOutput();
+                };
+                reader.readAsDataURL(file);
+            }
+
+            function handleAudio(file) {
+                if (!file.type.startsWith('audio/')) return;
+                audioMime = file.type;
+                audioFileName.textContent = file.name;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    audioBase64 = e.target.result.split(',')[1];
+                    audioStatus.innerHTML = '<span class="status-dot ready"></span>Готово';
+                    audioStatus.style.color = 'var(--success)';
+                    resetOutput();
+                };
+                reader.readAsDataURL(file);
+            }
+
+            setupDragDrop(document.getElementById('imageDropZone'), imageInput, handleImage);
+            setupDragDrop(document.getElementById('audioDropZone'), audioInput, handleAudio);
+
+            function resetOutput() {
+                generatedHTML = null;
+                btnDownload.classList.remove('visible');
+                btnPreview.classList.remove('visible');
+                generatedInfo.classList.remove('visible');
+            }
+
+            function generateSite() {
+                if (!imageBase64 || !audioBase64) {
+                    alert('⚠️ Загрузите изображение и аудиофайл.');
+                    return;
+                }
+                const imgSrc = 'data:' + imageMime + ';base64,' + imageBase64;
+                const audioSrc = 'data:' + audioMime + ';base64,' + audioBase64;
+                generatedHTML = buildSite(imgSrc, audioSrc, audioMime);
+                btnDownload.classList.add('visible');
+                btnPreview.classList.add('visible');
+                generatedInfo.classList.add('visible');
+                generatedInfo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            function buildSite(imgSrc, audioSrc, mime) {
+                return [
+                    '<!DOCTYPE html>',
+                    '<html lang="ru">',
+                    '<head>',
+                    '<meta charset="UTF-8">',
+                    '<meta name="viewport" content="width=device-width,initial-scale=1.0">',
+                    '<title>⬡ Void Page</title>',
+                    '<style>',
+                    '*{margin:0;padding:0;box-sizing:border-box}',
+                    'body{',
+                    'background:#08080d;',
+                    'background-image:',
+                    'radial-gradient(ellipse at 30% 20%,rgba(167,139,250,0.06) 0%,transparent 55%),',
+                    'radial-gradient(ellipse at 70% 70%,rgba(6,182,212,0.05) 0%,transparent 55%),',
+                    'radial-gradient(ellipse at 50% 50%,rgba(124,58,237,0.03) 0%,transparent 70%);',
+                    'min-height:100vh;',
+                    'display:flex;',
+                    'align-items:center;',
+                    'justify-content:center;',
+                    'font-family:\'Inter\',\'Segoe UI\',system-ui,sans-serif;',
+                    'cursor:pointer;',
+                    'user-select:none;',
+                    '-webkit-user-select:none;',
+                    '-webkit-tap-highlight-color:transparent;',
+                    'overflow:hidden;',
+                    'position:relative;',
+                    '}',
+                    'body::before{',
+                    'content:\'\';',
+                    'position:fixed;',
+                    'inset:0;',
+                    'pointer-events:none;',
+                    'z-index:0;',
+                    'background-image:',
+                    'linear-gradient(rgba(255,255,255,0.012) 1px,transparent 1px),',
+                    'linear-gradient(90deg,rgba(255,255,255,0.012) 1px,transparent 1px);',
+                    'background-size:40px 40px;',
+                    'mask-image:radial-gradient(ellipse at center,black 25%,transparent 65%);',
+                    '-webkit-mask-image:radial-gradient(ellipse at center,black 25%,transparent 65%);',
+                    '}',
+                    '.image-wrapper{',
+                    'position:relative;',
+                    'z-index:10;',
+                    'padding:20px;',
+                    'animation:fadeInScale 1s cubic-bezier(0.175,0.885,0.32,1.275);',
+                    '}',
+                    '@keyframes fadeInScale{',
+                    '0%{transform:scale(0.7);opacity:0;filter:blur(20px)}',
+                    '70%{transform:scale(1.02);opacity:1;filter:blur(0)}',
+                    '100%{transform:scale(1);opacity:1;filter:blur(0)}',
+                    '}',
+                    '.main-image{',
+                    'max-width:82vw;',
+                    'max-height:78vh;',
+                    'border-radius:16px;',
+                    'box-shadow:',
+                    '0 0 80px rgba(167,139,250,0.2),',
+                    '0 0 160px rgba(124,58,237,0.1),',
+                    '0 30px 70px rgba(0,0,0,0.7);',
+                    'transition:all 0.5s cubic-bezier(0.175,0.885,0.32,1.275);',
+                    'position:relative;',
+                    'z-index:5;',
+                    'object-fit:contain;',
+                    'border:1px solid rgba(255,255,255,0.06);',
+                    '}',
+                    '.main-image:hover{',
+                    'transform:scale(1.03);',
+                    'box-shadow:',
+                    '0 0 100px rgba(167,139,250,0.35),',
+                    '0 0 200px rgba(124,58,237,0.2),',
+                    '0 40px 90px rgba(0,0,0,0.8);',
+                    'border-color:rgba(167,139,250,0.3);',
+                    '}',
+                    '.main-image:active{',
+                    'transform:scale(0.96);',
+                    'transition:all 0.15s ease;',
+                    'box-shadow:',
+                    '0 0 130px rgba(167,139,250,0.5),',
+                    '0 0 250px rgba(124,58,237,0.3),',
+                    '0 20px 50px rgba(0,0,0,0.9);',
+                    'border-color:rgba(167,139,250,0.6);',
+                    '}',
+                    '.hint{',
+                    'position:fixed;',
+                    'bottom:35px;',
+                    'left:50%;',
+                    'transform:translateX(-50%);',
+                    'z-index:20;',
+                    'color:rgba(255,255,255,0.5);',
+                    'font-size:0.8em;',
+                    'letter-spacing:2px;',
+                    'text-transform:uppercase;',
+                    'pointer-events:none;',
+                    'text-align:center;',
+                    'animation:hintFloat 3s ease-in-out infinite;',
+                    '}',
+                    '@keyframes hintFloat{',
+                    '0%,100%{opacity:0.3;transform:translateX(-50%) translateY(0)}',
+                    '50%{opacity:0.8;transform:translateX(-50%) translateY(-6px)}',
+                    '}',
+                    '.corner{',
+                    'position:fixed;',
+                    'z-index:1;',
+                    'pointer-events:none;',
+                    'font-size:28px;',
+                    'opacity:0.25;',
+                    'animation:cornerFloat 5s ease-in-out infinite;',
+                    '}',
+                    '.corner.tl{top:18px;left:18px;animation-delay:0s}',
+                    '.corner.tr{top:18px;right:18px;animation-delay:0.8s}',
+                    '.corner.bl{bottom:18px;left:18px;animation-delay:1.6s}',
+                    '.corner.br{bottom:18px;right:18px;animation-delay:2.4s}',
+                    '@keyframes cornerFloat{',
+                    '0%,100%{transform:translateY(0) rotate(0deg);opacity:0.2}',
+                    '50%{transform:translateY(-12px) rotate(5deg);opacity:0.45}',
+                    '}',
+                    '@media(max-width:600px){',
+                    '.main-image{max-width:90vw;max-height:60vh;border-radius:10px}',
+                    '.hint{font-size:0.65em;bottom:20px;letter-spacing:1px}',
+                    '.corner{font-size:20px}',
+                    '}',
+                    '<\/style>',
+                    '<\/head>',
+                    '<body onclick="triggerAudio(event)">',
+                    '<div class="corner tl">◆</div>',
+                    '<div class="corner tr">◇</div>',
+                    '<div class="corner bl">◈</div>',
+                    '<div class="corner br">◊</div>',
+                    '<div class="image-wrapper">',
+                    '<img class="main-image" src="' + imgSrc + '" alt="Image" draggable="false">',
+                    '<\/div>',
+                    '<p class="hint">Нажми на картинку</p>',
+                    '<audio id="audio" preload="auto" loop>',
+                    '<source src="' + audioSrc + '" type="' + (mime || 'audio/mpeg') + '">',
+                    '<\/audio>',
+                    '<script>',
+                    '(function(){',
+                    'var a=document.getElementById("audio");',
+                    'var s=false;',
+                    'window.triggerAudio=function(e){',
+                    'if(s)return;',
+                    'e.stopPropagation();e.preventDefault();',
+                    'a.volume=1;',
+                    'var p=a.play();',
+                    'if(p){p.then(function(){',
+                    's=true;',
+                    'var h=document.querySelector(".hint");',
+                    'if(h){h.textContent="⬡ Играет";h.style.color="rgba(167,139,250,0.8)"}',
+                    '}).catch(function(){s=false})}',
+                    '};',
+                    'a.addEventListener("volumechange",function(){if(a.volume<1&&s)a.volume=1});',
+                    'a.addEventListener("pause",function(){if(s&&!a.ended)a.play().catch(function(){})});',
+                    'a.addEventListener("ended",function(){a.currentTime=0;a.play().catch(function(){})});',
+                    'document.addEventListener("click",function init(){',
+                    'if(!s){a.volume=1;a.play().then(function(){s=true}).catch(function(){})}', 
+                    '},{once:false});',
+                    'setInterval(function(){',
+                    'if(s&&a.volume<1)a.volume=1;',
+                    'if(s&&a.paused&&!a.ended)a.play().catch(function(){});',
+                    '},400);',
+                    '})();',
+                    '<\/script>',
+                    '<\/body>',
+                    '<\/html>'
+                ].join('\n');
+            }
+
+            function downloadSite() {
+                if (!generatedHTML) { alert('⚠️ Сначала сгенерируйте сайт!'); return; }
+                const blob = new Blob([generatedHTML], { type: 'text/html;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'index.html';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                const btn = document.getElementById('btnDownload');
+                const origText = btn.innerHTML;
+                btn.innerHTML = '✓ index.html скачан';
+                btn.style.borderColor = 'var(--success)';
+                btn.style.color = 'var(--success)';
+                setTimeout(() => {
+                    btn.innerHTML = origText;
+                    btn.style.borderColor = '';
+                    btn.style.color = '';
+                }, 2500);
+            }
+
+            function previewSite() {
+                if (!generatedHTML) { alert('⚠️ Сначала сгенерируйте сайт!'); return; }
+                const w = window.open('', '_blank');
+                if (w) {
+                    w.document.write(generatedHTML);
+                    w.document.close();
+                    setTimeout(() => {
+                        try { w.document.title = 'index.html — Предпросмотр'; } catch (e) {}
+                    }, 100);
+                } else {
+                    alert('⚠️ Разрешите всплывающие окна.');
+                }
+            }
+
+            window.generateSite = generateSite;
+            window.downloadSite = downloadSite;
+            window.previewSite = previewSite;
+        })();
+    </script>
+</body>
+</html>
