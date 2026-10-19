@@ -42,5 +42,16 @@
     "buttonText": "Скачать .zip архив",
     "icon": "archive",
     "color": "#f59e0b"
+  },
+  {
+    "title": "VoidForge",
+    "category": "website",
+    "description": "Интерактивный генератор одностраничных сайтов для аудио-презентаций. Загрузите картинку и трек, чтобы получить готовый HTML-файл.",
+    "tags": ["HTML", "CSS", "JavaScript", "File API"],
+    "type": "link",
+    "link": "voidforge.html",
+    "buttonText": "Открыть генератор",
+    "icon": "layout",
+    "color": "#8b5cf6"
   }
 ]
