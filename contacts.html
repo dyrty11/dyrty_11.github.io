@@ -3,34 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Контакты — Дмитрий</title>
+    <title>Контакты</title>
     
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://formspree.io; form-action 'self' https://formspree.io; frame-ancestors 'none'; base-uri 'self';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://formspree.io; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://formspree.io;">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="referrer" content="strict-origin-when-cross-origin">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js" crossorigin="anonymous"></script>
+
     <link rel="stylesheet" href="styles.css">
     <script src="theme-init.js"></script>
 </head>
 <body>
     <div class="page-wrapper">
         <header>
-            <a href="index.html" class="logo">D<span>K</span>.</a>
-            <nav>
+            <a href="index.html" class="logo">P<span>.</span></a>
+            
+            <nav class="desktop-nav">
                 <a href="index.html">Главная</a>
                 <a href="projects.html">Проекты</a>
                 <a href="services.html">Услуги</a>
                 <a href="contacts.html" class="active">Контакты</a>
             </nav>
-            <div class="theme-switch" id="themeToggle">
-                <div class="theme-switch-ball"></div>
-                <svg class="sun-icon" width="16" height="16" viewBox="0 0 24 24"><path d="M12 18C8.686 18 6 15.314 6 12C6 8.686 8.686 6 12 6C15.314 6 18 8.686 18 12C18 15.314 15.314 18 12 18ZM12 16C14.209 16 16 14.209 16 12C16 9.791 14.209 8 12 8C9.791 8 8 9.791 8 12C8 14.209 9.791 16 12 16ZM11 1H13V4H11V1ZM11 20H13V23H11V20ZM3.515 4.929L4.929 3.515L7.05 5.636L5.636 7.05L3.515 4.929ZM16.95 18.364L18.364 16.95L20.485 19.071L19.071 20.485L16.95 18.364ZM19.071 3.515L20.485 4.929L18.364 7.05L16.95 5.636L19.071 3.515ZM5.636 16.95L7.05 18.364L4.929 20.485L3.515 19.071L5.636 16.95ZM23 11V13H20V11H23ZM4 11V13H1V11H4Z"/></svg>
-                <svg class="moon-icon" width="16" height="16" viewBox="0 0 24 24"><path d="M10 7C10 10.866 13.134 14 17 14C18.9584 14 20.729 13.1957 21.9995 11.8995C22 11.933 22 11.9665 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C12.0335 2 12.067 2 12.1005 2.00049C10.8043 3.27098 10 5.04157 10 7ZM4 12C4 16.4183 7.58172 20 12 20C15.0583 20 17.7158 18.2839 19.062 15.7621C18.3941 15.9199 17.7027 16 17 16C12.0294 16 8 11.9706 8 7C8 6.29727 8.08009 5.60587 8.2379 4.93798C5.71611 6.28423 4 8.94168 4 12Z"/></svg>
+
+            <div class="header-controls">
+                <div class="theme-switch" id="themeToggle">
+                    <div class="theme-switch-ball"></div>
+                    <svg class="sun-icon" width="16" height="16" viewBox="0 0 24 24"><path d="M12 18C8.686 18 6 15.314 6 12C6 8.686 8.686 6 12 6C15.314 6 18 8.686 18 12C18 15.314 15.314 18 12 18ZM12 16C14.209 16 16 14.209 16 12C16 9.791 14.209 8 12 8C9.791 8 8 9.791 8 12C8 14.209 9.791 16 12 16ZM11 1H13V4H11V1ZM11 20H13V23H11V20ZM3.515 4.929L4.929 3.515L7.05 5.636L5.636 7.05L3.515 4.929ZM16.95 18.364L18.364 16.95L20.485 19.071L19.071 20.485L16.95 18.364ZM19.071 3.515L20.485 4.929L18.364 7.05L16.95 5.636L19.071 3.515ZM5.636 16.95L7.05 18.364L4.929 20.485L3.515 19.071L5.636 16.95ZM23 11V13H20V11H23ZM4 11V13H1V11H4Z"/></svg>
+                    <svg class="moon-icon" width="16" height="16" viewBox="0 0 24 24"><path d="M10 7C10 10.866 13.134 14 17 14C18.9584 14 20.729 13.1957 21.9995 11.8995C22 11.933 22 11.9665 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C12.0335 2 12.067 2 12.1005 2.00049C10.8043 3.27098 10 5.04157 10 7ZM4 12C4 16.4183 7.58172 20 12 20C15.0583 20 17.7158 18.2839 19.062 15.7621C18.3941 15.9199 17.7027 16 17 16C12.0294 16 8 11.9706 8 7C8 6.29727 8.08009 5.60587 8.2379 4.93798C5.71611 6.28423 4 8.94168 4 12Z"/></svg>
+                </div>
+                <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Открыть меню">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
             </div>
         </header>
+
+        <div class="mobile-nav" id="mobileNav">
+            <a href="index.html">Главная</a>
+            <a href="projects.html">Проекты</a>
+            <a href="services.html">Услуги</a>
+            <a href="contacts.html" class="active">Контакты</a>
+        </div>
 
         <div class="container">
             <div class="page-header">
@@ -47,20 +67,16 @@
                     <h3>Telegram</h3><p>@dyrty_11</p>
                 </a>
             </div>
-                        <div class="contact-form">
-                <!-- ФОРМА НАСТРОЕНА НА ТВОЙ FORMSPREE -->
+            <div class="contact-form">
                 <form id="contactForm" action="https://formspree.io/f/mjygdrkq" method="POST" enctype="multipart/form-data">
-                    
                     <div class="form-group">
                         <label>Ваше имя</label>
                         <input type="text" name="name" placeholder="Иван Иванов" required>
                     </div>
-                    
                     <div class="form-group">
                         <label>Email</label>
                         <input type="email" name="email" placeholder="ivan@example.com" required>
                     </div>
-                    
                     <div class="form-group">
                         <label>Сообщение</label>
                         <textarea name="message" placeholder="Расскажите о вашем проекте..." required></textarea>
@@ -81,13 +97,11 @@
                     <button type="submit" class="submit-btn">Отправить сообщение</button>
                 </form>
             </div>
-                </form>
-            </div>
         </div>
 
         <footer>
             <div class="footer-content">
-                <a href="index.html" class="logo">D<span>K</span>.</a>
+                <a href="index.html" class="logo">P<span>.</span></a>
                 <div class="footer-links">
                     <a href="index.html">Главная</a>
                     <a href="projects.html">Проекты</a>
@@ -101,7 +115,7 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                &copy; 2026 Дмитрий. Все права защищены.
+                &copy; 2026 Все права защищены.
             </div>
         </footer>
     </div>
