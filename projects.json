@@ -2,12 +2,23 @@
   {
     "title": "VoidForge",
     "category": "website",
-    "description": "Интерактивный сайт-генератор для soundtag",
+    "description": "Интерактивный сайт генератор для soundtag",
     "tags": ["HTML", "CSS", "JavaScript", "File API"],
     "type": "link",
     "link": "voidforge.html",
     "buttonText": "Открыть генератор",
     "icon": "layout",
     "color": "#8b5cf6"
+  },
+  {
+    "title": "FilePilot",
+    "category": "file",
+    "description": "FilePilot — это десктопное приложение (EXE) для Windows. Наводит порядок в файлах: поиск по содержимому (PDF, DOCX, код), поиск дубликатов, умная автосортировка. 100% приватность, без облаков.",
+    "tags": ["Python", "Windows", "EXE"],
+    "type": "link",
+    "link": "https://pomf2.lain.la/f/ff7rdfxg.7z",
+    "buttonText": "Скачать .7z (EXE)",
+    "icon": "file",
+    "color": "#0ea5e9"
   }
 ]
