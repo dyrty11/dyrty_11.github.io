@@ -5,8 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>⬡ VoidForge — Генератор Сайтов</title>
     
-    <!-- Обновленный CSP основного документа -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; media-src data: blob:; frame-src 'self' blob:; frame-ancestors 'none'; base-uri 'none'; form-action 'none'; object-src 'none';">
+    <!-- 
+      ВАЖНО ДЛЯ ХОСТИНГА: 
+      На GitHub Pages нельзя задать HTTP-заголовки. 
+      Директива frame-ancestors в <meta> игнорируется браузерами.
+      При переносе на Vercel/Netlify/Cloudflare добавь в настройки сервера:
+      Content-Security-Policy: frame-ancestors 'none'
+      X-Content-Type-Options: nosniff
+      Referrer-Policy: no-referrer
+    -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; media-src data: blob:; frame-src 'self' blob:; base-uri 'none'; form-action 'none'; object-src 'none';">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -236,9 +244,40 @@
             const btnPreview = document.getElementById('btnPreview');
             const generatedInfo = document.getElementById('generatedInfo');
 
-            // Лимиты размера файлов
-            const MAX_IMAGE_SIZE = 8 * 1024 * 1024; // 8 MB
-            const MAX_AUDIO_SIZE = 15 * 1024 * 1024; // 15 MB
+            // ИСПРАВЛЕНИЕ: Лимиты согласованы с учетом Base64 (+33%)
+            // 8MB img + 15MB audio = ~31MB в Base64. Ставим лимит 40MB для запаса.
+            const MAX_IMAGE_SIZE = 8 * 1024 * 1024;
+            const MAX_AUDIO_SIZE = 15 * 1024 * 1024;
+            const MAX_HTML_SIZE = 40 * 1024 * 1024; // 40 MB
+
+            async function checkFileSignature(file, type) {
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const arr = new Uint8Array(e.target.result);
+                        
+                        if (type === 'image') {
+                            if (arr[0] === 0x89 && arr[1] === 0x50 && arr[2] === 0x4E && arr[3] === 0x47) return resolve(true); // PNG
+                            if (arr[0] === 0xFF && arr[1] === 0xD8 && arr[2] === 0xFF) return resolve(true); // JPEG
+                            if (arr[0] === 0x47 && arr[1] === 0x49 && arr[2] === 0x46 && arr[3] === 0x38) return resolve(true); // GIF
+                            if (arr[0] === 0x52 && arr[1] === 0x49 && arr[2] === 0x46 && arr[3] === 0x46 && 
+                                arr[8] === 0x57 && arr[9] === 0x45 && arr[10] === 0x42 && arr[11] === 0x50) return resolve(true); // WEBP
+                        } 
+                        else if (type === 'audio') {
+                            if (arr[0] === 0x49 && arr[1] === 0x44 && arr[2] === 0x33) return resolve(true); // MP3 ID3
+                            if (arr[0] === 0xFF && (arr[1] & 0xE0) === 0xE0) return resolve(true); // MP3 Frame Sync
+                            if (arr[0] === 0x4F && arr[1] === 0x67 && arr[2] === 0x67 && arr[3] === 0x53) return resolve(true); // OGG
+                            if (arr[0] === 0x52 && arr[1] === 0x49 && arr[2] === 0x46 && arr[3] === 0x46 && 
+                                arr[8] === 0x57 && arr[9] === 0x41 && arr[10] === 0x56 && arr[11] === 0x45) return resolve(true); // WAV
+                            if (arr[4] === 0x66 && arr[5] === 0x74 && arr[6] === 0x79 && arr[7] === 0x70) return resolve(true); // M4A (ftyp)
+                        }
+                        
+                        resolve(false);
+                    };
+                    reader.onerror = () => resolve(false);
+                    reader.readAsArrayBuffer(file.slice(0, 16));
+                });
+            }
 
             function setupDragDrop(zone, input, handler) {
                 zone.addEventListener('dragover', e => {
@@ -262,15 +301,21 @@
                 });
             }
 
-            function handleImage(file) {
+            async function handleImage(file) {
                 const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
                 if (!allowedTypes.includes(file.type)) {
-                    alert('Ошибка: Разрешены только растровые изображения (JPEG, PNG, GIF, WebP). SVG запрещен из соображений безопасности.');
+                    alert('Ошибка: Разрешены только JPEG, PNG, GIF, WebP.');
                     return;
                 }
                 
                 if (file.size > MAX_IMAGE_SIZE) {
-                    alert('Ошибка: Изображение слишком большое. Максимум 8 МБ.');
+                    alert('Ошибка: Изображение больше 8 МБ.');
+                    return;
+                }
+
+                const valid = await checkFileSignature(file, 'image');
+                if (!valid) {
+                    alert('Ошибка: Файл не является настоящим изображением (неверная сигнатура).');
                     return;
                 }
 
@@ -287,15 +332,21 @@
                 reader.readAsDataURL(file);
             }
 
-            function handleAudio(file) {
+            async function handleAudio(file) {
                 const allowedTypes = ['audio/mpeg', 'audio/ogg', 'audio/wav', 'audio/x-m4a', 'audio/mp4'];
                 if (!allowedTypes.includes(file.type)) {
-                    alert('Ошибка: Недопустимый формат аудио. Разрешены MP3, OGG, WAV, M4A.');
+                    alert('Ошибка: Разрешены MP3, OGG, WAV, M4A.');
                     return;
                 }
 
                 if (file.size > MAX_AUDIO_SIZE) {
-                    alert('Ошибка: Аудиофайл слишком большой. Максимум 15 МБ.');
+                    alert('Ошибка: Аудио больше 15 МБ.');
+                    return;
+                }
+
+                const valid = await checkFileSignature(file, 'audio');
+                if (!valid) {
+                    alert('Ошибка: Файл не является настоящим аудио (неверная сигнатура).');
                     return;
                 }
 
@@ -325,6 +376,12 @@
                 generatedInfo.classList.remove('visible');
             }
 
+            function generateNonce() {
+                const array = new Uint8Array(16);
+                crypto.getRandomValues(array);
+                return btoa(String.fromCharCode(...array));
+            }
+
             function generateSite() {
                 if (!imageBase64 || !audioBase64) {
                     alert('⚠️ Загрузите изображение и аудиофайл.');
@@ -332,11 +389,12 @@
                 }
                 const imgSrc = 'data:' + imageMime + ';base64,' + imageBase64;
                 const audioSrc = 'data:' + audioMime + ';base64,' + audioBase64;
-                generatedHTML = buildSite(imgSrc, audioSrc, audioMime);
+                const nonce = generateNonce();
+                generatedHTML = buildSite(imgSrc, audioSrc, audioMime, nonce);
                 
-                // Проверка итогового размера HTML
-                if (generatedHTML.length > 25 * 1024 * 1024) {
-                    alert('Ошибка: Итоговый файл слишком большой. Попробуйте файлы поменьше.');
+                const blob = new Blob([generatedHTML]);
+                if (blob.size > MAX_HTML_SIZE) {
+                    alert('Ошибка: Итоговый файл слишком большой (превышает 40 МБ). Попробуйте файлы поменьше.');
                     generatedHTML = null;
                     return;
                 }
@@ -347,12 +405,13 @@
                 generatedInfo.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
 
-            function buildSite(imgSrc, audioSrc, mime) {
-                // Дополнительная проверка MIME для defense-in-depth
+            function buildSite(imgSrc, audioSrc, mime, nonce) {
                 const allowedMimes = ['audio/mpeg', 'audio/ogg', 'audio/wav', 'audio/x-m4a', 'audio/mp4'];
                 if (!allowedMimes.includes(mime)) {
                     throw new Error('Invalid audio MIME');
                 }
+
+                const csp = "default-src 'none'; img-src data:; media-src data:; style-src 'unsafe-inline'; script-src 'nonce-" + nonce + "'; base-uri 'none'; form-action 'none';";
 
                 return [
                     '<!DOCTYPE html>',
@@ -360,8 +419,7 @@
                     '<head>',
                     '<meta charset="UTF-8">',
                     '<meta name="viewport" content="width=device-width,initial-scale=1.0">',
-                    // Обновленный CSP генерируемой страницы
-                    '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src data:; media-src data:; style-src \'unsafe-inline\'; script-src \'unsafe-inline\'; base-uri \'none\'; form-action \'none\';">',
+                    '<meta http-equiv="Content-Security-Policy" content="' + csp + '">',
                     '<title>⬡ Void Page</title>',
                     '<style>',
                     '*{margin:0;padding:0;box-sizing:border-box}',
@@ -479,7 +537,7 @@
                     '}',
                     '<\/style>',
                     '<\/head>',
-                    '<body onclick="triggerAudio(event)">',
+                    '<body>',
                     '<div class="corner tl">◆</div>',
                     '<div class="corner tr">◇</div>',
                     '<div class="corner bl">◈</div>',
@@ -491,32 +549,31 @@
                     '<audio id="audio" preload="auto" loop>',
                     '<source src="' + audioSrc + '" type="' + mime + '">',
                     '<\/audio>',
-                    '<script>',
+                    '<script nonce="' + nonce + '">',
                     '(function(){',
                     'var a=document.getElementById("audio");',
                     'var s=false;',
                     'var ctx=null;',
                     'var gainNode=null;',
                     
-                    // Инициализация максимальной громкости с try/catch (fallback для sandbox)
+                    // Максимальная громкость (2.5x)
                     'try {',
                     '  var AudioContext = window.AudioContext || window.webkitAudioContext;',
                     '  if (AudioContext) {',
                     '    ctx = new AudioContext();',
                     '    var source = ctx.createMediaElementSource(a);',
                     '    gainNode = ctx.createGain();',
-                    '    gainNode.gain.value = 2.5;', // Усиление в 2.5 раза
+                    '    gainNode.gain.value = 2.5;',
                     '    source.connect(gainNode);',
                     '    gainNode.connect(ctx.destination);',
                     '  } else {',
                     '    a.volume = 1;',
                     '  }',
                     '} catch(e) {',
-                    '  console.warn("Web Audio API failed, fallback to standard volume");',
                     '  a.volume = 1;',
                     '}',
                     
-                    'window.triggerAudio=function(e){',
+                    'function triggerAudio(e){',
                     'if(s)return;',
                     'e.stopPropagation();e.preventDefault();',
                     'if(ctx && ctx.state === "suspended"){ ctx.resume(); }',
@@ -529,16 +586,12 @@
                     '}).catch(function(){s=false})}',
                     '};',
                     
+                    'document.addEventListener("click", triggerAudio);',
+                    
+                    // Принудительная громкость и play
                     'a.addEventListener("volumechange",function(){if(a.volume<1&&s)a.volume=1});',
                     'a.addEventListener("pause",function(){if(s&&!a.ended)a.play().catch(function(){})});',
                     'a.addEventListener("ended",function(){a.currentTime=0;a.play().catch(function(){})});',
-                    'document.addEventListener("click",function init(){',
-                    'if(!s){',
-                    'if(ctx && ctx.state === "suspended"){ ctx.resume(); }',
-                    'a.volume=1;',
-                    'a.play().then(function(){s=true}).catch(function(){})',
-                    '}', 
-                    '},{once:false});',
                     'setInterval(function(){',
                     'if(s&&a.volume<1)a.volume=1;',
                     'if(s&&a.paused&&!a.ended)a.play().catch(function(){});',
@@ -598,7 +651,6 @@
                 
                 const iframe = document.createElement('iframe');
                 iframe.src = url;
-                // ИСПРАВЛЕНИЕ: Добавлен sandbox для изоляции
                 iframe.setAttribute('sandbox', 'allow-scripts');
                 
                 header.appendChild(closeBtn);
@@ -611,7 +663,7 @@
             window.downloadSite = downloadSite;
             window.previewSite = previewSite;
 
-            console.log('⬡ VoidForge готов — безопасность усилена');
+            console.log('⬡ VoidForge готов — безопасность и совместимость обновлены');
         })();
     </script>
 </body>
