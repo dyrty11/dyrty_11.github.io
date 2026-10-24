@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>⬡ VoidForge — Генератор Сайтов</title>
+    
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; media-src data: blob:; frame-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #0b0b0f;
@@ -18,11 +24,7 @@
             --success: #10b981;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -44,12 +46,8 @@
         body::before {
             content: '';
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 0;
             background-image:
                 linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
@@ -59,347 +57,92 @@
         }
 
         .container {
-            width: 100%;
-            max-width: 780px;
-            background: var(--surface);
-            border-radius: 20px;
-            padding: 40px 32px;
-            border: 1px solid var(--border);
-            box-shadow:
-                0 4px 6px -1px rgba(0, 0, 0, 0.3),
-                0 20px 40px -10px rgba(0, 0, 0, 0.5),
-                0 0 0 1px rgba(255, 255, 255, 0.02) inset;
-            position: relative;
-            z-index: 1;
-            backdrop-filter: blur(10px);
+            width: 100%; max-width: 780px; background: var(--surface);
+            border-radius: 20px; padding: 40px 32px; border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 20px 40px -10px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+            position: relative; z-index: 1; backdrop-filter: blur(10px);
         }
 
-        .hex-decoration {
-            position: absolute;
-            top: -30px;
-            right: -30px;
-            width: 80px;
-            height: 80px;
-            pointer-events: none;
-            z-index: 0;
-            opacity: 0.3;
-        }
-        .hex-decoration::before {
-            content: '⬡';
-            font-size: 70px;
-            color: var(--primary);
-            filter: blur(15px);
-            position: absolute;
-            animation: hexFloat 6s ease-in-out infinite;
-        }
-        @keyframes hexFloat {
-            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.2; }
-            50% { transform: translateY(-20px) rotate(15deg); opacity: 0.5; }
-        }
+        .hex-decoration { position: absolute; top: -30px; right: -30px; width: 80px; height: 80px; pointer-events: none; z-index: 0; opacity: 0.3; }
+        .hex-decoration::before { content: '⬡'; font-size: 70px; color: var(--primary); filter: blur(15px); position: absolute; animation: hexFloat 6s ease-in-out infinite; }
+        @keyframes hexFloat { 0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.2; } 50% { transform: translateY(-20px) rotate(15deg); opacity: 0.5; } }
 
-        .header {
-            text-align: center;
-            margin-bottom: 35px;
-            position: relative;
-            z-index: 1;
-        }
-        .logo {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 4px;
-        }
-        .logo-icon {
-            font-size: 38px;
-            filter: drop-shadow(0 0 20px rgba(167, 139, 250, 0.5));
-            animation: logoGlow 2s ease-in-out infinite;
-        }
-        @keyframes logoGlow {
-            0%, 100% { filter: drop-shadow(0 0 20px rgba(167, 139, 250, 0.5)); }
-            50% { filter: drop-shadow(0 0 35px rgba(167, 139, 250, 0.9)); }
-        }
-        .header h1 {
-            font-size: 2em;
-            font-weight: 700;
-            color: #fff;
-            letter-spacing: -1px;
-        }
+        .header { text-align: center; margin-bottom: 35px; position: relative; z-index: 1; }
+        .logo { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+        .logo-icon { font-size: 38px; filter: drop-shadow(0 0 20px rgba(167, 139, 250, 0.5)); animation: logoGlow 2s ease-in-out infinite; }
+        @keyframes logoGlow { 0%, 100% { filter: drop-shadow(0 0 20px rgba(167, 139, 250, 0.5)); } 50% { filter: drop-shadow(0 0 35px rgba(167, 139, 250, 0.9)); } }
+        .header h1 { font-size: 2em; font-weight: 700; color: #fff; letter-spacing: -1px; }
         .header h1 span { color: var(--primary); }
-        .header .subtitle {
-            color: var(--text2);
-            font-size: 0.8em;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            font-weight: 400;
-            margin-top: 4px;
-        }
+        .header .subtitle { color: var(--text2); font-size: 0.8em; letter-spacing: 3px; text-transform: uppercase; font-weight: 400; margin-top: 4px; }
 
-        .section {
-            background: var(--surface2);
-            border-radius: 14px;
-            padding: 20px 22px;
-            margin-bottom: 16px;
-            border: 1px solid var(--border);
-            transition: all 0.3s ease;
-            position: relative;
-            z-index: 1;
-        }
-        .section:hover {
-            border-color: rgba(167, 139, 250, 0.3);
-            box-shadow: 0 0 30px rgba(167, 139, 250, 0.04);
-        }
-        .section-title {
-            font-size: 0.8em;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--primary);
-            margin-bottom: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .section-title .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 2px;
-            background: var(--primary);
-            animation: dotPulse 2s ease-in-out infinite;
-        }
-        @keyframes dotPulse {
-            0%, 100% { opacity: 0.4; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.3); }
-        }
+        .section { background: var(--surface2); border-radius: 14px; padding: 20px 22px; margin-bottom: 16px; border: 1px solid var(--border); transition: all 0.3s ease; position: relative; z-index: 1; }
+        .section:hover { border-color: rgba(167, 139, 250, 0.3); box-shadow: 0 0 30px rgba(167, 139, 250, 0.04); }
+        .section-title { font-size: 0.8em; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--primary); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+        .section-title .dot { width: 8px; height: 8px; border-radius: 2px; background: var(--primary); animation: dotPulse 2s ease-in-out infinite; }
+        @keyframes dotPulse { 0%, 100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 1; transform: scale(1.3); } }
 
         input[type="file"] { display: none; }
         
-        .file-upload-area {
-            border: 2px dashed var(--border);
-            border-radius: 10px;
-            padding: 22px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            background: rgba(0, 0, 0, 0.25);
-            position: relative;
-            overflow: hidden;
-        }
-        .file-upload-area::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(167, 139, 250, 0.05), transparent);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        .file-upload-area:hover {
-            border-color: var(--primary);
-            background: rgba(167, 139, 250, 0.04);
-        }
+        .file-upload-area { border: 2px dashed var(--border); border-radius: 10px; padding: 22px; text-align: center; cursor: pointer; transition: all 0.25s ease; background: rgba(0, 0, 0, 0.25); position: relative; overflow: hidden; }
+        .file-upload-area::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(167, 139, 250, 0.05), transparent); opacity: 0; transition: opacity 0.3s ease; }
+        .file-upload-area:hover { border-color: var(--primary); background: rgba(167, 139, 250, 0.04); }
         .file-upload-area:hover::after { opacity: 1; }
-        .file-upload-area .upload-icon {
-            font-size: 32px;
-            display: block;
-            margin-bottom: 6px;
-            position: relative;
-            z-index: 1;
-        }
-        .file-upload-area .upload-text {
-            font-size: 0.8em;
-            color: var(--text2);
-            position: relative;
-            z-index: 1;
-        }
-        .file-upload-area .file-name {
-            font-size: 0.7em;
-            color: var(--primary);
-            margin-top: 6px;
-            font-weight: 500;
-            word-break: break-all;
-            position: relative;
-            z-index: 1;
-        }
+        .file-upload-area .upload-icon { font-size: 32px; display: block; margin-bottom: 6px; position: relative; z-index: 1; }
+        .file-upload-area .upload-text { font-size: 0.8em; color: var(--text2); position: relative; z-index: 1; }
+        .file-upload-area .file-name { font-size: 0.7em; color: var(--primary); margin-top: 6px; font-weight: 500; word-break: break-all; position: relative; z-index: 1; }
 
-        .preview-row {
-            display: flex;
-            gap: 14px;
-            flex-wrap: wrap;
-        }
-        .preview-mini {
-            flex: 1;
-            min-width: 130px;
-            background: var(--surface2);
-            border-radius: 10px;
-            padding: 14px;
-            text-align: center;
-            border: 1px solid var(--border);
-        }
-        .preview-mini img {
-            max-width: 100%;
-            max-height: 85px;
-            border-radius: 6px;
-            object-fit: cover;
-        }
-        .preview-mini .no-preview {
-            color: var(--text2);
-            font-size: 0.7em;
-            padding: 14px 0;
-            opacity: 0.5;
-        }
-        .preview-mini .mini-label {
-            font-size: 0.65em;
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
-            color: var(--text2);
-            margin-bottom: 6px;
-        }
+        .preview-row { display: flex; gap: 14px; flex-wrap: wrap; }
+        .preview-mini { flex: 1; min-width: 130px; background: var(--surface2); border-radius: 10px; padding: 14px; text-align: center; border: 1px solid var(--border); }
+        .preview-mini img { max-width: 100%; max-height: 85px; border-radius: 6px; object-fit: cover; }
+        .preview-mini .no-preview { color: var(--text2); font-size: 0.7em; padding: 14px 0; opacity: 0.5; }
+        .preview-mini .mini-label { font-size: 0.65em; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text2); margin-bottom: 6px; }
 
-        .btn-row {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 6px;
-            position: relative;
-            z-index: 1;
-        }
-        .btn {
-            padding: 12px 22px;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 0.85em;
-            cursor: pointer;
-            letter-spacing: 0.3px;
-            transition: all 0.25s ease;
-            text-transform: uppercase;
-            font-family: inherit;
-            position: relative;
-            overflow: hidden;
-        }
-        .btn::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
-            opacity: 0;
-            transition: opacity 0.25s ease;
-        }
+        .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; position: relative; z-index: 1; }
+        .btn { padding: 12px 22px; border: none; border-radius: 10px; font-weight: 600; font-size: 0.85em; cursor: pointer; letter-spacing: 0.3px; transition: all 0.25s ease; text-transform: uppercase; font-family: inherit; position: relative; overflow: hidden; }
+        .btn::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent); opacity: 0; transition: opacity 0.25s ease; }
         .btn:hover::after { opacity: 1; }
         
-        .btn-generate {
-            flex: 1;
-            min-width: 180px;
-            background: var(--primary2);
-            color: #fff;
-            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
-            letter-spacing: 1px;
-        }
-        .btn-generate:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(124, 58, 237, 0.55);
-        }
-        .btn-generate:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 10px rgba(124, 58, 237, 0.3);
-        }
+        .btn-generate { flex: 1; min-width: 180px; background: var(--primary2); color: #fff; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4); letter-spacing: 1px; }
+        .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(124, 58, 237, 0.55); }
+        .btn-generate:active { transform: translateY(0); box-shadow: 0 2px 10px rgba(124, 58, 237, 0.3); }
         
-        .btn-download {
-            background: var(--surface2);
-            color: #fff;
-            border: 1px solid var(--border);
-            display: none;
-            align-items: center;
-            gap: 6px;
-            justify-content: center;
-        }
+        .btn-download { background: var(--surface2); color: #fff; border: 1px solid var(--border); display: none; align-items: center; gap: 6px; justify-content: center; }
         .btn-download.visible { display: flex; }
-        .btn-download:hover {
-            border-color: var(--success);
-            color: var(--success);
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
-        }
+        .btn-download:hover { border-color: var(--success); color: var(--success); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2); }
         
-        .btn-preview {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text);
-            display: none;
-        }
+        .btn-preview { background: transparent; border: 1px solid var(--border); color: var(--text); display: none; }
         .btn-preview.visible { display: inline-flex; }
-        .btn-preview:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.2);
-        }
+        .btn-preview:hover { border-color: var(--accent); color: var(--accent); box-shadow: 0 4px 15px rgba(6, 182, 212, 0.2); }
 
-        .generated-info {
-            display: none;
-            margin-top: 14px;
-            padding: 14px 18px;
-            background: rgba(16, 185, 129, 0.06);
-            border-radius: 10px;
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            text-align: center;
-            color: var(--success);
-            font-weight: 500;
-            font-size: 0.8em;
-            letter-spacing: 0.5px;
-            position: relative;
-            z-index: 1;
-        }
-        .generated-info.visible {
-            display: block;
-            animation: slideUp 0.4s ease;
-        }
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(12px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .generated-info { display: none; margin-top: 14px; padding: 14px 18px; background: rgba(16, 185, 129, 0.06); border-radius: 10px; border: 1px solid rgba(16, 185, 129, 0.2); text-align: center; color: var(--success); font-weight: 500; font-size: 0.8em; letter-spacing: 0.5px; position: relative; z-index: 1; }
+        .generated-info.visible { display: block; animation: slideUp 0.4s ease; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 
-        .status-dot {
-            display: inline-block;
-            width: 6px;
-            height: 6px;
-            border-radius: 2px;
-            background: var(--text2);
-            margin-right: 6px;
-        }
-        .status-dot.ready {
-            background: var(--success);
-            box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
-        }
+        .status-dot { display: inline-block; width: 6px; height: 6px; border-radius: 2px; background: var(--text2); margin-right: 6px; }
+        .status-dot.ready { background: var(--success); box-shadow: 0 0 10px rgba(16, 185, 129, 0.6); }
+        .filename-hint { display: inline-block; background: rgba(167, 139, 250, 0.1); color: var(--primary); padding: 2px 8px; border-radius: 4px; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.9em; letter-spacing: 0; text-transform: none; }
 
-        .filename-hint {
-            display: inline-block;
-            background: rgba(167, 139, 250, 0.1);
-            color: var(--primary);
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-family: 'SF Mono', 'Fira Code', monospace;
-            font-size: 0.9em;
-            letter-spacing: 0;
-            text-transform: none;
+        .preview-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9); z-index: 9999;
+            display: flex; flex-direction: column; padding: 20px; box-sizing: border-box;
+            backdrop-filter: blur(5px);
         }
+        .preview-modal-header { display: flex; justify-content: flex-end; margin-bottom: 15px; }
+        .preview-modal-close {
+            padding: 10px 20px; background: var(--primary); color: white; border: none;
+            border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600;
+            transition: background 0.3s;
+        }
+        .preview-modal-close:hover { background: var(--primary2); }
+        .preview-modal iframe { width: 100%; height: 100%; border: none; border-radius: 12px; background: #fff; }
 
-        /* --- ОПТИМИЗАЦИЯ ПОД МОБИЛЬНЫЕ --- */
         @media (max-width: 600px) {
-            body { padding: 10px; }
-            .container { padding: 25px 18px; border-radius: 16px; }
-            .header h1 { font-size: 1.6em; }
-            .logo-icon { font-size: 32px; }
-            .section { padding: 16px; }
-            .file-upload-area { padding: 18px; }
-            .btn-row { flex-direction: column; }
-            .btn { width: 100%; padding: 14px; font-size: 0.9em; }
-            .preview-row { flex-direction: column; gap: 10px; }
-            .preview-mini { min-width: 100%; }
-            .hex-decoration { display: none; }
-        }
-        @media (max-width: 380px) {
-            .container { padding: 20px 12px; }
+            .container { padding: 22px 14px; border-radius: 14px; }
             .header h1 { font-size: 1.4em; }
-            .section-title { font-size: 0.7em; letter-spacing: 1px; }
-            .file-upload-area .upload-icon { font-size: 26px; }
+            .btn-row { flex-direction: column; }
+            .preview-row { flex-direction: column; gap: 8px; }
+            .hex-decoration { display: none; }
         }
     </style>
 </head>
@@ -413,36 +156,33 @@
                 <span class="logo-icon">⬡</span>
                 <h1>Void<span>Forge</span></h1>
             </div>
-            <p class="subtitle">Генератор сайтов</p>
+            <p class="subtitle">Генератор сайтов для soundtag</p>
         </div>
 
-        <!-- Изображение -->
         <div class="section">
             <div class="section-title">
-                <span class="dot"></span> Изображение
+                <span class="dot"></span> Изображение (JPEG, PNG, GIF, WebP)
             </div>
             <div class="file-upload-area" id="imageDropZone" onclick="document.getElementById('imageInput').click()">
                 <span class="upload-icon">🖼️</span>
-                <span class="upload-text">Перетащите или нажмите</span>
+                <span class="upload-text">Перетащите или нажмите для выбора</span>
                 <span class="file-name" id="imageFileName">Не выбрано</span>
             </div>
-            <input type="file" id="imageInput" accept="image/*">
+            <input type="file" id="imageInput" accept="image/jpeg, image/png, image/gif, image/webp">
         </div>
 
-        <!-- Аудио -->
         <div class="section">
             <div class="section-title">
-                <span class="dot"></span> Аудио
+                <span class="dot"></span> Аудио (MP3, OGG, WAV, M4A)
             </div>
             <div class="file-upload-area" id="audioDropZone" onclick="document.getElementById('audioInput').click()">
                 <span class="upload-icon">🎧</span>
-                <span class="upload-text">Перетащите или нажмите</span>
+                <span class="upload-text">Перетащите или нажмите для выбора</span>
                 <span class="file-name" id="audioFileName">Не выбрано</span>
             </div>
-            <input type="file" id="audioInput" accept="audio/*">
+            <input type="file" id="audioInput" accept="audio/mpeg, audio/ogg, audio/wav, audio/x-m4a, audio/mp4">
         </div>
 
-        <!-- Превью -->
         <div class="preview-row">
             <div class="preview-mini">
                 <div class="mini-label">Превью</div>
@@ -459,7 +199,6 @@
             </div>
         </div>
 
-        <!-- Кнопки -->
         <div class="btn-row">
             <button class="btn btn-generate" id="btnGenerate" onclick="generateSite()">
                 ⚡ Сгенерировать
@@ -519,7 +258,11 @@
             }
 
             function handleImage(file) {
-                if (!file.type.startsWith('image/')) return;
+                const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert('Ошибка: Разрешены только растровые изображения (JPEG, PNG, GIF, WebP). SVG запрещен из соображений безопасности.');
+                    return;
+                }
                 imageMime = file.type;
                 imageFileName.textContent = file.name;
                 const reader = new FileReader();
@@ -534,13 +277,21 @@
             }
 
             function handleAudio(file) {
-                if (!file.type.startsWith('audio/')) return;
+                const allowedTypes = ['audio/mpeg', 'audio/ogg', 'audio/wav', 'audio/x-m4a', 'audio/mp4'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert('Ошибка: Недопустимый формат аудио. Разрешены MP3, OGG, WAV, M4A.');
+                    return;
+                }
                 audioMime = file.type;
                 audioFileName.textContent = file.name;
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     audioBase64 = e.target.result.split(',')[1];
-                    audioStatus.innerHTML = '<span class="status-dot ready"></span>Готово';
+                    audioStatus.textContent = '';
+                    const dot = document.createElement('span');
+                    dot.className = 'status-dot ready';
+                    audioStatus.appendChild(dot);
+                    audioStatus.appendChild(document.createTextNode('Готово'));
                     audioStatus.style.color = 'var(--success)';
                     resetOutput();
                 };
@@ -578,6 +329,7 @@
                     '<head>',
                     '<meta charset="UTF-8">',
                     '<meta name="viewport" content="width=device-width,initial-scale=1.0">',
+                    '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src data:; media-src data:; style-src \'unsafe-inline\'; script-src \'unsafe-inline\';">',
                     '<title>⬡ Void Page</title>',
                     '<style>',
                     '*{margin:0;padding:0;box-sizing:border-box}',
@@ -705,15 +457,34 @@
                     '<\/div>',
                     '<p class="hint">Нажми на картинку</p>',
                     '<audio id="audio" preload="auto" loop>',
-                    '<source src="' + audioSrc + '" type="' + (mime || 'audio/mpeg') + '">',
+                    '<source src="' + audioSrc + '" type="' + mime + '">',
                     '<\/audio>',
                     '<script>',
                     '(function(){',
                     'var a=document.getElementById("audio");',
                     'var s=false;',
+                    'var ctx=null;',
+                    'var gainNode=null;',
+                    
+                    // --- ИНИЦИАЛИЗАЦИЯ МАКСИМАЛЬНОЙ ГРОМКОСТИ ---
+                    'var AudioContext = window.AudioContext || window.webkitAudioContext;',
+                    'if (AudioContext) {',
+                    '  ctx = new AudioContext();',
+                    '  var source = ctx.createMediaElementSource(a);',
+                    '  gainNode = ctx.createGain();',
+                    '  gainNode.gain.value = 2.5;', // Усиление громкости в 2.5 раза!
+                    '  source.connect(gainNode);',
+                    '  gainNode.connect(ctx.destination);',
+                    '} else {',
+                    '  a.volume = 1;', // Фоллбэк для старых браузеров
+                    '}',
+                    
                     'window.triggerAudio=function(e){',
                     'if(s)return;',
                     'e.stopPropagation();e.preventDefault();',
+                    
+                    // Возобновляем аудиоконтекст (требование браузеров)
+                    'if(ctx && ctx.state === "suspended"){ ctx.resume(); }',
                     'a.volume=1;',
                     'var p=a.play();',
                     'if(p){p.then(function(){',
@@ -722,11 +493,16 @@
                     'if(h){h.textContent="⬡ Играет";h.style.color="rgba(167,139,250,0.8)"}',
                     '}).catch(function(){s=false})}',
                     '};',
+                    
                     'a.addEventListener("volumechange",function(){if(a.volume<1&&s)a.volume=1});',
                     'a.addEventListener("pause",function(){if(s&&!a.ended)a.play().catch(function(){})});',
                     'a.addEventListener("ended",function(){a.currentTime=0;a.play().catch(function(){})});',
                     'document.addEventListener("click",function init(){',
-                    'if(!s){a.volume=1;a.play().then(function(){s=true}).catch(function(){})}', 
+                    'if(!s){',
+                    'if(ctx && ctx.state === "suspended"){ ctx.resume(); }',
+                    'a.volume=1;',
+                    'a.play().then(function(){s=true}).catch(function(){})',
+                    '}', 
                     '},{once:false});',
                     'setInterval(function(){',
                     'if(s&&a.volume<1)a.volume=1;',
@@ -741,15 +517,19 @@
 
             function downloadSite() {
                 if (!generatedHTML) { alert('⚠️ Сначала сгенерируйте сайт!'); return; }
-                const blob = new Blob([generatedHTML], { type: 'text/html;charset=utf-8' });
+                
+                // ИСПРАВЛЕНИЕ: Тип application/octet-stream для правильного скачивания в Firefox
+                const blob = new Blob([generatedHTML], { type: 'application/octet-stream' });
                 const url = URL.createObjectURL(blob);
+                
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = 'index.html';
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
-                URL.revokeObjectURL(url);
+                
+                setTimeout(() => URL.revokeObjectURL(url), 2000);
 
                 const btn = document.getElementById('btnDownload');
                 const origText = btn.innerHTML;
@@ -765,21 +545,38 @@
 
             function previewSite() {
                 if (!generatedHTML) { alert('⚠️ Сначала сгенерируйте сайт!'); return; }
-                const w = window.open('', '_blank');
-                if (w) {
-                    w.document.write(generatedHTML);
-                    w.document.close();
-                    setTimeout(() => {
-                        try { w.document.title = 'index.html — Предпросмотр'; } catch (e) {}
-                    }, 100);
-                } else {
-                    alert('⚠️ Разрешите всплывающие окна.');
-                }
+                
+                const blob = new Blob([generatedHTML], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                
+                const modal = document.createElement('div');
+                modal.className = 'preview-modal';
+                
+                const header = document.createElement('div');
+                header.className = 'preview-modal-header';
+                
+                const closeBtn = document.createElement('button');
+                closeBtn.className = 'preview-modal-close';
+                closeBtn.textContent = 'Закрыть предпросмотр';
+                closeBtn.onclick = () => {
+                    document.body.removeChild(modal);
+                    URL.revokeObjectURL(url);
+                };
+                
+                const iframe = document.createElement('iframe');
+                iframe.src = url;
+                
+                header.appendChild(closeBtn);
+                modal.appendChild(header);
+                modal.appendChild(iframe);
+                document.body.appendChild(modal);
             }
 
             window.generateSite = generateSite;
             window.downloadSite = downloadSite;
             window.previewSite = previewSite;
+
+            console.log('⬡ VoidForge готов — безопасность усилена');
         })();
     </script>
 </body>
