@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>⬡ VoidForge — Генератор Сайтов</title>
     
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; media-src data: blob:; frame-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
+    <!-- Обновленный CSP основного документа -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; media-src data: blob:; frame-src 'self' blob:; frame-ancestors 'none'; base-uri 'none'; form-action 'none'; object-src 'none';">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -235,6 +236,10 @@
             const btnPreview = document.getElementById('btnPreview');
             const generatedInfo = document.getElementById('generatedInfo');
 
+            // Лимиты размера файлов
+            const MAX_IMAGE_SIZE = 8 * 1024 * 1024; // 8 MB
+            const MAX_AUDIO_SIZE = 15 * 1024 * 1024; // 15 MB
+
             function setupDragDrop(zone, input, handler) {
                 zone.addEventListener('dragover', e => {
                     e.preventDefault();
@@ -263,6 +268,12 @@
                     alert('Ошибка: Разрешены только растровые изображения (JPEG, PNG, GIF, WebP). SVG запрещен из соображений безопасности.');
                     return;
                 }
+                
+                if (file.size > MAX_IMAGE_SIZE) {
+                    alert('Ошибка: Изображение слишком большое. Максимум 8 МБ.');
+                    return;
+                }
+
                 imageMime = file.type;
                 imageFileName.textContent = file.name;
                 const reader = new FileReader();
@@ -282,6 +293,12 @@
                     alert('Ошибка: Недопустимый формат аудио. Разрешены MP3, OGG, WAV, M4A.');
                     return;
                 }
+
+                if (file.size > MAX_AUDIO_SIZE) {
+                    alert('Ошибка: Аудиофайл слишком большой. Максимум 15 МБ.');
+                    return;
+                }
+
                 audioMime = file.type;
                 audioFileName.textContent = file.name;
                 const reader = new FileReader();
@@ -316,6 +333,14 @@
                 const imgSrc = 'data:' + imageMime + ';base64,' + imageBase64;
                 const audioSrc = 'data:' + audioMime + ';base64,' + audioBase64;
                 generatedHTML = buildSite(imgSrc, audioSrc, audioMime);
+                
+                // Проверка итогового размера HTML
+                if (generatedHTML.length > 25 * 1024 * 1024) {
+                    alert('Ошибка: Итоговый файл слишком большой. Попробуйте файлы поменьше.');
+                    generatedHTML = null;
+                    return;
+                }
+
                 btnDownload.classList.add('visible');
                 btnPreview.classList.add('visible');
                 generatedInfo.classList.add('visible');
@@ -323,13 +348,20 @@
             }
 
             function buildSite(imgSrc, audioSrc, mime) {
+                // Дополнительная проверка MIME для defense-in-depth
+                const allowedMimes = ['audio/mpeg', 'audio/ogg', 'audio/wav', 'audio/x-m4a', 'audio/mp4'];
+                if (!allowedMimes.includes(mime)) {
+                    throw new Error('Invalid audio MIME');
+                }
+
                 return [
                     '<!DOCTYPE html>',
                     '<html lang="ru">',
                     '<head>',
                     '<meta charset="UTF-8">',
                     '<meta name="viewport" content="width=device-width,initial-scale=1.0">',
-                    '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src data:; media-src data:; style-src \'unsafe-inline\'; script-src \'unsafe-inline\';">',
+                    // Обновленный CSP генерируемой страницы
+                    '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src data:; media-src data:; style-src \'unsafe-inline\'; script-src \'unsafe-inline\'; base-uri \'none\'; form-action \'none\';">',
                     '<title>⬡ Void Page</title>',
                     '<style>',
                     '*{margin:0;padding:0;box-sizing:border-box}',
@@ -466,24 +498,27 @@
                     'var ctx=null;',
                     'var gainNode=null;',
                     
-                    // --- ИНИЦИАЛИЗАЦИЯ МАКСИМАЛЬНОЙ ГРОМКОСТИ ---
-                    'var AudioContext = window.AudioContext || window.webkitAudioContext;',
-                    'if (AudioContext) {',
-                    '  ctx = new AudioContext();',
-                    '  var source = ctx.createMediaElementSource(a);',
-                    '  gainNode = ctx.createGain();',
-                    '  gainNode.gain.value = 2.5;', // Усиление громкости в 2.5 раза!
-                    '  source.connect(gainNode);',
-                    '  gainNode.connect(ctx.destination);',
-                    '} else {',
-                    '  a.volume = 1;', // Фоллбэк для старых браузеров
+                    // Инициализация максимальной громкости с try/catch (fallback для sandbox)
+                    'try {',
+                    '  var AudioContext = window.AudioContext || window.webkitAudioContext;',
+                    '  if (AudioContext) {',
+                    '    ctx = new AudioContext();',
+                    '    var source = ctx.createMediaElementSource(a);',
+                    '    gainNode = ctx.createGain();',
+                    '    gainNode.gain.value = 2.5;', // Усиление в 2.5 раза
+                    '    source.connect(gainNode);',
+                    '    gainNode.connect(ctx.destination);',
+                    '  } else {',
+                    '    a.volume = 1;',
+                    '  }',
+                    '} catch(e) {',
+                    '  console.warn("Web Audio API failed, fallback to standard volume");',
+                    '  a.volume = 1;',
                     '}',
                     
                     'window.triggerAudio=function(e){',
                     'if(s)return;',
                     'e.stopPropagation();e.preventDefault();',
-                    
-                    // Возобновляем аудиоконтекст (требование браузеров)
                     'if(ctx && ctx.state === "suspended"){ ctx.resume(); }',
                     'a.volume=1;',
                     'var p=a.play();',
@@ -517,8 +552,6 @@
 
             function downloadSite() {
                 if (!generatedHTML) { alert('⚠️ Сначала сгенерируйте сайт!'); return; }
-                
-                // ИСПРАВЛЕНИЕ: Тип application/octet-stream для правильного скачивания в Firefox
                 const blob = new Blob([generatedHTML], { type: 'application/octet-stream' });
                 const url = URL.createObjectURL(blob);
                 
@@ -565,6 +598,8 @@
                 
                 const iframe = document.createElement('iframe');
                 iframe.src = url;
+                // ИСПРАВЛЕНИЕ: Добавлен sandbox для изоляции
+                iframe.setAttribute('sandbox', 'allow-scripts');
                 
                 header.appendChild(closeBtn);
                 modal.appendChild(header);
