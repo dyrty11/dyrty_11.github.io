@@ -69,34 +69,44 @@
                 </a>
             </div>
             <div class="contact-form">
-                <form id="contactForm" action="https://formspree.io/f/mjygdrkq" method="POST" enctype="multipart/form-data">
-                    <div class="form-group">
-                        <label>Ваше имя</label>
-                        <input type="text" name="name" placeholder="Иван Иванов" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" name="email" placeholder="ivan@example.com" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Сообщение</label>
-                        <textarea name="message" placeholder="Расскажите о вашем проекте..." required></textarea>
-                    </div>
+                <form id="contactForm" action="https://formsubmit.co/d81816320@gmail.com" method="POST" enctype="multipart/form-data">
+    
+    <!-- Скрытые настройки FormSubmit -->
+    <input type="hidden" name="_subject" value="Новое сообщение с портфолио!">
+    <input type="hidden" name="_captcha" value="false">
+    <input type="hidden" name="_template" value="table">
+    <!-- Опционально: страница, куда перекинет после успешной отправки (если JS отключен) -->
+    <input type="hidden" name="_next" value="https://dyrty11.github.io/dyrty_11.github.io/contacts.html">
 
-                    <div class="form-group">
-                        <label>Прикрепить файл (необязательно)</label>
-                        <div class="file-upload-wrapper">
-                            <input type="file" id="fileInput" name="attachment" class="file-input" accept=".pdf,.zip,.doc,.docx,.png,.jpg,.jpeg">
-                            <label for="fileInput" class="file-label">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                                Выбрать файл
-                            </label>
-                            <span id="fileName" class="file-name">Файл не выбран</span>
-                        </div>
-                    </div>
+    <div class="form-group">
+        <label>Ваше имя</label>
+        <input type="text" name="name" placeholder="Иван Иванов" required>
+    </div>
+    
+    <div class="form-group">
+        <label>Email</label>
+        <input type="email" name="email" placeholder="ivan@example.com" required>
+    </div>
+    
+    <div class="form-group">
+        <label>Сообщение</label>
+        <textarea name="message" placeholder="Расскажите о вашем проекте..." required></textarea>
+    </div>
 
-                    <button type="submit" class="submit-btn">Отправить сообщение</button>
-                </form>
+    <div class="form-group">
+        <label>Прикрепить файл (необязательно)</label>
+        <div class="file-upload-wrapper">
+            <input type="file" id="fileInput" name="attachment" class="file-input" accept=".pdf,.zip,.doc,.docx,.png,.jpg,.jpeg">
+            <label for="fileInput" class="file-label">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                Выбрать файл
+            </label>
+            <span id="fileName" class="file-name">Файл не выбран</span>
+        </div>
+    </div>
+
+    <button type="submit" class="submit-btn">Отправить сообщение</button>
+</form>
             </div>
         </div>
 
