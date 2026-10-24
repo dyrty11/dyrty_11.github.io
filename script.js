@@ -233,7 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- 4. Обработка формы контактов ---
+        // --- 4. Обработка формы контактов (Formcarry AJAX) ---
     const contactForm = document.getElementById('contactForm');
     if (contactForm) {
         // Обновление имени выбранного файла
@@ -246,6 +246,44 @@ document.addEventListener('DOMContentLoaded', () => {
                     : 'Файл не выбран';
             });
         }
+
+        contactForm.addEventListener('submit', async function (e) {
+            e.preventDefault(); // Останавливаем перезагрузку страницы
+            
+            const submitBtn = this.querySelector('.submit-btn');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Отправка...';
+
+            const formData = new FormData(this);
+
+            try {
+                const response = await fetch(this.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    alert('Сообщение успешно отправлено! Я свяжусь с вами.');
+                    this.reset();
+                    if (fileNameEl) fileNameEl.textContent = 'Файл не выбран';
+                } else if (data.code === 422) {
+                    // Ошибка валидации (например, неверный email)
+                    alert('Проверьте правильность заполнения полей.');
+                } else {
+                    alert('Ошибка при отправке: ' + (data.message || 'Неизвестная ошибка'));
+                }
+            } catch (error) {
+                alert('Ошибка сети. Проверьте подключение к интернету.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        });
+    }
 
         contactForm.addEventListener('submit', async function (e) {
             e.preventDefault();
