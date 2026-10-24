@@ -6,11 +6,9 @@ document.addEventListener('DOMContentLoaded', () => {
         themeToggle.addEventListener('click', (event) => {
             const currentTheme = htmlElement.getAttribute('data-theme');
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-
             const persistTheme = () => {
                 try { localStorage.setItem('theme', newTheme); } catch (e) {}
             };
-
             if (!document.startViewTransition) {
                 htmlElement.setAttribute('data-theme', newTheme);
                 persistTheme();
@@ -52,7 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
             'shopping-bag': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>',
             'archive': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>'
         };
-
         const tagIcons = {
             'react': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2"></circle><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(0 12 12)"></ellipse><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"></ellipse><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)"></ellipse></svg>',
             'javascript': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>',
@@ -65,21 +62,15 @@ document.addEventListener('DOMContentLoaded', () => {
             'exe': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>',
             'default': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>'
         };
-
         function getTagIcon(tagName) {
             const key = String(tagName).toLowerCase();
             return tagIcons[key] || tagIcons['default'];
         }
-
         let allProjects = [];
         let currentFilters = { category: 'all', tag: 'all', search: '' };
-
         const fallbackProjects = [
             { "title": "VoidForge", "category": "website", "description": "Генератор аудио-сайтов.", "tags": ["HTML", "JavaScript"], "type": "link", "link": "voidforge.html", "buttonText": "Открыть", "icon": "layout", "color": "#8b5cf6" }
         ];
-
-        // Безопасная проверка URL через встроенный парсер.
-        // Отсекает javascript:, data:, vbscript: и обходы через \t \n \r.
         function sanitizeURL(url) {
             try {
                 const u = new URL(url, window.location.href);
@@ -89,41 +80,32 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (e) {}
             return '#';
         }
-
         function getColorClass(colorHex) {
             const map = { '#2563eb': 'color-blue', '#8b5cf6': 'color-purple', '#10b981': 'color-green', '#f59e0b': 'color-orange' };
             return map[colorHex] || 'color-blue';
         }
-
         fetch('projects.json')
             .then(response => { if (!response.ok) throw new Error('Network error'); return response.json(); })
             .then(data => { allProjects = Array.isArray(data) ? data : []; buildTagFilters(); applyFilters(); })
             .catch(() => { allProjects = fallbackProjects; buildTagFilters(); applyFilters(); });
-
         function buildTagFilters() {
             const tagFiltersContainer = document.getElementById('tagFilters');
             if (!tagFiltersContainer) return;
             tagFiltersContainer.innerHTML = '';
-
             const allTags = new Set();
             allProjects.forEach(p => {
                 if (Array.isArray(p.tags)) p.tags.forEach(t => allTags.add(String(t)));
             });
-
             const makeFilterBtn = (label, tagValue, isActive) => {
                 const btn = document.createElement('button');
                 btn.className = 'tag-filter-btn' + (isActive ? ' active' : '');
                 btn.setAttribute('data-tag', tagValue);
                 if (tagValue !== 'all') btn.innerHTML = getTagIcon(tagValue);
-                btn.appendChild(document.createTextNode(
-                    (tagValue === 'all' ? '' : ' ') + label
-                ));
+                btn.appendChild(document.createTextNode((tagValue === 'all' ? '' : ' ') + label));
                 return btn;
             };
-
             tagFiltersContainer.appendChild(makeFilterBtn('Все теги', 'all', true));
             allTags.forEach(tag => tagFiltersContainer.appendChild(makeFilterBtn(tag, tag, false)));
-
             tagFiltersContainer.querySelectorAll('.tag-filter-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     tagFiltersContainer.querySelectorAll('.tag-filter-btn').forEach(b => b.classList.remove('active'));
@@ -133,23 +115,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             });
         }
-
         function applyFilters() {
             const filtered = allProjects.filter(project => {
                 const title = String(project.title || '');
                 const desc = String(project.description || '');
                 const tags = Array.isArray(project.tags) ? project.tags.map(String) : [];
-
                 const matchCategory = currentFilters.category === 'all' || project.category === currentFilters.category;
                 const matchTag = currentFilters.tag === 'all' || tags.includes(currentFilters.tag);
                 const searchLower = currentFilters.search.toLowerCase();
                 const matchSearch = title.toLowerCase().includes(searchLower) || desc.toLowerCase().includes(searchLower);
-
                 return matchCategory && matchTag && matchSearch;
             });
             renderProjects(filtered);
         }
-
         function renderProjects(projects) {
             projectsGrid.innerHTML = '';
             if (projects.length === 0) {
@@ -159,21 +137,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 projectsGrid.appendChild(empty);
                 return;
             }
-
             projects.forEach(project => {
                 const card = document.createElement('div');
                 card.className = 'project-card';
-
                 const iconDiv = document.createElement('div');
                 iconDiv.className = 'project-icon ' + getColorClass(project.color);
                 iconDiv.innerHTML = icons[project.icon] || icons['file'];
-
                 const titleEl = document.createElement('h3');
                 titleEl.textContent = String(project.title || '');
-
                 const descEl = document.createElement('p');
                 descEl.textContent = String(project.description || '');
-
                 const tagsDiv = document.createElement('div');
                 tagsDiv.className = 'project-tags';
                 if (Array.isArray(project.tags)) {
@@ -186,12 +159,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         tagsDiv.appendChild(tagSpan);
                     });
                 }
-
                 const isDownload = project.type === 'download';
                 const linkEl = document.createElement('a');
                 linkEl.className = 'action-btn ' + (isDownload ? 'btn-outline' : 'btn-primary');
                 linkEl.href = sanitizeURL(project.link);
-
                 if (isDownload) {
                     linkEl.setAttribute('download', '');
                     linkEl.setAttribute('rel', 'noopener noreferrer');
@@ -199,13 +170,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     linkEl.setAttribute('target', '_blank');
                     linkEl.setAttribute('rel', 'noopener noreferrer');
                 }
-
                 linkEl.appendChild(document.createTextNode(String(project.buttonText || 'Открыть') + ' '));
                 const btnIcon = isDownload
                     ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>'
                     : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>';
                 linkEl.insertAdjacentHTML('beforeend', btnIcon);
-
                 card.appendChild(iconDiv);
                 card.appendChild(titleEl);
                 card.appendChild(descEl);
@@ -214,7 +183,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 projectsGrid.appendChild(card);
             });
         }
-
         document.querySelectorAll('.tab-btn').forEach(button => {
             button.addEventListener('click', () => {
                 document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -223,7 +191,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 applyFilters();
             });
         });
-
         const searchInput = document.getElementById('searchInput');
         if (searchInput) {
             searchInput.addEventListener('input', (e) => {
@@ -233,10 +200,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-        // --- 4. Обработка формы контактов (Formcarry AJAX) ---
+    // --- 4. Обработка формы контактов (Formcarry AJAX) ---
     const contactForm = document.getElementById('contactForm');
     if (contactForm) {
-        // Обновление имени выбранного файла
         const fileInput = document.getElementById('fileInput');
         const fileNameEl = document.getElementById('fileName');
         if (fileInput && fileNameEl) {
@@ -248,8 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         contactForm.addEventListener('submit', async function (e) {
-            e.preventDefault(); // Останавливаем перезагрузку страницы
-            
+            e.preventDefault();
             const submitBtn = this.querySelector('.submit-btn');
             const originalText = submitBtn.textContent;
             submitBtn.disabled = true;
@@ -271,7 +236,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     this.reset();
                     if (fileNameEl) fileNameEl.textContent = 'Файл не выбран';
                 } else if (data.code === 422) {
-                    // Ошибка валидации (например, неверный email)
                     alert('Проверьте правильность заполнения полей.');
                 } else {
                     alert('Ошибка при отправке: ' + (data.message || 'Неизвестная ошибка'));
@@ -282,100 +246,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 submitBtn.disabled = false;
                 submitBtn.textContent = originalText;
             }
-        });
-    }
-
-        contactForm.addEventListener('submit', async function (e) {
-            e.preventDefault();
-            const submitBtn = this.querySelector('.submit-btn');
-            const originalText = submitBtn.textContent;
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Отправка...';
-
-            const formData = new FormData(this);
-            try {
-                const response = await fetch(this.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: { 'Accept': 'application/json' }
-                });
-                if (response.ok) {
-                    alert('Сообщение успешно отправлено!');
-                    this.reset();
-                    if (fileNameEl) fileNameEl.textContent = 'Файл не выбран';
-                } else {
-                    alert('Ошибка при отправке.');
-                }
-            } catch (error) {
-                alert('Ошибка сети.');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = originalText;
-            }
-        });
-    }
-
-    // --- 5. Анимации ---
-    const animateCSS = (element, animation, prefix = 'animate__') => {
-        const animationName = `${prefix}${animation}`;
-        element.classList.add(`${prefix}animated`, animationName);
-        function handleAnimationEnd() {
-            element.classList.remove(`${prefix}animated`, animationName);
-            element.removeEventListener('animationend', handleAnimationEnd);
-        }
-        element.addEventListener('animationend', handleAnimationEnd);
-    };
-
-    document.querySelectorAll('.footer-socials a, .btn-secondary').forEach(el => {
-        el.addEventListener('mouseenter', () => {
-            const svg = el.querySelector('svg');
-            if (svg) animateCSS(svg, 'heartBeat');
-        });
-    });
-
-    if (window.anime) {
-        document.querySelectorAll('.project-icon svg, .service-icon svg').forEach(svg => {
-            const paths = svg.querySelectorAll('path, line, polyline, rect, circle');
-            paths.forEach(path => {
-                try {
-                    const length = path.getTotalLength();
-                    path.style.strokeDasharray = length;
-                    path.style.strokeDashoffset = length;
-                } catch (e) {}
-            });
-
-            const parentCard = svg.closest('.project-card, .service-card');
-            if (parentCard) {
-                parentCard.addEventListener('mouseenter', () => {
-                    anime({
-                        targets: paths,
-                        strokeDashoffset: [anime.setDashoffset, 0],
-                        easing: 'easeInOutSine',
-                        duration: 1200,
-                        delay: anime.stagger(50)
-                    });
-                });
-            }
-        });
-    }
-
-    // --- 6. Мобильное меню ---
-    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-    const mobileNav = document.getElementById('mobileNav');
-
-    if (mobileMenuBtn && mobileNav) {
-        mobileMenuBtn.addEventListener('click', () => {
-            mobileMenuBtn.classList.toggle('active');
-            mobileNav.classList.toggle('active');
-            document.body.style.overflow = mobileNav.classList.contains('active') ? 'hidden' : '';
-        });
-
-        mobileNav.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-                mobileMenuBtn.classList.remove('active');
-                mobileNav.classList.remove('active');
-                document.body.style.overflow = '';
-            });
         });
     }
 });
