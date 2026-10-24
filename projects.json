@@ -13,9 +13,9 @@
   {
     "title": "FilePilot",
     "category": "file",
-    "description": "FilePilot — это десктопное приложение (EXE) для Windows(для распаковки нужен 7z). Наводит порядок в файлах: поиск по содержимому (PDF, DOCX, код), поиск дубликатов, умная автосортировка. 100% приватность, без облаков.",
+    "description": "FilePilot — это десктопное приложение (EXE) для Windows. Наводит порядок в файлах: поиск по содержимому (PDF, DOCX, код), поиск дубликатов, умная автосортировка. 100% приватность, без облаков.",
     "tags": ["Python", "Windows", "EXE"],
-    "type": "link",
+    "type": "download",
     "link": "https://pomf2.lain.la/f/ff7rdfxg.7z",
     "buttonText": "Скачать .7z (EXE)",
     "icon": "file",
