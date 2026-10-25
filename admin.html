@@ -1,162 +1,704 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online Admin — P.</title>
+    <title>Online Admin v2 — P.</title>
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.github.com; object-src 'none'; base-uri 'none'; form-action 'none';">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #050505; --surface: #0a0a0a; --border: #333; --text: #fff; --text-muted: #888; --accent: #ccff00; }
+        :root {
+            --bg: #050505; --surface: #0a0a0a; --border: #333;
+            --text: #fff; --text-muted: #888; --accent: #ccff00;
+            --danger: #ff3333; --success: #ccff00;
+        }
+        [data-theme="light"] {
+            --bg: #f4f4f4; --surface: #ffffff; --border: #d4d4d4;
+            --text: #050505; --text-muted: #666; --accent: #88cc00;
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; border-radius: 0 !important; }
-        body { font-family: 'IBM Plex Mono', monospace; background: var(--bg); color: var(--text); min-height: 100vh; padding: 40px 20px; }
-        .container { max-width: 1000px; margin: 0 auto; }
-        h1 { font-family: 'Space Grotesk', sans-serif; font-size: 2.5em; text-transform: uppercase; letter-spacing: -1px; margin-bottom: 10px; }
+        body {
+            font-family: 'IBM Plex Mono', monospace; background: var(--bg); color: var(--text);
+            min-height: 100vh; padding: 30px 20px; transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width: 1100px; margin: 0 auto; }
+        
+        .header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        h1 { font-family: 'Space Grotesk', sans-serif; font-size: 2.2em; text-transform: uppercase; letter-spacing: -1px; }
         h1 span { color: var(--accent); }
-        .subtitle { color: var(--text-muted); font-size: 0.9em; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
-        .token-section { background: var(--surface); border: 1px solid var(--border); padding: 20px; margin-bottom: 30px; }
+        .subtitle { color: var(--text-muted); font-size: 0.85em; margin-bottom: 20px; }
+        
+        .theme-btn {
+            background: var(--surface); border: 1px solid var(--border); color: var(--text);
+            padding: 10px 15px; cursor: pointer; font-size: 18px; transition: all 0.2s;
+        }
+        .theme-btn:hover { border-color: var(--accent); }
+
+        /* Статистика */
+        .stats {
+            display: flex; gap: 20px; flex-wrap: wrap;
+            background: var(--surface); border: 1px solid var(--border);
+            padding: 15px 20px; margin-bottom: 20px; font-size: 13px;
+        }
+        .stats span { color: var(--text-muted); }
+        .stats strong { color: var(--accent); font-size: 1.2em; margin-left: 5px; }
+
+        /* Токен */
+        .token-section { background: var(--surface); border: 1px solid var(--border); padding: 20px; margin-bottom: 20px; }
         .token-section label { display: block; font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
         .token-section input { width: 100%; padding: 10px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 14px; }
         .token-hint { font-size: 11px; color: var(--text-muted); margin-top: 8px; line-height: 1.5; }
-        .status-badge { display: inline-block; padding: 4px 8px; font-size: 10px; text-transform: uppercase; border: 1px solid var(--border); color: var(--text-muted); }
+        .status-badge { display: inline-block; padding: 4px 8px; font-size: 10px; text-transform: uppercase; border: 1px solid var(--border); color: var(--text-muted); margin-top: 10px; }
         .status-badge.connected { border-color: var(--accent); color: var(--accent); }
-        .project-item { background: var(--surface); border: 1px solid var(--border); padding: 20px; margin-bottom: 20px; position: relative; }
-        .project-item .delete-btn { position: absolute; top: 20px; right: 20px; background: transparent; border: 1px solid #ff3333; color: #ff3333; padding: 5px 10px; cursor: pointer; text-transform: uppercase; font-size: 10px; }
-        .project-item .delete-btn:hover { background: #ff3333; color: #000; }
-        .form-group { margin-bottom: 15px; }
+
+        /* Панель инструментов */
+        .toolbar {
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 15px; margin-bottom: 20px; flex-wrap: wrap;
+        }
+        .toolbar input[type="text"] {
+            flex: 1; min-width: 200px; padding: 10px 15px;
+            background: var(--surface); border: 1px solid var(--border); color: var(--text);
+            font-family: 'IBM Plex Mono', monospace; font-size: 14px;
+        }
+        .toolbar input:focus { outline: none; border-color: var(--accent); }
+        
+        .unsaved-badge {
+            color: #ff9800; font-size: 12px; text-transform: uppercase;
+            font-weight: bold; padding: 8px 12px; border: 1px solid #ff9800;
+        }
+
+        /* Карточка проекта */
+        .project-item {
+            background: var(--surface); border: 1px solid var(--border);
+            padding: 20px; margin-bottom: 15px; position: relative;
+            transition: all 0.2s;
+        }
+        .project-item.dragging { opacity: 0.4; }
+        .project-item.drag-over { border-color: var(--accent); border-style: dashed; }
+        
+        .project-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--border);
+        }
+        .project-number {
+            font-family: 'Space Grotesk', sans-serif; font-size: 1.3em;
+            font-weight: 700; color: var(--accent);
+        }
+        .project-actions { display: flex; gap: 8px; }
+        
+        .icon-btn {
+            background: transparent; border: 1px solid var(--border);
+            color: var(--text-muted); width: 32px; height: 32px;
+            cursor: pointer; font-size: 14px; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .icon-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+        .drag-handle { cursor: grab; color: var(--text-muted); font-size: 18px; padding: 5px; }
+        .drag-handle:active { cursor: grabbing; }
+
+        /* Поля */
+        .form-group { margin-bottom: 12px; }
         .form-group label { display: block; font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 5px; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 14px; }
-        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--accent); }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 10px; background: var(--bg); border: 1px solid var(--border);
+            color: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 14px;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--accent); }
+        .form-group textarea { resize: vertical; }
+
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
-        .btn { padding: 15px 30px; background: transparent; border: 1px solid var(--border); color: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 14px; text-transform: uppercase; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 15px; }
+
+        /* Иконка превью */
+        .icon-row { display: flex; gap: 10px; align-items: center; }
+        .icon-preview {
+            width: 40px; height: 40px; flex-shrink: 0;
+            border: 1px solid var(--border); background: var(--bg);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--accent);
+        }
+        .icon-preview svg { width: 24px; height: 24px; }
+
+        /* Палитра цветов */
+        .color-row { display: flex; gap: 8px; align-items: center; }
+        .color-swatch {
+            width: 24px; height: 24px; cursor: pointer;
+            border: 2px solid var(--border); transition: transform 0.2s;
+        }
+        .color-swatch:hover { transform: scale(1.15); }
+        .color-swatch.active { border-color: var(--text); }
+        .color-input { flex: 1; }
+
+        /* Кнопки */
+        .btn {
+            padding: 12px 24px; background: transparent; border: 1px solid var(--border);
+            color: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 13px;
+            text-transform: uppercase; font-weight: 600; cursor: pointer; transition: all 0.2s;
+        }
         .btn:hover { border-color: var(--accent); color: var(--accent); }
         .btn-primary { background: var(--accent); color: #000; border-color: var(--accent); }
         .btn-primary:hover { opacity: 0.8; color: #000; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 30px; border-top: 1px solid var(--border); padding-top: 30px; }
+
+        .add-btn { width: 100%; margin-bottom: 20px; padding: 15px; font-size: 14px; }
+        .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px; }
+        
+        .log {
+            margin-top: 20px; padding: 15px; background: var(--surface); border: 1px solid var(--border);
+            font-size: 12px; color: var(--text-muted); max-height: 100px; overflow-y: auto;
+        }
+        .log.error { border-color: var(--danger); color: var(--danger); }
+        .log.success { border-color: var(--accent); color: var(--accent); }
+
         .hint { font-size: 12px; color: var(--text-muted); margin-top: 20px; line-height: 1.6; }
-        .log { margin-top: 20px; padding: 15px; background: var(--bg); border: 1px solid var(--border); font-size: 12px; color: var(--text-muted); max-height: 150px; overflow-y: auto; }
+        .hint kbd {
+            background: var(--surface); border: 1px solid var(--border);
+            padding: 2px 6px; font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+        }
+
+        /* Тост уведомления */
+        .toast {
+            position: fixed; bottom: 20px; right: 20px; z-index: 9999;
+            background: var(--surface); border: 1px solid var(--accent); color: var(--text);
+            padding: 15px 25px; font-size: 14px; box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        @media (max-width: 768px) {
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+            h1 { font-size: 1.6em; }
+            .header-row { flex-direction: column; gap: 10px; }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Online <span>Admin</span></h1>
-        <p class="subtitle">Редактирование projects.json напрямую на GitHub.</p>
+        <div class="header-row">
+            <div>
+                <h1>Online <span>Admin</span> v2</h1>
+                <p class="subtitle">Управление projects.json прямо на GitHub</p>
+            </div>
+            <button class="theme-btn" id="themeBtn" title="Переключить тему">🌙</button>
+        </div>
+
+        <!-- Статистика -->
+        <div class="stats" id="stats"></div>
+
+        <!-- Токен -->
         <div class="token-section">
-            <label>GitHub Personal Access Token (fine-grained, Contents: Read and write)</label>
+            <label>GitHub Personal Access Token (fine-grained, Contents: Read & Write)</label>
             <input type="password" id="tokenInput" placeholder="github_pat_...">
-            <div class="token-hint">Токен хранится только в вашем браузере (localStorage). Он не отправляется никуда, кроме api.github.com.</div>
-            <div style="margin-top: 10px;"><span class="status-badge" id="tokenStatus">Не подключено</span></div>
+            <div class="token-hint">
+                Токен хранится только в localStorage вашего браузера. Он отправляется только на api.github.com.
+            </div>
+            <span class="status-badge" id="tokenStatus">Не подключено</span>
         </div>
+
+        <!-- Панель поиска -->
+        <div class="toolbar">
+            <input type="text" id="searchAdmin" placeholder="🔍 Поиск по названию, описанию, тегам...">
+            <span class="unsaved-badge" id="unsavedBadge" style="display:none;">● Не сохранено</span>
+        </div>
+
         <div id="projectsList"></div>
-        <button class="btn" id="addBtn" style="width: 100%; margin-bottom: 20px;">+ Добавить проект</button>
+
+        <button class="btn add-btn" id="addBtn">+ Добавить проект</button>
+
         <div class="actions">
-            <button class="btn btn-primary" id="saveBtn">Сохранить на GitHub</button>
-            <button class="btn" id="loadBtn">Загрузить из GitHub</button>
+            <button class="btn btn-primary" id="saveBtn">💾 Сохранить на GitHub</button>
+            <button class="btn" id="loadBtn">⬇ Загрузить из GitHub</button>
+            <button class="btn" id="exportBtn">📦 Экспорт (backup)</button>
+            <button class="btn" id="importBtn">📂 Импорт</button>
+            <button class="btn" id="viewSiteBtn">🌐 Открыть сайт</button>
+            <input type="file" id="importFile" accept=".json" hidden>
         </div>
+
         <div class="log" id="log">Готов к работе.</div>
+
         <div class="hint">
-            <strong>Как пользоваться:</strong><br>
-            1. Вставьте токен и нажмите «Загрузить из GitHub».<br>
-            2. Редактируйте проекты.<br>
-            3. Нажмите «Сохранить на GitHub» — файл projects.json обновится в репозитории.<br>
-            4. GitHub Pages подхватит изменения через 1–2 минуты.
+            <strong>Быстрые команды:</strong> <kbd>Ctrl+S</kbd> — сохранить на GitHub. <kbd>Shift+Click</kbd> — тоже.<br>
+            <strong>Порядок:</strong> перетаскивайте карточки за ручку <strong>☰</strong> слева, чтобы менять порядок проектов.
         </div>
     </div>
+
     <script>
         (function() {
             const REPO_OWNER = 'dyrty11';
             const REPO_NAME = 'dyrty_11.github.io';
             const FILE_PATH = 'projects.json';
-            let projects = []; let fileSha = null;
-            const listEl = document.getElementById('projectsList'); const tokenInput = document.getElementById('tokenInput');
-            const tokenStatus = document.getElementById('tokenStatus'); const logEl = document.getElementById('log');
+
+            const ICON_SVGS = {
+                'layout': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>',
+                'file': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><polyline points="9 15 12 12 15 15"></polyline></svg>',
+                'shopping-bag': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>',
+                'archive': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>'
+            };
+
+            const PRESET_COLORS = ['#ccff00', '#0ea5e9', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444'];
+
+            let projects = [];
+            let fileSha = null;
+            let hasUnsavedChanges = false;
+            let searchFilter = '';
+            let draggedIndex = null;
+
+            const listEl = document.getElementById('projectsList');
+            const tokenInput = document.getElementById('tokenInput');
+            const tokenStatus = document.getElementById('tokenStatus');
+            const logEl = document.getElementById('log');
+            const statsEl = document.getElementById('stats');
+            const unsavedBadge = document.getElementById('unsavedBadge');
+
+            // ====== ТЕМА ======
+            const themeBtn = document.getElementById('themeBtn');
+            const savedTheme = localStorage.getItem('admin_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeBtn();
+
+            themeBtn.addEventListener('click', () => {
+                const cur = document.documentElement.getAttribute('data-theme');
+                const next = cur === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', next);
+                localStorage.setItem('admin_theme', next);
+                updateThemeBtn();
+            });
+            function updateThemeBtn() {
+                themeBtn.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '🌙' : '☀️';
+            }
+
+            // ====== ТОКЕН ======
             const savedToken = localStorage.getItem('gh_admin_token');
-            if (savedToken) { tokenInput.value = savedToken; tokenStatus.textContent = 'Подключено'; tokenStatus.classList.add('connected'); }
+            if (savedToken) {
+                tokenInput.value = savedToken;
+                tokenStatus.textContent = 'Подключено';
+                tokenStatus.classList.add('connected');
+            }
             tokenInput.addEventListener('input', () => {
                 localStorage.setItem('gh_admin_token', tokenInput.value);
-                if (tokenInput.value) { tokenStatus.textContent = 'Подключено'; tokenStatus.classList.add('connected'); }
-                else { tokenStatus.textContent = 'Не подключено'; tokenStatus.classList.remove('connected'); }
+                if (tokenInput.value) {
+                    tokenStatus.textContent = 'Подключено';
+                    tokenStatus.classList.add('connected');
+                } else {
+                    tokenStatus.textContent = 'Не подключено';
+                    tokenStatus.classList.remove('connected');
+                }
             });
-            function log(msg) { logEl.textContent = msg; }
-                        async function fetchFile() {
+
+            // ====== ЛОГИ ======
+            function log(msg, type = '') {
+                logEl.textContent = msg;
+                logEl.className = 'log ' + type;
+            }
+
+            function toast(msg) {
+                const t = document.createElement('div');
+                t.className = 'toast';
+                t.textContent = msg;
+                document.body.appendChild(t);
+                setTimeout(() => t.remove(), 2500);
+            }
+
+            // ====== UNSAVED ======
+            function markUnsaved() {
+                if (!hasUnsavedChanges) {
+                    hasUnsavedChanges = true;
+                    unsavedBadge.style.display = 'inline-block';
+                }
+            }
+            function markSaved() {
+                hasUnsavedChanges = false;
+                unsavedBadge.style.display = 'none';
+            }
+
+            window.addEventListener('beforeunload', (e) => {
+                if (hasUnsavedChanges) {
+                    e.preventDefault();
+                    e.returnValue = '';
+                }
+            });
+
+            // ====== STATS ======
+            function updateStats() {
+                const total = projects.length;
+                const websites = projects.filter(p => p.category === 'website').length;
+                const files = projects.filter(p => p.category === 'file').length;
+                statsEl.innerHTML = `
+                    <span>Всего: <strong>${total}</strong></span>
+                    <span>Сайтов: <strong>${websites}</strong></span>
+                    <span>Файлов: <strong>${files}</strong></span>
+                `;
+            }
+
+            // ====== GITHUB API ======
+            async function fetchFile() {
                 const token = tokenInput.value.trim();
-                if (!token) { alert('Введите токен'); return; }
+                if (!token) { toast('Введите токен'); return; }
                 log('Загрузка projects.json...');
                 try {
-                    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
                     if (!res.ok) throw new Error(`HTTP ${res.status}`);
                     const data = await res.json();
                     fileSha = data.sha;
-                    
-                    // ИСПРАВЛЕНИЕ: Правильное декодирование UTF-8 из Base64
-                    const base64Clean = data.content.replace(/\s/g, ''); // Убираем переносы строк
+                    const base64Clean = data.content.replace(/\s/g, '');
                     const content = decodeURIComponent(escape(atob(base64Clean)));
-                    
                     projects = JSON.parse(content);
+                    markSaved();
                     render();
-                    log('Файл успешно загружен.');
-                } catch (e) { 
-                    log('Ошибка загрузки: ' + e.message); 
-                    alert('Не удалось загрузить projects.json. Проверьте токен и репозиторий.'); 
+                    log('Файл загружен. Проектов: ' + projects.length, 'success');
+                    toast('Файл загружен!');
+                } catch (e) {
+                    log('Ошибка загрузки: ' + e.message, 'error');
                 }
             }
+
             async function saveFile() {
                 const token = tokenInput.value.trim();
-                if (!token) { alert('Введите токен'); return; }
-                if (!fileSha) { alert('Сначала загрузите файл с GitHub.'); return; }
+                if (!token) { toast('Введите токен'); return; }
+                if (!fileSha) { toast('Сначала загрузите файл с GitHub'); return; }
+                
+                // Валидация
+                const errors = validate();
+                if (errors.length > 0) {
+                    toast('Исправьте ошибки: ' + errors[0]);
+                    log('Валидация не пройдена: ' + errors.join('; '), 'error');
+                    return;
+                }
+                
                 log('Сохранение на GitHub...');
                 const content = btoa(unescape(encodeURIComponent(JSON.stringify(projects, null, 2))));
                 try {
                     const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
                         method: 'PUT',
                         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ message: 'Update projects.json via admin panel', content: content, sha: fileSha })
+                        body: JSON.stringify({ message: 'Update projects.json via admin v2', content, sha: fileSha })
                     });
                     if (!res.ok) throw new Error(`HTTP ${res.status}`);
                     const data = await res.json();
                     fileSha = data.content.sha;
-                    log('Успешно сохранено! GitHub Pages обновится через 1–2 минуты.');
-                } catch (e) { log('Ошибка сохранения: ' + e.message); alert('Не удалось сохранить файл. Проверьте права токена.'); }
+                    markSaved();
+                    log('Сохранено! GitHub Pages обновится через 1–2 минуты.', 'success');
+                    toast('Сохранено на GitHub!');
+                } catch (e) {
+                    log('Ошибка сохранения: ' + e.message, 'error');
+                }
             }
+
+            function validate() {
+                const errors = [];
+                projects.forEach((p, i) => {
+                    if (!p.title || !p.title.trim()) errors.push(`#${i+1}: пустое название`);
+                    if (!p.link || !p.link.trim()) errors.push(`#${i+1}: пустая ссылка`);
+                });
+                return errors;
+            }
+
+            // ====== RENDER ======
             function render() {
                 listEl.innerHTML = '';
+                let visibleCount = 0;
+
                 projects.forEach((proj, index) => {
+                    // Фильтр поиска
+                    if (searchFilter) {
+                        const haystack = `${proj.title || ''} ${proj.description || ''} ${(proj.tags || []).join(' ')}`.toLowerCase();
+                        if (!haystack.includes(searchFilter)) return;
+                    }
+                    visibleCount++;
+
                     const item = document.createElement('div');
                     item.className = 'project-item';
+                    item.draggable = true;
+                    item.dataset.index = index;
+
+                    // Формируем SVG-превью иконки
+                    const iconSVG = ICON_SVGS[proj.icon] || ICON_SVGS['layout'];
+
+                    // Свотчи цветов
+                    const colorSwatches = PRESET_COLORS.map(c =>
+                        `<div class="color-swatch ${c === proj.color ? 'active' : ''}" style="background:${c}" data-color="${c}" data-index="${index}" title="${c}"></div>`
+                    ).join('');
+
                     item.innerHTML = `
-                        <button class="delete-btn" data-index="${index}">Удалить</button>
-                        <div class="form-group"><label>Название</label><input type="text" class="field-title" value="${proj.title || ''}" data-index="${index}"></div>
-                        <div class="grid-2">
-                            <div class="form-group"><label>Категория</label><select class="field-category" data-index="${index}"><option value="website" ${proj.category === 'website' ? 'selected' : ''}>Веб-сайт</option><option value="file" ${proj.category === 'file' ? 'selected' : ''}>Файл</option></select></div>
-                            <div class="form-group"><label>Тип ссылки</label><select class="field-type" data-index="${index}"><option value="link" ${proj.type === 'link' ? 'selected' : ''}>Ссылка</option><option value="download" ${proj.type === 'download' ? 'selected' : ''}>Скачать</option></select></div>
+                        <div class="project-header">
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <span class="drag-handle" title="Перетащите для изменения порядка">☰</span>
+                                <span class="project-number">#${index + 1}</span>
+                            </div>
+                            <div class="project-actions">
+                                <button class="icon-btn" data-action="duplicate" data-index="${index}" title="Дублировать">⧉</button>
+                                <button class="icon-btn danger" data-action="delete" data-index="${index}" title="Удалить">✕</button>
+                            </div>
                         </div>
-                        <div class="form-group"><label>Описание</label><textarea class="field-desc" rows="2" data-index="${index}">${proj.description || ''}</textarea></div>
+                        <div class="form-group">
+                            <label>Название</label>
+                            <input type="text" class="field-title" value="${escapeHtml(proj.title || '')}" data-index="${index}">
+                        </div>
                         <div class="grid-2">
-                            <div class="form-group"><label>Ссылка (URL или путь)</label><input type="text" class="field-link" value="${proj.link || ''}" data-index="${index}"></div>
-                            <div class="form-group"><label>Текст кнопки</label><input type="text" class="field-btnText" value="${proj.buttonText || 'Открыть'}" data-index="${index}"></div>
+                            <div class="form-group">
+                                <label>Категория</label>
+                                <select class="field-category" data-index="${index}">
+                                    <option value="website" ${proj.category === 'website' ? 'selected' : ''}>Веб-сайт</option>
+                                    <option value="file" ${proj.category === 'file' ? 'selected' : ''}>Файл</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Тип ссылки</label>
+                                <select class="field-type" data-index="${index}">
+                                    <option value="link" ${proj.type === 'link' ? 'selected' : ''}>Ссылка (открыть)</option>
+                                    <option value="download" ${proj.type === 'download' ? 'selected' : ''}>Скачать</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Описание</label>
+                            <textarea class="field-desc" rows="2" data-index="${index}">${escapeHtml(proj.description || '')}</textarea>
+                        </div>
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label>Ссылка (URL или путь)</label>
+                                <input type="text" class="field-link" value="${escapeHtml(proj.link || '')}" data-index="${index}">
+                            </div>
+                            <div class="form-group">
+                                <label>Текст кнопки</label>
+                                <input type="text" class="field-btnText" value="${escapeHtml(proj.buttonText || 'Открыть')}" data-index="${index}">
+                            </div>
                         </div>
                         <div class="grid-3">
-                            <div class="form-group"><label>Теги (через запятую)</label><input type="text" class="field-tags" value="${(proj.tags || []).join(', ')}" data-index="${index}"></div>
-                            <div class="form-group"><label>Иконка</label><select class="field-icon" data-index="${index}"><option value="layout" ${proj.icon === 'layout' ? 'selected' : ''}>Макет</option><option value="file" ${proj.icon === 'file' ? 'selected' : ''}>Файл</option><option value="shopping-bag" ${proj.icon === 'shopping-bag' ? 'selected' : ''}>Магазин</option><option value="archive" ${proj.icon === 'archive' ? 'selected' : ''}>Архив</option></select></div>
-                            <div class="form-group"><label>Цвет</label><input type="text" class="field-color" value="${proj.color || '#ccff00'}" data-index="${index}"></div>
-                        </div>`;
+                            <div class="form-group">
+                                <label>Теги (через запятую)</label>
+                                <input type="text" class="field-tags" value="${escapeHtml((proj.tags || []).join(', '))}" data-index="${index}">
+                            </div>
+                            <div class="form-group">
+                                <label>Иконка</label>
+                                <div class="icon-row">
+                                    <div class="icon-preview" data-preview="${index}">${iconSVG}</div>
+                                    <select class="field-icon" data-index="${index}">
+                                        <option value="layout" ${proj.icon === 'layout' ? 'selected' : ''}>Макет</option>
+                                        <option value="file" ${proj.icon === 'file' ? 'selected' : ''}>Файл</option>
+                                        <option value="shopping-bag" ${proj.icon === 'shopping-bag' ? 'selected' : ''}>Магазин</option>
+                                        <option value="archive" ${proj.icon === 'archive' ? 'selected' : ''}>Архив</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Цвет</label>
+                                <div class="color-row">
+                                    ${colorSwatches}
+                                    <input type="text" class="field-color color-input" value="${escapeHtml(proj.color || '#ccff00')}" data-index="${index}" maxlength="7">
+                                </div>
+                            </div>
+                        </div>
+                    `;
                     listEl.appendChild(item);
                 });
-                listEl.querySelectorAll('.delete-btn').forEach(btn => { btn.addEventListener('click', (e) => { const idx = parseInt(e.target.getAttribute('data-index')); projects.splice(idx, 1); render(); }); });
-                const fields = [{ cls: 'field-title', key: 'title' },{ cls: 'field-category', key: 'category' },{ cls: 'field-type', key: 'type' },{ cls: 'field-desc', key: 'description' },{ cls: 'field-link', key: 'link' },{ cls: 'field-btnText', key: 'buttonText' },{ cls: 'field-icon', key: 'icon' },{ cls: 'field-color', key: 'color' }];
-                fields.forEach(f => { listEl.querySelectorAll('.' + f.cls).forEach(el => { el.addEventListener('input', (e) => { const idx = parseInt(e.target.getAttribute('data-index')); projects[idx][f.key] = e.target.value; }); }); });
-                listEl.querySelectorAll('.field-tags').forEach(el => { el.addEventListener('input', (e) => { const idx = parseInt(e.target.getAttribute('data-index')); projects[idx].tags = e.target.value.split(',').map(s => s.trim()).filter(s => s); }); });
+
+                if (visibleCount === 0 && projects.length > 0) {
+                    listEl.innerHTML = '<p style="text-align:center;padding:30px;color:var(--text-muted);">Ничего не найдено</p>';
+                } else if (projects.length === 0) {
+                    listEl.innerHTML = '<p style="text-align:center;padding:30px;color:var(--text-muted);">Список пуст. Нажмите "+ Добавить проект" или "Загрузить из GitHub"</p>';
+                }
+
+                updateStats();
+                bindEvents();
             }
+
+            function escapeHtml(s) {
+                return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+            }
+
+            // ====== СОБЫТИЯ ======
+            function bindEvents() {
+                // Поля ввода
+                const fields = [
+                    { cls: 'field-title', key: 'title' },
+                    { cls: 'field-category', key: 'category' },
+                    { cls: 'field-type', key: 'type' },
+                    { cls: 'field-desc', key: 'description' },
+                    { cls: 'field-link', key: 'link' },
+                    { cls: 'field-btnText', key: 'buttonText' },
+                    { cls: 'field-icon', key: 'icon' },
+                    { cls: 'field-color', key: 'color' }
+                ];
+
+                fields.forEach(f => {
+                    listEl.querySelectorAll('.' + f.cls).forEach(el => {
+                        el.addEventListener('input', (e) => {
+                            const idx = parseInt(e.target.dataset.index);
+                            if (!isNaN(idx) && projects[idx]) {
+                                projects[idx][f.key] = e.target.value;
+                                markUnsaved();
+                                // Обновляем превью иконки при смене
+                                if (f.key === 'icon') {
+                                    const preview = listEl.querySelector(`[data-preview="${idx}"]`);
+                                    if (preview) preview.innerHTML = ICON_SVGS[e.target.value] || ICON_SVGS['layout'];
+                                }
+                            }
+                        });
+                    });
+                });
+
+                // Теги
+                listEl.querySelectorAll('.field-tags').forEach(el => {
+                    el.addEventListener('input', (e) => {
+                        const idx = parseInt(e.target.dataset.index);
+                        if (!isNaN(idx) && projects[idx]) {
+                            projects[idx].tags = e.target.value.split(',').map(s => s.trim()).filter(s => s);
+                            markUnsaved();
+                        }
+                    });
+                });
+
+                // Свотчи цветов
+                listEl.querySelectorAll('.color-swatch').forEach(sw => {
+                    sw.addEventListener('click', (e) => {
+                        const color = e.target.dataset.color;
+                        const idx = parseInt(e.target.dataset.index);
+                        if (!isNaN(idx) && projects[idx]) {
+                            projects[idx].color = color;
+                            markUnsaved();
+                            render();
+                        }
+                    });
+                });
+
+                // Действия
+                listEl.querySelectorAll('[data-action]').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const idx = parseInt(e.currentTarget.dataset.index);
+                        const action = e.currentTarget.dataset.action;
+                        if (action === 'delete') {
+                            if (confirm(`Удалить проект "${projects[idx]?.title || ''}"?`)) {
+                                projects.splice(idx, 1);
+                                markUnsaved();
+                                render();
+                            }
+                        } else if (action === 'duplicate') {
+                            const copy = JSON.parse(JSON.stringify(projects[idx]));
+                            copy.title = (copy.title || 'Проект') + ' (копия)';
+                            projects.splice(idx + 1, 0, copy);
+                            markUnsaved();
+                            render();
+                            toast('Проект скопирован');
+                        }
+                    });
+                });
+
+                // Drag & Drop
+                listEl.querySelectorAll('.project-item').forEach(item => {
+                    item.addEventListener('dragstart', (e) => {
+                        draggedIndex = parseInt(item.dataset.index);
+                        item.classList.add('dragging');
+                        e.dataTransfer.effectAllowed = 'move';
+                    });
+                    item.addEventListener('dragend', () => {
+                        item.classList.remove('dragging');
+                        listEl.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+                        draggedIndex = null;
+                    });
+                    item.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                        if (draggedIndex !== null && parseInt(item.dataset.index) !== draggedIndex) {
+                            item.classList.add('drag-over');
+                        }
+                    });
+                    item.addEventListener('dragleave', () => item.classList.remove('drag-over'));
+                    item.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        item.classList.remove('drag-over');
+                        const targetIdx = parseInt(item.dataset.index);
+                        if (draggedIndex !== null && draggedIndex !== targetIdx) {
+                            const [moved] = projects.splice(draggedIndex, 1);
+                            projects.splice(targetIdx, 0, moved);
+                            markUnsaved();
+                            render();
+                        }
+                    });
+                });
+            }
+
+            // ====== КНОПКИ ======
             document.getElementById('addBtn').addEventListener('click', () => {
-                projects.push({ title: 'Новый проект', category: 'website', description: 'Описание проекта', tags: ['JS'], type: 'link', link: 'https://example.com', buttonText: 'Открыть', icon: 'layout', color: '#ccff00' });
+                projects.push({
+                    title: 'Новый проект',
+                    category: 'website',
+                    description: 'Описание проекта',
+                    tags: ['JS'],
+                    type: 'link',
+                    link: 'https://example.com',
+                    buttonText: 'Открыть',
+                    icon: 'layout',
+                    color: '#ccff00'
+                });
+                markUnsaved();
                 render();
             });
+
             document.getElementById('loadBtn').addEventListener('click', fetchFile);
             document.getElementById('saveBtn').addEventListener('click', saveFile);
+
+            document.getElementById('exportBtn').addEventListener('click', () => {
+                const blob = new Blob([JSON.stringify(projects, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'projects-backup-' + new Date().toISOString().slice(0,10) + '.json';
+                a.click();
+                URL.revokeObjectURL(url);
+                toast('Backup сохранён');
+            });
+
+            document.getElementById('importBtn').addEventListener('click', () => {
+                document.getElementById('importFile').click();
+            });
+
+            document.getElementById('importFile').addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    try {
+                        const data = JSON.parse(ev.target.result);
+                        if (!Array.isArray(data)) throw new Error('Это не массив JSON');
+                        if (confirm(`Импортировать ${data.length} проектов? Текущие будут заменены.`)) {
+                            projects = data;
+                            markUnsaved();
+                            render();
+                            log('Импортировано ' + data.length + ' проектов', 'success');
+                            toast('Импорт завершён');
+                        }
+                    } catch (err) {
+                        alert('Ошибка импорта: ' + err.message);
+                    }
+                };
+                reader.readAsText(file);
+                e.target.value = '';
+            });
+
+            document.getElementById('viewSiteBtn').addEventListener('click', () => {
+                window.open(`https://${REPO_OWNER}.github.io/${REPO_NAME}/projects.html`, '_blank');
+            });
+
+            // ====== ПОИСК ======
+            document.getElementById('searchAdmin').addEventListener('input', (e) => {
+                searchFilter = e.target.value.toLowerCase().trim();
+                render();
+            });
+
+            // ====== CTRL+S ======
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                    e.preventDefault();
+                    saveFile();
+                }
+            });
         })();
     </script>
 </body>

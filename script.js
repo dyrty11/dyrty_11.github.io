@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- 4. Обработка формы контактов ---
+    // --- 4. Обработка формы контактов (Formcarry AJAX) ---
     const contactForm = document.getElementById('contactForm');
     if (contactForm) {
         contactForm.addEventListener('submit', async function (e) {
@@ -234,7 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 5. Мобильное меню (боковая панель) ---
+    // --- 5. Мобильное меню (исправленная логика) ---
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     const mobileNav = document.getElementById('mobileNav');
     const menuBackdrop = document.createElement('div');
@@ -245,7 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const toggleMenu = () => {
             const isActive = mobileNav.classList.toggle('active');
             menuBackdrop.classList.toggle('active', isActive);
-            document.body.style.overflow = isActive ? 'hidden' : '';
+            document.body.classList.toggle('menu-open', isActive);
         };
         mobileMenuBtn.addEventListener('click', toggleMenu);
         menuBackdrop.addEventListener('click', toggleMenu);
@@ -253,7 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
             link.addEventListener('click', () => {
                 mobileNav.classList.remove('active');
                 menuBackdrop.classList.remove('active');
-                document.body.style.overflow = '';
+                document.body.classList.remove('menu-open');
             });
         });
     }

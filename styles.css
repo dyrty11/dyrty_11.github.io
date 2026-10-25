@@ -2,7 +2,7 @@
     --bg-color: #050505;
     --text-main: #ffffff;
     --text-muted: #888888;
-    --accent: #ccff00; /* Кислотно-зеленый */
+    --accent: #ccff00;
     --border: #333333;
     --card-bg: #0a0a0a;
     
@@ -34,16 +34,20 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
+body.menu-open { overflow: hidden; }
+
 .page-wrapper { flex: 1; display: flex; flex-direction: column; animation: fadeIn 0.4s ease forwards; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 body.page-exit .page-wrapper { opacity: 0; transition: opacity 0.2s ease; }
 
-/* ШАПКА */
+/* =========================================
+   ШАПКА (Самый высокий z-index)
+   ========================================= */
 header {
     position: fixed; top: 0; left: 0; width: 100%;
     display: flex; justify-content: space-between; align-items: center;
     padding: 20px 5%; background: var(--bg-color); border-bottom: 1px solid var(--border);
-    z-index: 1000;
+    z-index: 1002; /* Поверх меню */
 }
 .logo { font-family: var(--font-display); font-size: 24px; font-weight: 700; text-decoration: none; color: var(--text-main); letter-spacing: -1px; }
 .logo span { color: var(--accent); }
@@ -72,28 +76,47 @@ nav.desktop-nav a:hover, nav.desktop-nav a.active { color: var(--accent); }
 [data-theme="light"] .theme-switch .sun-icon { fill: #000; }
 
 .header-controls { display: flex; align-items: center; gap: 20px; }
-.mobile-menu-btn { display: none; background: none; border: none; color: var(--text-main); cursor: pointer; }
+.mobile-menu-btn { display: none; background: none; border: none; color: var(--text-main); cursor: pointer; z-index: 1003; position: relative; }
 
+/* =========================================
+   БОКОВОЕ МЕНЮ
+   ========================================= */
+.menu-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s;
+}
+.menu-backdrop.active { opacity: 1; pointer-events: auto; }
+
+.mobile-nav {
+    position: fixed; top: 0; right: 0; width: 80%; max-width: 300px; height: 100vh;
+    background: var(--bg-color); border-left: 1px solid var(--border);
+    display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start;
+    gap: 30px; padding: 100px 40px 40px; z-index: 1001;
+    transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    pointer-events: none;
+}
+.mobile-nav.active { 
+    transform: translateX(0); 
+    pointer-events: auto;
+}
+.mobile-nav a { font-family: var(--font-display); font-size: 28px; font-weight: 700; color: var(--text-main); text-decoration: none; text-transform: uppercase; transition: color 0.2s; }
+.mobile-nav a:hover, .mobile-nav a.active { color: var(--accent); }
+
+/* =========================================
+   ОСНОВНОЙ КОНТЕНТ
+   ========================================= */
 .container { max-width: 1400px; margin: 0 auto; padding: 140px 5% 80px; flex: 1; width: 100%; }
 
 /* ГЛАВНАЯ */
 .hero { display: flex; flex-direction: column; justify-content: center; min-height: 60vh; border-bottom: 1px solid var(--border); padding-bottom: 60px; margin-bottom: 60px; }
 .badge { font-size: 12px; color: var(--accent); border: 1px solid var(--accent); padding: 4px 10px; display: inline-block; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; align-self: flex-start; }
-.hero h1 { 
-    font-family: var(--font-display); font-size: clamp(50px, 12vw, 140px); 
-    line-height: 0.9; font-weight: 700; text-transform: uppercase; letter-spacing: -3px; margin-bottom: 30px;
-}
+.hero h1 { font-family: var(--font-display); font-size: clamp(50px, 12vw, 140px); line-height: 0.9; font-weight: 700; text-transform: uppercase; letter-spacing: -3px; margin-bottom: 30px; }
 .hero h1 span { color: transparent; -webkit-text-stroke: 2px var(--text-main); }
 .hero p { font-size: 16px; color: var(--text-muted); max-width: 500px; margin-bottom: 40px; }
 .hero-buttons { display: flex; gap: 20px; }
 
 /* Кнопки */
-.btn { 
-    font-family: var(--font-mono); font-size: 13px; font-weight: 500; text-transform: uppercase; 
-    padding: 16px 32px; border: 1px solid var(--border); background: transparent; color: var(--text-main);
-    cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-    transition: background 0.2s, color 0.2s, border-color 0.2s; position: relative;
-}
+.btn { font-family: var(--font-mono); font-size: 13px; font-weight: 500; text-transform: uppercase; padding: 16px 32px; border: 1px solid var(--border); background: transparent; color: var(--text-main); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 10px; transition: background 0.2s, color 0.2s, border-color 0.2s; position: relative; }
 .btn:hover { background: var(--accent); color: #000; border-color: var(--accent); }
 .btn-primary { border-color: var(--accent); color: var(--accent); }
 .btn-primary:hover { background: var(--accent); color: #000; }
@@ -173,14 +196,7 @@ nav.desktop-nav a:hover, nav.desktop-nav a.active { color: var(--accent); }
 .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--accent); }
 .form-group textarea { resize: vertical; min-height: 120px; }
 
-/* Плашка недоступности файла */
-.file-disabled-notice {
-    display: flex; align-items: center; gap: 10px;
-    padding: 12px 15px; border: 1px dashed var(--text-muted);
-    color: var(--text-muted); font-size: 12px; font-weight: 500;
-    text-transform: uppercase; letter-spacing: 1px;
-    background: rgba(255, 255, 255, 0.02); cursor: not-allowed;
-}
+.file-disabled-notice { display: flex; align-items: center; gap: 10px; padding: 12px 15px; border: 1px dashed var(--text-muted); color: var(--text-muted); font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; background: rgba(255, 255, 255, 0.02); cursor: not-allowed; }
 .file-disabled-notice svg { color: var(--accent); }
 .file-hint { font-size: 11px; color: var(--text-muted); margin-top: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
 
@@ -199,24 +215,13 @@ footer { border-top: 1px solid var(--border); padding: 40px 5%; display: flex; f
 .footer-socials svg { width: 20px; height: 20px; }
 .footer-bottom { text-align: center; font-size: 12px; color: var(--text-muted); padding-top: 20px; border-top: 1px solid var(--border); }
 
-/* МОБИЛЬНОЕ МЕНЮ (Боковая панель) */
-.mobile-nav {
-    position: fixed; top: 0; right: 0; width: 80%; max-width: 300px; height: 100vh;
-    background: var(--bg-color); border-left: 1px solid var(--border);
-    display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
-    gap: 30px; padding: 40px; z-index: 1000;
-    transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-.mobile-nav.active { transform: translateX(0); }
-.mobile-nav a { font-family: var(--font-display); font-size: 28px; font-weight: 700; color: var(--text-main); text-decoration: none; text-transform: uppercase; transition: color 0.2s; }
-.mobile-nav a:hover { color: var(--accent); }
+/* МОДАЛКА ПРЕДПРОСМОТРА (для VoidForge) */
+.preview-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9999; display: flex; flex-direction: column; padding: 20px; }
+.preview-modal-header { display: flex; justify-content: flex-end; margin-bottom: 20px; }
+.preview-modal-close { background: var(--accent); color: #000; border: none; padding: 10px 20px; font-family: var(--font-mono); font-weight: bold; cursor: pointer; text-transform: uppercase; }
+.preview-modal iframe { width: 100%; height: 100%; border: 1px solid var(--border); background: #fff; }
 
-.menu-backdrop {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 999;
-    opacity: 0; pointer-events: none; transition: opacity 0.3s;
-}
-.menu-backdrop.active { opacity: 1; pointer-events: auto; }
-
+/* АДАПТИВНОСТЬ */
 @media (max-width: 968px) {
     nav.desktop-nav { display: none; }
     .mobile-menu-btn { display: block; }
