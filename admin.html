@@ -82,7 +82,7 @@
                 else { tokenStatus.textContent = 'Не подключено'; tokenStatus.classList.remove('connected'); }
             });
             function log(msg) { logEl.textContent = msg; }
-            async function fetchFile() {
+                        async function fetchFile() {
                 const token = tokenInput.value.trim();
                 if (!token) { alert('Введите токен'); return; }
                 log('Загрузка projects.json...');
@@ -91,11 +91,18 @@
                     if (!res.ok) throw new Error(`HTTP ${res.status}`);
                     const data = await res.json();
                     fileSha = data.sha;
-                    const content = atob(data.content);
+                    
+                    // ИСПРАВЛЕНИЕ: Правильное декодирование UTF-8 из Base64
+                    const base64Clean = data.content.replace(/\s/g, ''); // Убираем переносы строк
+                    const content = decodeURIComponent(escape(atob(base64Clean)));
+                    
                     projects = JSON.parse(content);
                     render();
                     log('Файл успешно загружен.');
-                } catch (e) { log('Ошибка загрузки: ' + e.message); alert('Не удалось загрузить projects.json. Проверьте токен и репозиторий.'); }
+                } catch (e) { 
+                    log('Ошибка загрузки: ' + e.message); 
+                    alert('Не удалось загрузить projects.json. Проверьте токен и репозиторий.'); 
+                }
             }
             async function saveFile() {
                 const token = tokenInput.value.trim();
