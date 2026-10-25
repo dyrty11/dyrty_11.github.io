@@ -4,174 +4,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>⬡ VoidForge — Генератор Сайтов</title>
-    
-    <!-- 
-      ВАЖНО ДЛЯ ХОСТИНГА: 
-      На GitHub Pages нельзя задать HTTP-заголовки. 
-      Директива frame-ancestors в <meta> игнорируется браузерами.
-      При переносе на Vercel/Netlify/Cloudflare добавь в настройки сервера:
-      Content-Security-Policy: frame-ancestors 'none'
-      X-Content-Type-Options: nosniff
-      Referrer-Policy: no-referrer
-    -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; media-src data: blob:; frame-src 'self' blob:; base-uri 'none'; form-action 'none'; object-src 'none';">
-    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg: #0b0b0f;
-            --surface: #13131a;
-            --surface2: #1a1a24;
-            --border: #222233;
-            --primary: #a78bfa;
-            --primary2: #7c3aed;
-            --accent: #06b6d4;
-            --text: #e2e8f0;
-            --text2: #94a3b8;
-            --success: #10b981;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: var(--bg);
-            background-image:
-                radial-gradient(ellipse at 15% 20%, rgba(167, 139, 250, 0.04) 0%, transparent 55%),
-                radial-gradient(ellipse at 85% 75%, rgba(6, 182, 212, 0.04) 0%, transparent 55%),
-                radial-gradient(ellipse at 50% 50%, rgba(124, 58, 237, 0.02) 0%, transparent 70%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text);
-            padding: 20px;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 0;
-            background-image:
-                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-            background-size: 50px 50px;
-            mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
-            -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
-        }
-
-        .container {
-            width: 100%; max-width: 780px; background: var(--surface);
-            border-radius: 20px; padding: 40px 32px; border: 1px solid var(--border);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 20px 40px -10px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
-            position: relative; z-index: 1; backdrop-filter: blur(10px);
-        }
-
-        .hex-decoration { position: absolute; top: -30px; right: -30px; width: 80px; height: 80px; pointer-events: none; z-index: 0; opacity: 0.3; }
-        .hex-decoration::before { content: '⬡'; font-size: 70px; color: var(--primary); filter: blur(15px); position: absolute; animation: hexFloat 6s ease-in-out infinite; }
-        @keyframes hexFloat { 0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.2; } 50% { transform: translateY(-20px) rotate(15deg); opacity: 0.5; } }
-
-        .header { text-align: center; margin-bottom: 35px; position: relative; z-index: 1; }
-        .logo { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 4px; }
-        .logo-icon { font-size: 38px; filter: drop-shadow(0 0 20px rgba(167, 139, 250, 0.5)); animation: logoGlow 2s ease-in-out infinite; }
-        @keyframes logoGlow { 0%, 100% { filter: drop-shadow(0 0 20px rgba(167, 139, 250, 0.5)); } 50% { filter: drop-shadow(0 0 35px rgba(167, 139, 250, 0.9)); } }
-        .header h1 { font-size: 2em; font-weight: 700; color: #fff; letter-spacing: -1px; }
-        .header h1 span { color: var(--primary); }
-        .header .subtitle { color: var(--text2); font-size: 0.8em; letter-spacing: 3px; text-transform: uppercase; font-weight: 400; margin-top: 4px; }
-
-        .section { background: var(--surface2); border-radius: 14px; padding: 20px 22px; margin-bottom: 16px; border: 1px solid var(--border); transition: all 0.3s ease; position: relative; z-index: 1; }
-        .section:hover { border-color: rgba(167, 139, 250, 0.3); box-shadow: 0 0 30px rgba(167, 139, 250, 0.04); }
-        .section-title { font-size: 0.8em; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--primary); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
-        .section-title .dot { width: 8px; height: 8px; border-radius: 2px; background: var(--primary); animation: dotPulse 2s ease-in-out infinite; }
-        @keyframes dotPulse { 0%, 100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 1; transform: scale(1.3); } }
-
+        :root { --bg: #050505; --surface: #0a0a0a; --border: #333; --text: #fff; --text-muted: #888; --accent: #ccff00; }
+        * { margin: 0; padding: 0; box-sizing: border-box; border-radius: 0 !important; }
+        body { font-family: 'IBM Plex Mono', monospace; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .container { width: 100%; max-width: 800px; background: var(--surface); border: 1px solid var(--border); padding: 40px; }
+        .header { text-align: center; margin-bottom: 40px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
+        .header h1 { font-family: 'Space Grotesk', sans-serif; font-size: 2.5em; font-weight: 700; text-transform: uppercase; letter-spacing: -2px; color: var(--text); }
+        .header h1 span { color: var(--accent); }
+        .header .subtitle { font-size: 0.8em; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-top: 5px; }
+        .section { margin-bottom: 25px; }
+        .section-title { font-size: 0.8em; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 10px; }
+        .section-title::before { content: '> '; color: var(--accent); }
+        .file-upload-area { border: 1px dashed var(--border); padding: 30px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--bg); }
+        .file-upload-area:hover { border-color: var(--accent); }
+        .file-upload-area .upload-icon { font-size: 24px; display: block; margin-bottom: 10px; }
+        .file-upload-area .upload-text { font-size: 0.9em; color: var(--text-muted); }
+        .file-upload-area .file-name { font-size: 0.8em; color: var(--accent); margin-top: 10px; word-break: break-all; }
         input[type="file"] { display: none; }
-        
-        .file-upload-area { border: 2px dashed var(--border); border-radius: 10px; padding: 22px; text-align: center; cursor: pointer; transition: all 0.25s ease; background: rgba(0, 0, 0, 0.25); position: relative; overflow: hidden; }
-        .file-upload-area::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(167, 139, 250, 0.05), transparent); opacity: 0; transition: opacity 0.3s ease; }
-        .file-upload-area:hover { border-color: var(--primary); background: rgba(167, 139, 250, 0.04); }
-        .file-upload-area:hover::after { opacity: 1; }
-        .file-upload-area .upload-icon { font-size: 32px; display: block; margin-bottom: 6px; position: relative; z-index: 1; }
-        .file-upload-area .upload-text { font-size: 0.8em; color: var(--text2); position: relative; z-index: 1; }
-        .file-upload-area .file-name { font-size: 0.7em; color: var(--primary); margin-top: 6px; font-weight: 500; word-break: break-all; position: relative; z-index: 1; }
-
-        .preview-row { display: flex; gap: 14px; flex-wrap: wrap; }
-        .preview-mini { flex: 1; min-width: 130px; background: var(--surface2); border-radius: 10px; padding: 14px; text-align: center; border: 1px solid var(--border); }
-        .preview-mini img { max-width: 100%; max-height: 85px; border-radius: 6px; object-fit: cover; }
-        .preview-mini .no-preview { color: var(--text2); font-size: 0.7em; padding: 14px 0; opacity: 0.5; }
-        .preview-mini .mini-label { font-size: 0.65em; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text2); margin-bottom: 6px; }
-
-        .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; position: relative; z-index: 1; }
-        .btn { padding: 12px 22px; border: none; border-radius: 10px; font-weight: 600; font-size: 0.85em; cursor: pointer; letter-spacing: 0.3px; transition: all 0.25s ease; text-transform: uppercase; font-family: inherit; position: relative; overflow: hidden; }
-        .btn::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent); opacity: 0; transition: opacity 0.25s ease; }
-        .btn:hover::after { opacity: 1; }
-        
-        .btn-generate { flex: 1; min-width: 180px; background: var(--primary2); color: #fff; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4); letter-spacing: 1px; }
-        .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(124, 58, 237, 0.55); }
-        .btn-generate:active { transform: translateY(0); box-shadow: 0 2px 10px rgba(124, 58, 237, 0.3); }
-        
-        .btn-download { background: var(--surface2); color: #fff; border: 1px solid var(--border); display: none; align-items: center; gap: 6px; justify-content: center; }
-        .btn-download.visible { display: flex; }
-        .btn-download:hover { border-color: var(--success); color: var(--success); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2); }
-        
-        .btn-preview { background: transparent; border: 1px solid var(--border); color: var(--text); display: none; }
-        .btn-preview.visible { display: inline-flex; }
-        .btn-preview:hover { border-color: var(--accent); color: var(--accent); box-shadow: 0 4px 15px rgba(6, 182, 212, 0.2); }
-
-        .generated-info { display: none; margin-top: 14px; padding: 14px 18px; background: rgba(16, 185, 129, 0.06); border-radius: 10px; border: 1px solid rgba(16, 185, 129, 0.2); text-align: center; color: var(--success); font-weight: 500; font-size: 0.8em; letter-spacing: 0.5px; position: relative; z-index: 1; }
-        .generated-info.visible { display: block; animation: slideUp 0.4s ease; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-
-        .status-dot { display: inline-block; width: 6px; height: 6px; border-radius: 2px; background: var(--text2); margin-right: 6px; }
-        .status-dot.ready { background: var(--success); box-shadow: 0 0 10px rgba(16, 185, 129, 0.6); }
-        .filename-hint { display: inline-block; background: rgba(167, 139, 250, 0.1); color: var(--primary); padding: 2px 8px; border-radius: 4px; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.9em; letter-spacing: 0; text-transform: none; }
-
-        .preview-modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.9); z-index: 9999;
-            display: flex; flex-direction: column; padding: 20px; box-sizing: border-box;
-            backdrop-filter: blur(5px);
-        }
+        .preview-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; }
+        .preview-mini { border: 1px solid var(--border); padding: 15px; text-align: center; background: var(--bg); }
+        .preview-mini .mini-label { font-size: 0.7em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
+        .preview-mini img { max-width: 100%; max-height: 80px; object-fit: contain; }
+        .preview-mini .no-preview { color: var(--border); font-size: 2em; }
+        .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn { flex: 1; padding: 15px; border: 1px solid var(--border); background: transparent; color: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 0.9em; font-weight: 500; text-transform: uppercase; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-generate { background: var(--accent); color: #000; border-color: var(--accent); }
+        .btn-generate:hover:not(:disabled) { background: #aadd00; color: #000; }
+        .btn-download, .btn-preview { display: none; }
+        .btn-download.visible, .btn-preview.visible { display: flex; }
+        .generated-info { display: none; margin-top: 20px; padding: 15px; border: 1px solid var(--accent); color: var(--accent); font-size: 0.9em; text-align: center; text-transform: uppercase; }
+        .generated-info.visible { display: block; }
+        .preview-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; flex-direction: column; padding: 20px; }
         .preview-modal-header { display: flex; justify-content: flex-end; margin-bottom: 15px; }
-        .preview-modal-close {
-            padding: 10px 20px; background: var(--primary); color: white; border: none;
-            border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600;
-            transition: background 0.3s;
-        }
-        .preview-modal-close:hover { background: var(--primary2); }
-        .preview-modal iframe { width: 100%; height: 100%; border: none; border-radius: 12px; background: #fff; }
-
-        @media (max-width: 600px) {
-            .container { padding: 22px 14px; border-radius: 14px; }
-            .header h1 { font-size: 1.4em; }
-            .btn-row { flex-direction: column; }
-            .preview-row { flex-direction: column; gap: 8px; }
-            .hex-decoration { display: none; }
-        }
+        .preview-modal-close { background: var(--accent); color: #000; border: none; padding: 10px 20px; font-family: 'IBM Plex Mono', monospace; font-weight: bold; text-transform: uppercase; cursor: pointer; }
+        .preview-modal iframe { width: 100%; height: 100%; border: 1px solid var(--border); background: #000; }
+        @media (max-width: 600px) { .container { padding: 20px; } .preview-row { grid-template-columns: 1fr; } .btn-row { flex-direction: column; } .header h1 { font-size: 1.8em; } }
     </style>
 </head>
 <body>
-
     <div class="container">
-        <div class="hex-decoration"></div>
-
         <div class="header">
-            <div class="logo">
-                <span class="logo-icon">⬡</span>
-                <h1>Void<span>Forge</span></h1>
-            </div>
-            <p class="subtitle">Генератор сайтов для soundtag</p>
+            <h1>Void<span>Forge</span></h1>
+            <p class="subtitle">Генератор Soundtag Сайтов</p>
         </div>
-
         <div class="section">
-            <div class="section-title">
-                <span class="dot"></span> Изображение (JPEG, PNG, GIF, WebP)
-            </div>
+            <div class="section-title">Изображение (JPEG, PNG, GIF, WebP)</div>
             <div class="file-upload-area" id="imageDropZone" onclick="document.getElementById('imageInput').click()">
                 <span class="upload-icon">🖼️</span>
                 <span class="upload-text">Перетащите или нажмите для выбора</span>
@@ -179,11 +63,8 @@
             </div>
             <input type="file" id="imageInput" accept="image/jpeg, image/png, image/gif, image/webp">
         </div>
-
         <div class="section">
-            <div class="section-title">
-                <span class="dot"></span> Аудио (MP3, OGG, WAV, M4A)
-            </div>
+            <div class="section-title">Аудио (MP3, OGG, WAV, M4A)</div>
             <div class="file-upload-area" id="audioDropZone" onclick="document.getElementById('audioInput').click()">
                 <span class="upload-icon">🎧</span>
                 <span class="upload-text">Перетащите или нажмите для выбора</span>
@@ -191,479 +72,145 @@
             </div>
             <input type="file" id="audioInput" accept="audio/mpeg, audio/ogg, audio/wav, audio/x-m4a, audio/mp4">
         </div>
-
         <div class="preview-row">
             <div class="preview-mini">
-                <div class="mini-label">Превью</div>
+                <div class="mini-label">Превью изображения</div>
                 <img id="imagePreview" src="" alt="" style="display:none;">
                 <div class="no-preview" id="noImagePreview">—</div>
             </div>
             <div class="preview-mini">
-                <div class="mini-label">Статус</div>
-                <div style="padding:10px 0;">
-                    <span id="audioStatus" style="font-size:0.75em;color:var(--text2);">
-                        <span class="status-dot"></span>Ожидание
-                    </span>
-                </div>
+                <div class="mini-label">Статус аудио</div>
+                <div style="padding:10px 0;"><span id="audioStatus" style="font-size:0.8em;color:var(--text-muted);">Ожидание</span></div>
             </div>
         </div>
-
         <div class="btn-row">
-            <button class="btn btn-generate" id="btnGenerate" onclick="generateSite()">
-                ⚡ Сгенерировать
-            </button>
-            <button class="btn btn-download" id="btnDownload" onclick="downloadSite()">
-                ⬇ Скачать
-            </button>
-            <button class="btn btn-preview" id="btnPreview" onclick="previewSite()">
-                ◉ Предпросмотр
-            </button>
+            <button class="btn btn-generate" id="btnGenerate" onclick="generateSite()">⚡ Сгенерировать</button>
+            <button class="btn btn-download" id="btnDownload" onclick="downloadSite()">⬇ Скачать</button>
+            <button class="btn btn-preview" id="btnPreview" onclick="previewSite()">◉ Предпросмотр</button>
         </div>
-
-        <div class="generated-info" id="generatedInfo">
-            ✓ Сайт готов! Файл сохранится как <span class="filename-hint">index.html</span>
-        </div>
+        <div class="generated-info" id="generatedInfo">✓ Сайт готов! Файл сохранится как <span style="font-weight:bold;">index.html</span></div>
     </div>
-
     <script>
         (function() {
-            let imageBase64 = null;
-            let imageMime = null;
-            let audioBase64 = null;
-            let audioMime = null;
-            let generatedHTML = null;
-
-            const imageInput = document.getElementById('imageInput');
-            const audioInput = document.getElementById('audioInput');
-            const imageFileName = document.getElementById('imageFileName');
-            const audioFileName = document.getElementById('audioFileName');
-            const imagePreview = document.getElementById('imagePreview');
-            const noImagePreview = document.getElementById('noImagePreview');
-            const audioStatus = document.getElementById('audioStatus');
-            const btnDownload = document.getElementById('btnDownload');
-            const btnPreview = document.getElementById('btnPreview');
-            const generatedInfo = document.getElementById('generatedInfo');
-
-            // ИСПРАВЛЕНИЕ: Лимиты согласованы с учетом Base64 (+33%)
-            // 8MB img + 15MB audio = ~31MB в Base64. Ставим лимит 40MB для запаса.
-            const MAX_IMAGE_SIZE = 8 * 1024 * 1024;
-            const MAX_AUDIO_SIZE = 15 * 1024 * 1024;
-            const MAX_HTML_SIZE = 40 * 1024 * 1024; // 40 MB
+            let imageBase64 = null; let imageMime = null; let audioBase64 = null; let audioMime = null; let generatedHTML = null;
+            const imageInput = document.getElementById('imageInput'); const audioInput = document.getElementById('audioInput');
+            const imageFileName = document.getElementById('imageFileName'); const audioFileName = document.getElementById('audioFileName');
+            const imagePreview = document.getElementById('imagePreview'); const noImagePreview = document.getElementById('noImagePreview');
+            const audioStatus = document.getElementById('audioStatus'); const btnDownload = document.getElementById('btnDownload');
+            const btnPreview = document.getElementById('btnPreview'); const generatedInfo = document.getElementById('generatedInfo');
+            const MAX_IMAGE_SIZE = 8 * 1024 * 1024; const MAX_AUDIO_SIZE = 15 * 1024 * 1024; const MAX_HTML_SIZE = 40 * 1024 * 1024;
 
             async function checkFileSignature(file, type) {
                 return new Promise((resolve) => {
                     const reader = new FileReader();
                     reader.onload = (e) => {
                         const arr = new Uint8Array(e.target.result);
-                        
                         if (type === 'image') {
-                            if (arr[0] === 0x89 && arr[1] === 0x50 && arr[2] === 0x4E && arr[3] === 0x47) return resolve(true); // PNG
-                            if (arr[0] === 0xFF && arr[1] === 0xD8 && arr[2] === 0xFF) return resolve(true); // JPEG
-                            if (arr[0] === 0x47 && arr[1] === 0x49 && arr[2] === 0x46 && arr[3] === 0x38) return resolve(true); // GIF
-                            if (arr[0] === 0x52 && arr[1] === 0x49 && arr[2] === 0x46 && arr[3] === 0x46 && 
-                                arr[8] === 0x57 && arr[9] === 0x45 && arr[10] === 0x42 && arr[11] === 0x50) return resolve(true); // WEBP
-                        } 
-                        else if (type === 'audio') {
-                            if (arr[0] === 0x49 && arr[1] === 0x44 && arr[2] === 0x33) return resolve(true); // MP3 ID3
-                            if (arr[0] === 0xFF && (arr[1] & 0xE0) === 0xE0) return resolve(true); // MP3 Frame Sync
-                            if (arr[0] === 0x4F && arr[1] === 0x67 && arr[2] === 0x67 && arr[3] === 0x53) return resolve(true); // OGG
-                            if (arr[0] === 0x52 && arr[1] === 0x49 && arr[2] === 0x46 && arr[3] === 0x46 && 
-                                arr[8] === 0x57 && arr[9] === 0x41 && arr[10] === 0x56 && arr[11] === 0x45) return resolve(true); // WAV
-                            if (arr[4] === 0x66 && arr[5] === 0x74 && arr[6] === 0x79 && arr[7] === 0x70) return resolve(true); // M4A (ftyp)
+                            if (arr[0] === 0x89 && arr[1] === 0x50 && arr[2] === 0x4E && arr[3] === 0x47) return resolve(true);
+                            if (arr[0] === 0xFF && arr[1] === 0xD8 && arr[2] === 0xFF) return resolve(true);
+                            if (arr[0] === 0x47 && arr[1] === 0x49 && arr[2] === 0x46 && arr[3] === 0x38) return resolve(true);
+                            if (arr[0] === 0x52 && arr[1] === 0x49 && arr[2] === 0x46 && arr[3] === 0x46 && arr[8] === 0x57 && arr[9] === 0x45 && arr[10] === 0x42 && arr[11] === 0x50) return resolve(true);
+                        } else if (type === 'audio') {
+                            if (arr[0] === 0x49 && arr[1] === 0x44 && arr[2] === 0x33) return resolve(true);
+                            if (arr[0] === 0xFF && (arr[1] & 0xE0) === 0xE0) return resolve(true);
+                            if (arr[0] === 0x4F && arr[1] === 0x67 && arr[2] === 0x67 && arr[3] === 0x53) return resolve(true);
+                            if (arr[0] === 0x52 && arr[1] === 0x49 && arr[2] === 0x46 && arr[3] === 0x46 && arr[8] === 0x57 && arr[9] === 0x41 && arr[10] === 0x56 && arr[11] === 0x45) return resolve(true);
+                            if (arr[4] === 0x66 && arr[5] === 0x74 && arr[6] === 0x79 && arr[7] === 0x70) return resolve(true);
                         }
-                        
                         resolve(false);
                     };
-                    reader.onerror = () => resolve(false);
-                    reader.readAsArrayBuffer(file.slice(0, 16));
+                    reader.onerror = () => resolve(false); reader.readAsArrayBuffer(file.slice(0, 16));
                 });
             }
-
             function setupDragDrop(zone, input, handler) {
-                zone.addEventListener('dragover', e => {
-                    e.preventDefault();
-                    zone.style.borderColor = 'var(--primary)';
-                    zone.style.background = 'rgba(167,139,250,0.06)';
-                });
-                zone.addEventListener('dragleave', () => {
-                    zone.style.borderColor = 'var(--border)';
-                    zone.style.background = 'rgba(0,0,0,0.25)';
-                });
-                zone.addEventListener('drop', e => {
-                    e.preventDefault();
-                    zone.style.borderColor = 'var(--border)';
-                    zone.style.background = 'rgba(0,0,0,0.25)';
-                    const f = e.dataTransfer.files[0];
-                    if (f) handler(f);
-                });
-                input.addEventListener('change', function() {
-                    if (this.files[0]) handler(this.files[0]);
-                });
+                zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = 'var(--accent)'; });
+                zone.addEventListener('dragleave', () => { zone.style.borderColor = 'var(--border)'; });
+                zone.addEventListener('drop', e => { e.preventDefault(); zone.style.borderColor = 'var(--border)'; const f = e.dataTransfer.files[0]; if (f) handler(f); });
+                input.addEventListener('change', function() { if (this.files[0]) handler(this.files[0]); });
             }
-
             async function handleImage(file) {
                 const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-                if (!allowedTypes.includes(file.type)) {
-                    alert('Ошибка: Разрешены только JPEG, PNG, GIF, WebP.');
-                    return;
-                }
-                
-                if (file.size > MAX_IMAGE_SIZE) {
-                    alert('Ошибка: Изображение больше 8 МБ.');
-                    return;
-                }
-
+                if (!allowedTypes.includes(file.type)) { alert('Разрешены только JPEG, PNG, GIF, WebP.'); return; }
+                if (file.size > MAX_IMAGE_SIZE) { alert('Изображение больше 8 МБ.'); return; }
                 const valid = await checkFileSignature(file, 'image');
-                if (!valid) {
-                    alert('Ошибка: Файл не является настоящим изображением (неверная сигнатура).');
-                    return;
-                }
-
-                imageMime = file.type;
-                imageFileName.textContent = file.name;
+                if (!valid) { alert('Файл не является изображением (неверная сигнатура).'); return; }
+                imageMime = file.type; imageFileName.textContent = file.name;
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    imageBase64 = e.target.result.split(',')[1];
-                    imagePreview.src = e.target.result;
-                    imagePreview.style.display = 'block';
-                    noImagePreview.style.display = 'none';
-                    resetOutput();
-                };
+                reader.onload = function(e) { imageBase64 = e.target.result.split(',')[1]; imagePreview.src = e.target.result; imagePreview.style.display = 'block'; noImagePreview.style.display = 'none'; resetOutput(); };
                 reader.readAsDataURL(file);
             }
-
             async function handleAudio(file) {
                 const allowedTypes = ['audio/mpeg', 'audio/ogg', 'audio/wav', 'audio/x-m4a', 'audio/mp4'];
-                if (!allowedTypes.includes(file.type)) {
-                    alert('Ошибка: Разрешены MP3, OGG, WAV, M4A.');
-                    return;
-                }
-
-                if (file.size > MAX_AUDIO_SIZE) {
-                    alert('Ошибка: Аудио больше 15 МБ.');
-                    return;
-                }
-
+                if (!allowedTypes.includes(file.type)) { alert('Разрешены MP3, OGG, WAV, M4A.'); return; }
+                if (file.size > MAX_AUDIO_SIZE) { alert('Аудио больше 15 МБ.'); return; }
                 const valid = await checkFileSignature(file, 'audio');
-                if (!valid) {
-                    alert('Ошибка: Файл не является настоящим аудио (неверная сигнатура).');
-                    return;
-                }
-
-                audioMime = file.type;
-                audioFileName.textContent = file.name;
+                if (!valid) { alert('Файл не является аудио (неверная сигнатура).'); return; }
+                audioMime = file.type; audioFileName.textContent = file.name;
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    audioBase64 = e.target.result.split(',')[1];
-                    audioStatus.textContent = '';
-                    const dot = document.createElement('span');
-                    dot.className = 'status-dot ready';
-                    audioStatus.appendChild(dot);
-                    audioStatus.appendChild(document.createTextNode('Готово'));
-                    audioStatus.style.color = 'var(--success)';
-                    resetOutput();
-                };
+                reader.onload = function(e) { audioBase64 = e.target.result.split(',')[1]; audioStatus.textContent = 'Готово'; audioStatus.style.color = 'var(--accent)'; resetOutput(); };
                 reader.readAsDataURL(file);
             }
-
             setupDragDrop(document.getElementById('imageDropZone'), imageInput, handleImage);
             setupDragDrop(document.getElementById('audioDropZone'), audioInput, handleAudio);
-
-            function resetOutput() {
-                generatedHTML = null;
-                btnDownload.classList.remove('visible');
-                btnPreview.classList.remove('visible');
-                generatedInfo.classList.remove('visible');
-            }
-
-            function generateNonce() {
-                const array = new Uint8Array(16);
-                crypto.getRandomValues(array);
-                return btoa(String.fromCharCode(...array));
-            }
-
+            function resetOutput() { generatedHTML = null; btnDownload.classList.remove('visible'); btnPreview.classList.remove('visible'); generatedInfo.classList.remove('visible'); }
+            function generateNonce() { const array = new Uint8Array(16); crypto.getRandomValues(array); return btoa(String.fromCharCode(...array)); }
             function generateSite() {
-                if (!imageBase64 || !audioBase64) {
-                    alert('⚠️ Загрузите изображение и аудиофайл.');
-                    return;
-                }
+                if (!imageBase64 || !audioBase64) { alert('⚠️ Загрузите изображение и аудиофайл.'); return; }
                 const imgSrc = 'data:' + imageMime + ';base64,' + imageBase64;
                 const audioSrc = 'data:' + audioMime + ';base64,' + audioBase64;
                 const nonce = generateNonce();
                 generatedHTML = buildSite(imgSrc, audioSrc, audioMime, nonce);
-                
                 const blob = new Blob([generatedHTML]);
-                if (blob.size > MAX_HTML_SIZE) {
-                    alert('Ошибка: Итоговый файл слишком большой (превышает 40 МБ). Попробуйте файлы поменьше.');
-                    generatedHTML = null;
-                    return;
-                }
-
-                btnDownload.classList.add('visible');
-                btnPreview.classList.add('visible');
-                generatedInfo.classList.add('visible');
-                generatedInfo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                if (blob.size > MAX_HTML_SIZE) { alert('Ошибка: Итоговый файл слишком большой (превышает 40 МБ).'); generatedHTML = null; return; }
+                btnDownload.classList.add('visible'); btnPreview.classList.add('visible'); generatedInfo.classList.add('visible');
             }
-
             function buildSite(imgSrc, audioSrc, mime, nonce) {
                 const allowedMimes = ['audio/mpeg', 'audio/ogg', 'audio/wav', 'audio/x-m4a', 'audio/mp4'];
-                if (!allowedMimes.includes(mime)) {
-                    throw new Error('Invalid audio MIME');
-                }
-
+                if (!allowedMimes.includes(mime)) throw new Error('Invalid audio MIME');
                 const csp = "default-src 'none'; img-src data:; media-src data:; style-src 'unsafe-inline'; script-src 'nonce-" + nonce + "'; base-uri 'none'; form-action 'none';";
-
                 return [
-                    '<!DOCTYPE html>',
-                    '<html lang="ru">',
-                    '<head>',
-                    '<meta charset="UTF-8">',
-                    '<meta name="viewport" content="width=device-width,initial-scale=1.0">',
-                    '<meta http-equiv="Content-Security-Policy" content="' + csp + '">',
-                    '<title>⬡ Void Page</title>',
+                    '<!DOCTYPE html>', '<html lang="ru">', '<head>', '<meta charset="UTF-8">', '<meta name="viewport" content="width=device-width,initial-scale=1.0">', '<meta http-equiv="Content-Security-Policy" content="' + csp + '">', '<title>⬡ Void Page</title>',
                     '<style>',
-                    '*{margin:0;padding:0;box-sizing:border-box}',
-                    'body{',
-                    'background:#08080d;',
-                    'background-image:',
-                    'radial-gradient(ellipse at 30% 20%,rgba(167,139,250,0.06) 0%,transparent 55%),',
-                    'radial-gradient(ellipse at 70% 70%,rgba(6,182,212,0.05) 0%,transparent 55%),',
-                    'radial-gradient(ellipse at 50% 50%,rgba(124,58,237,0.03) 0%,transparent 70%);',
-                    'min-height:100vh;',
-                    'display:flex;',
-                    'align-items:center;',
-                    'justify-content:center;',
-                    'font-family:\'Inter\',\'Segoe UI\',system-ui,sans-serif;',
-                    'cursor:pointer;',
-                    'user-select:none;',
-                    '-webkit-user-select:none;',
-                    '-webkit-tap-highlight-color:transparent;',
-                    'overflow:hidden;',
-                    'position:relative;',
-                    '}',
-                    'body::before{',
-                    'content:\'\';',
-                    'position:fixed;',
-                    'inset:0;',
-                    'pointer-events:none;',
-                    'z-index:0;',
-                    'background-image:',
-                    'linear-gradient(rgba(255,255,255,0.012) 1px,transparent 1px),',
-                    'linear-gradient(90deg,rgba(255,255,255,0.012) 1px,transparent 1px);',
-                    'background-size:40px 40px;',
-                    'mask-image:radial-gradient(ellipse at center,black 25%,transparent 65%);',
-                    '-webkit-mask-image:radial-gradient(ellipse at center,black 25%,transparent 65%);',
-                    '}',
-                    '.image-wrapper{',
-                    'position:relative;',
-                    'z-index:10;',
-                    'padding:20px;',
-                    'animation:fadeInScale 1s cubic-bezier(0.175,0.885,0.32,1.275);',
-                    '}',
-                    '@keyframes fadeInScale{',
-                    '0%{transform:scale(0.7);opacity:0;filter:blur(20px)}',
-                    '70%{transform:scale(1.02);opacity:1;filter:blur(0)}',
-                    '100%{transform:scale(1);opacity:1;filter:blur(0)}',
-                    '}',
-                    '.main-image{',
-                    'max-width:82vw;',
-                    'max-height:78vh;',
-                    'border-radius:16px;',
-                    'box-shadow:',
-                    '0 0 80px rgba(167,139,250,0.2),',
-                    '0 0 160px rgba(124,58,237,0.1),',
-                    '0 30px 70px rgba(0,0,0,0.7);',
-                    'transition:all 0.5s cubic-bezier(0.175,0.885,0.32,1.275);',
-                    'position:relative;',
-                    'z-index:5;',
-                    'object-fit:contain;',
-                    'border:1px solid rgba(255,255,255,0.06);',
-                    '}',
-                    '.main-image:hover{',
-                    'transform:scale(1.03);',
-                    'box-shadow:',
-                    '0 0 100px rgba(167,139,250,0.35),',
-                    '0 0 200px rgba(124,58,237,0.2),',
-                    '0 40px 90px rgba(0,0,0,0.8);',
-                    'border-color:rgba(167,139,250,0.3);',
-                    '}',
-                    '.main-image:active{',
-                    'transform:scale(0.96);',
-                    'transition:all 0.15s ease;',
-                    'box-shadow:',
-                    '0 0 130px rgba(167,139,250,0.5),',
-                    '0 0 250px rgba(124,58,237,0.3),',
-                    '0 20px 50px rgba(0,0,0,0.9);',
-                    'border-color:rgba(167,139,250,0.6);',
-                    '}',
-                    '.hint{',
-                    'position:fixed;',
-                    'bottom:35px;',
-                    'left:50%;',
-                    'transform:translateX(-50%);',
-                    'z-index:20;',
-                    'color:rgba(255,255,255,0.5);',
-                    'font-size:0.8em;',
-                    'letter-spacing:2px;',
-                    'text-transform:uppercase;',
-                    'pointer-events:none;',
-                    'text-align:center;',
-                    'animation:hintFloat 3s ease-in-out infinite;',
-                    '}',
-                    '@keyframes hintFloat{',
-                    '0%,100%{opacity:0.3;transform:translateX(-50%) translateY(0)}',
-                    '50%{opacity:0.8;transform:translateX(-50%) translateY(-6px)}',
-                    '}',
-                    '.corner{',
-                    'position:fixed;',
-                    'z-index:1;',
-                    'pointer-events:none;',
-                    'font-size:28px;',
-                    'opacity:0.25;',
-                    'animation:cornerFloat 5s ease-in-out infinite;',
-                    '}',
-                    '.corner.tl{top:18px;left:18px;animation-delay:0s}',
-                    '.corner.tr{top:18px;right:18px;animation-delay:0.8s}',
-                    '.corner.bl{bottom:18px;left:18px;animation-delay:1.6s}',
-                    '.corner.br{bottom:18px;right:18px;animation-delay:2.4s}',
-                    '@keyframes cornerFloat{',
-                    '0%,100%{transform:translateY(0) rotate(0deg);opacity:0.2}',
-                    '50%{transform:translateY(-12px) rotate(5deg);opacity:0.45}',
-                    '}',
-                    '@media(max-width:600px){',
-                    '.main-image{max-width:90vw;max-height:60vh;border-radius:10px}',
-                    '.hint{font-size:0.65em;bottom:20px;letter-spacing:1px}',
-                    '.corner{font-size:20px}',
-                    '}',
-                    '<\/style>',
-                    '<\/head>',
-                    '<body>',
-                    '<div class="corner tl">◆</div>',
-                    '<div class="corner tr">◇</div>',
-                    '<div class="corner bl">◈</div>',
-                    '<div class="corner br">◊</div>',
-                    '<div class="image-wrapper">',
-                    '<img class="main-image" src="' + imgSrc + '" alt="Image" draggable="false">',
-                    '<\/div>',
-                    '<p class="hint">Нажми на картинку</p>',
-                    '<audio id="audio" preload="auto" loop>',
-                    '<source src="' + audioSrc + '" type="' + mime + '">',
-                    '<\/audio>',
+                    '*{margin:0;padding:0;box-sizing:border-box;border-radius:0!important}',
+                    'body{background:#050505;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:"IBM Plex Mono",monospace;cursor:pointer;user-select:none;overflow:hidden;position:relative;}',
+                    'body::before{content:\'\';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(204,255,0,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(204,255,0,0.05) 1px,transparent 1px);background-size:40px 40px;}',
+                    '.image-wrapper{position:relative;z-index:10;padding:20px;animation:fadeIn 1s ease;border:1px solid #333;background:#0a0a0a;}',
+                    '@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}',
+                    '.main-image{max-width:80vw;max-height:75vh;object-fit:contain;border:1px solid #333;filter:grayscale(100%) contrast(1.2);transition:all 0.4s;}',
+                    '.main-image:hover{filter:grayscale(0%) contrast(1);border-color:#ccff00;}',
+                    '.main-image:active{transform:scale(0.98);}',
+                    '.hint{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);z-index:20;color:#888;font-size:0.8em;letter-spacing:2px;text-transform:uppercase;}',
+                    '.corner{position:fixed;font-size:24px;color:#ccff00;opacity:0.3;z-index:1;}',
+                    '.corner.tl{top:20px;left:20px;}.corner.tr{top:20px;right:20px;}.corner.bl{bottom:20px;left:20px;}.corner.br{bottom:20px;right:20px;}',
+                    '@media(max-width:600px){.main-image{max-width:90vw;max-height:60vh;}.hint{font-size:0.6em;}}',
+                    '<\/style>', '<\/head>', '<body>',
+                    '<div class="corner tl">[ ]</div><div class="corner tr">[ ]</div><div class="corner bl">[ ]</div><div class="corner br">[ ]</div>',
+                    '<div class="image-wrapper"><img class="main-image" src="' + imgSrc + '" alt="Image" draggable="false"><\/div>',
+                    '<p class="hint">[ Нажми на картинку ]</p>',
+                    '<audio id="audio" preload="auto" loop><source src="' + audioSrc + '" type="' + mime + '"><\/audio>',
                     '<script nonce="' + nonce + '">',
-                    '(function(){',
-                    'var a=document.getElementById("audio");',
-                    'var s=false;',
-                    'var ctx=null;',
-                    'var gainNode=null;',
-                    
-                    // Максимальная громкость (2.5x)
-                    'try {',
-                    '  var AudioContext = window.AudioContext || window.webkitAudioContext;',
-                    '  if (AudioContext) {',
-                    '    ctx = new AudioContext();',
-                    '    var source = ctx.createMediaElementSource(a);',
-                    '    gainNode = ctx.createGain();',
-                    '    gainNode.gain.value = 2.5;',
-                    '    source.connect(gainNode);',
-                    '    gainNode.connect(ctx.destination);',
-                    '  } else {',
-                    '    a.volume = 1;',
-                    '  }',
-                    '} catch(e) {',
-                    '  a.volume = 1;',
-                    '}',
-                    
-                    'function triggerAudio(e){',
-                    'if(s)return;',
-                    'e.stopPropagation();e.preventDefault();',
-                    'if(ctx && ctx.state === "suspended"){ ctx.resume(); }',
-                    'a.volume=1;',
-                    'var p=a.play();',
-                    'if(p){p.then(function(){',
-                    's=true;',
-                    'var h=document.querySelector(".hint");',
-                    'if(h){h.textContent="⬡ Играет";h.style.color="rgba(167,139,250,0.8)"}',
-                    '}).catch(function(){s=false})}',
-                    '};',
-                    
-                    'document.addEventListener("click", triggerAudio);',
-                    
-                    // Принудительная громкость и play
-                    'a.addEventListener("volumechange",function(){if(a.volume<1&&s)a.volume=1});',
-                    'a.addEventListener("pause",function(){if(s&&!a.ended)a.play().catch(function(){})});',
-                    'a.addEventListener("ended",function(){a.currentTime=0;a.play().catch(function(){})});',
-                    'setInterval(function(){',
-                    'if(s&&a.volume<1)a.volume=1;',
-                    'if(s&&a.paused&&!a.ended)a.play().catch(function(){});',
-                    '},400);',
-                    '})();',
-                    '<\/script>',
-                    '<\/body>',
-                    '<\/html>'
+                    '(function(){var a=document.getElementById("audio");var s=false;var ctx=null;var gainNode=null;',
+                    'try{var AudioContext=window.AudioContext||window.webkitAudioContext;if(AudioContext){ctx=new AudioContext();var source=ctx.createMediaElementSource(a);gainNode=ctx.createGain();gainNode.gain.value=2.5;source.connect(gainNode);gainNode.connect(ctx.destination);}else{a.volume=1;}}catch(e){a.volume=1;}',
+                    'function triggerAudio(e){if(s)return;e.stopPropagation();e.preventDefault();if(ctx&&ctx.state==="suspended"){ctx.resume();}a.volume=1;var p=a.play();if(p){p.then(function(){s=true;var h=document.querySelector(".hint");if(h){h.textContent="[ ИГРАЕТ ]";h.style.color="#ccff00";}}).catch(function(){s=false})}};',
+                    'document.addEventListener("click",triggerAudio);',
+                    'a.addEventListener("volumechange",function(){if(a.volume<1&&s)a.volume=1});a.addEventListener("pause",function(){if(s&&!a.ended)a.play().catch(function(){})});a.addEventListener("ended",function(){a.currentTime=0;a.play().catch(function(){})});',
+                    'setInterval(function(){if(s&&a.volume<1)a.volume=1;if(s&&a.paused&&!a.ended)a.play().catch(function(){});},400);})();',
+                    '<\/script>', '<\/body>', '<\/html>'
                 ].join('\n');
             }
-
             function downloadSite() {
-                if (!generatedHTML) { alert('⚠️ Сначала сгенерируйте сайт!'); return; }
-                const blob = new Blob([generatedHTML], { type: 'application/octet-stream' });
-                const url = URL.createObjectURL(blob);
-                
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'index.html';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                
-                setTimeout(() => URL.revokeObjectURL(url), 2000);
-
-                const btn = document.getElementById('btnDownload');
-                const origText = btn.innerHTML;
-                btn.innerHTML = '✓ index.html скачан';
-                btn.style.borderColor = 'var(--success)';
-                btn.style.color = 'var(--success)';
-                setTimeout(() => {
-                    btn.innerHTML = origText;
-                    btn.style.borderColor = '';
-                    btn.style.color = '';
-                }, 2500);
+                if (!generatedHTML) return; const blob = new Blob([generatedHTML], { type: 'application/octet-stream' }); const url = URL.createObjectURL(blob);
+                const a = document.createElement('a'); a.href = url; a.download = 'index.html'; document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(() => URL.revokeObjectURL(url), 2000);
+                const btn = document.getElementById('btnDownload'); const orig = btn.innerHTML; btn.innerHTML = '✓ Скачано'; setTimeout(() => { btn.innerHTML = orig; }, 2500);
             }
-
             function previewSite() {
-                if (!generatedHTML) { alert('⚠️ Сначала сгенерируйте сайт!'); return; }
-                
-                const blob = new Blob([generatedHTML], { type: 'text/html' });
-                const url = URL.createObjectURL(blob);
-                
-                const modal = document.createElement('div');
-                modal.className = 'preview-modal';
-                
-                const header = document.createElement('div');
-                header.className = 'preview-modal-header';
-                
-                const closeBtn = document.createElement('button');
-                closeBtn.className = 'preview-modal-close';
-                closeBtn.textContent = 'Закрыть предпросмотр';
-                closeBtn.onclick = () => {
-                    document.body.removeChild(modal);
-                    URL.revokeObjectURL(url);
-                };
-                
-                const iframe = document.createElement('iframe');
-                iframe.src = url;
-                iframe.setAttribute('sandbox', 'allow-scripts');
-                
-                header.appendChild(closeBtn);
-                modal.appendChild(header);
-                modal.appendChild(iframe);
-                document.body.appendChild(modal);
+                if (!generatedHTML) return; const blob = new Blob([generatedHTML], { type: 'text/html' }); const url = URL.createObjectURL(blob);
+                const modal = document.createElement('div'); modal.className = 'preview-modal'; const header = document.createElement('div'); header.className = 'preview-modal-header';
+                const closeBtn = document.createElement('button'); closeBtn.className = 'preview-modal-close'; closeBtn.textContent = 'Закрыть'; closeBtn.onclick = () => { document.body.removeChild(modal); URL.revokeObjectURL(url); };
+                const iframe = document.createElement('iframe'); iframe.src = url; iframe.setAttribute('sandbox', 'allow-scripts');
+                header.appendChild(closeBtn); modal.appendChild(header); modal.appendChild(iframe); document.body.appendChild(modal);
             }
-
-            window.generateSite = generateSite;
-            window.downloadSite = downloadSite;
-            window.previewSite = previewSite;
-
-            console.log('⬡ VoidForge готов — безопасность и совместимость обновлены');
+            window.generateSite = generateSite; window.downloadSite = downloadSite; window.previewSite = previewSite;
         })();
     </script>
 </body>

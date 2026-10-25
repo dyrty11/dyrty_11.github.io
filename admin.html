@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Admin — P.</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.github.com; object-src 'none'; base-uri 'none'; form-action 'none';">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #050505; --surface: #0a0a0a; --border: #333; --text: #fff; --text-muted: #888; --accent: #ccff00; }
+        * { margin: 0; padding: 0; box-sizing: border-box; border-radius: 0 !important; }
+        body { font-family: 'IBM Plex Mono', monospace; background: var(--bg); color: var(--text); min-height: 100vh; padding: 40px 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        h1 { font-family: 'Space Grotesk', sans-serif; font-size: 2.5em; text-transform: uppercase; letter-spacing: -1px; margin-bottom: 10px; }
+        h1 span { color: var(--accent); }
+        .subtitle { color: var(--text-muted); font-size: 0.9em; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
+        .token-section { background: var(--surface); border: 1px solid var(--border); padding: 20px; margin-bottom: 30px; }
+        .token-section label { display: block; font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+        .token-section input { width: 100%; padding: 10px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 14px; }
+        .token-hint { font-size: 11px; color: var(--text-muted); margin-top: 8px; line-height: 1.5; }
+        .status-badge { display: inline-block; padding: 4px 8px; font-size: 10px; text-transform: uppercase; border: 1px solid var(--border); color: var(--text-muted); }
+        .status-badge.connected { border-color: var(--accent); color: var(--accent); }
+        .project-item { background: var(--surface); border: 1px solid var(--border); padding: 20px; margin-bottom: 20px; position: relative; }
+        .project-item .delete-btn { position: absolute; top: 20px; right: 20px; background: transparent; border: 1px solid #ff3333; color: #ff3333; padding: 5px 10px; cursor: pointer; text-transform: uppercase; font-size: 10px; }
+        .project-item .delete-btn:hover { background: #ff3333; color: #000; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 5px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 14px; }
+        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--accent); }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+        .btn { padding: 15px 30px; background: transparent; border: 1px solid var(--border); color: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 14px; text-transform: uppercase; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-primary { background: var(--accent); color: #000; border-color: var(--accent); }
+        .btn-primary:hover { opacity: 0.8; color: #000; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 30px; border-top: 1px solid var(--border); padding-top: 30px; }
+        .hint { font-size: 12px; color: var(--text-muted); margin-top: 20px; line-height: 1.6; }
+        .log { margin-top: 20px; padding: 15px; background: var(--bg); border: 1px solid var(--border); font-size: 12px; color: var(--text-muted); max-height: 150px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Online <span>Admin</span></h1>
+        <p class="subtitle">Редактирование projects.json напрямую на GitHub.</p>
+        <div class="token-section">
+            <label>GitHub Personal Access Token (fine-grained, Contents: Read and write)</label>
+            <input type="password" id="tokenInput" placeholder="github_pat_...">
+            <div class="token-hint">Токен хранится только в вашем браузере (localStorage). Он не отправляется никуда, кроме api.github.com.</div>
+            <div style="margin-top: 10px;"><span class="status-badge" id="tokenStatus">Не подключено</span></div>
+        </div>
+        <div id="projectsList"></div>
+        <button class="btn" id="addBtn" style="width: 100%; margin-bottom: 20px;">+ Добавить проект</button>
+        <div class="actions">
+            <button class="btn btn-primary" id="saveBtn">Сохранить на GitHub</button>
+            <button class="btn" id="loadBtn">Загрузить из GitHub</button>
+        </div>
+        <div class="log" id="log">Готов к работе.</div>
+        <div class="hint">
+            <strong>Как пользоваться:</strong><br>
+            1. Вставьте токен и нажмите «Загрузить из GitHub».<br>
+            2. Редактируйте проекты.<br>
+            3. Нажмите «Сохранить на GitHub» — файл projects.json обновится в репозитории.<br>
+            4. GitHub Pages подхватит изменения через 1–2 минуты.
+        </div>
+    </div>
+    <script>
+        (function() {
+            const REPO_OWNER = 'dyrty11';
+            const REPO_NAME = 'dyrty_11.github.io';
+            const FILE_PATH = 'projects.json';
+            let projects = []; let fileSha = null;
+            const listEl = document.getElementById('projectsList'); const tokenInput = document.getElementById('tokenInput');
+            const tokenStatus = document.getElementById('tokenStatus'); const logEl = document.getElementById('log');
+            const savedToken = localStorage.getItem('gh_admin_token');
+            if (savedToken) { tokenInput.value = savedToken; tokenStatus.textContent = 'Подключено'; tokenStatus.classList.add('connected'); }
+            tokenInput.addEventListener('input', () => {
+                localStorage.setItem('gh_admin_token', tokenInput.value);
+                if (tokenInput.value) { tokenStatus.textContent = 'Подключено'; tokenStatus.classList.add('connected'); }
+                else { tokenStatus.textContent = 'Не подключено'; tokenStatus.classList.remove('connected'); }
+            });
+            function log(msg) { logEl.textContent = msg; }
+            async function fetchFile() {
+                const token = tokenInput.value.trim();
+                if (!token) { alert('Введите токен'); return; }
+                log('Загрузка projects.json...');
+                try {
+                    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const data = await res.json();
+                    fileSha = data.sha;
+                    const content = atob(data.content);
+                    projects = JSON.parse(content);
+                    render();
+                    log('Файл успешно загружен.');
+                } catch (e) { log('Ошибка загрузки: ' + e.message); alert('Не удалось загрузить projects.json. Проверьте токен и репозиторий.'); }
+            }
+            async function saveFile() {
+                const token = tokenInput.value.trim();
+                if (!token) { alert('Введите токен'); return; }
+                if (!fileSha) { alert('Сначала загрузите файл с GitHub.'); return; }
+                log('Сохранение на GitHub...');
+                const content = btoa(unescape(encodeURIComponent(JSON.stringify(projects, null, 2))));
+                try {
+                    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
+                        method: 'PUT',
+                        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: 'Update projects.json via admin panel', content: content, sha: fileSha })
+                    });
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const data = await res.json();
+                    fileSha = data.content.sha;
+                    log('Успешно сохранено! GitHub Pages обновится через 1–2 минуты.');
+                } catch (e) { log('Ошибка сохранения: ' + e.message); alert('Не удалось сохранить файл. Проверьте права токена.'); }
+            }
+            function render() {
+                listEl.innerHTML = '';
+                projects.forEach((proj, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'project-item';
+                    item.innerHTML = `
+                        <button class="delete-btn" data-index="${index}">Удалить</button>
+                        <div class="form-group"><label>Название</label><input type="text" class="field-title" value="${proj.title || ''}" data-index="${index}"></div>
+                        <div class="grid-2">
+                            <div class="form-group"><label>Категория</label><select class="field-category" data-index="${index}"><option value="website" ${proj.category === 'website' ? 'selected' : ''}>Веб-сайт</option><option value="file" ${proj.category === 'file' ? 'selected' : ''}>Файл</option></select></div>
+                            <div class="form-group"><label>Тип ссылки</label><select class="field-type" data-index="${index}"><option value="link" ${proj.type === 'link' ? 'selected' : ''}>Ссылка</option><option value="download" ${proj.type === 'download' ? 'selected' : ''}>Скачать</option></select></div>
+                        </div>
+                        <div class="form-group"><label>Описание</label><textarea class="field-desc" rows="2" data-index="${index}">${proj.description || ''}</textarea></div>
+                        <div class="grid-2">
+                            <div class="form-group"><label>Ссылка (URL или путь)</label><input type="text" class="field-link" value="${proj.link || ''}" data-index="${index}"></div>
+                            <div class="form-group"><label>Текст кнопки</label><input type="text" class="field-btnText" value="${proj.buttonText || 'Открыть'}" data-index="${index}"></div>
+                        </div>
+                        <div class="grid-3">
+                            <div class="form-group"><label>Теги (через запятую)</label><input type="text" class="field-tags" value="${(proj.tags || []).join(', ')}" data-index="${index}"></div>
+                            <div class="form-group"><label>Иконка</label><select class="field-icon" data-index="${index}"><option value="layout" ${proj.icon === 'layout' ? 'selected' : ''}>Макет</option><option value="file" ${proj.icon === 'file' ? 'selected' : ''}>Файл</option><option value="shopping-bag" ${proj.icon === 'shopping-bag' ? 'selected' : ''}>Магазин</option><option value="archive" ${proj.icon === 'archive' ? 'selected' : ''}>Архив</option></select></div>
+                            <div class="form-group"><label>Цвет</label><input type="text" class="field-color" value="${proj.color || '#ccff00'}" data-index="${index}"></div>
+                        </div>`;
+                    listEl.appendChild(item);
+                });
+                listEl.querySelectorAll('.delete-btn').forEach(btn => { btn.addEventListener('click', (e) => { const idx = parseInt(e.target.getAttribute('data-index')); projects.splice(idx, 1); render(); }); });
+                const fields = [{ cls: 'field-title', key: 'title' },{ cls: 'field-category', key: 'category' },{ cls: 'field-type', key: 'type' },{ cls: 'field-desc', key: 'description' },{ cls: 'field-link', key: 'link' },{ cls: 'field-btnText', key: 'buttonText' },{ cls: 'field-icon', key: 'icon' },{ cls: 'field-color', key: 'color' }];
+                fields.forEach(f => { listEl.querySelectorAll('.' + f.cls).forEach(el => { el.addEventListener('input', (e) => { const idx = parseInt(e.target.getAttribute('data-index')); projects[idx][f.key] = e.target.value; }); }); });
+                listEl.querySelectorAll('.field-tags').forEach(el => { el.addEventListener('input', (e) => { const idx = parseInt(e.target.getAttribute('data-index')); projects[idx].tags = e.target.value.split(',').map(s => s.trim()).filter(s => s); }); });
+            }
+            document.getElementById('addBtn').addEventListener('click', () => {
+                projects.push({ title: 'Новый проект', category: 'website', description: 'Описание проекта', tags: ['JS'], type: 'link', link: 'https://example.com', buttonText: 'Открыть', icon: 'layout', color: '#ccff00' });
+                render();
+            });
+            document.getElementById('loadBtn').addEventListener('click', fetchFile);
+            document.getElementById('saveBtn').addEventListener('click', saveFile);
+        })();
+    </script>
+</body>
+</html>

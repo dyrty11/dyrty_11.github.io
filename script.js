@@ -34,10 +34,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('a[href$=".html"]').forEach(link => {
         link.addEventListener('click', function (e) {
             const href = this.getAttribute('href');
-            if (!href || href.startsWith('#') || this.target === '_blank' || href === 'voidforge.html') return;
+            if (!href || href.startsWith('#') || this.target === '_blank' || href === 'voidforge.html' || href === 'json-formatter.html') return;
             e.preventDefault();
             document.body.classList.add('page-exit');
-            setTimeout(() => { window.location.href = href; }, 300);
+            setTimeout(() => { window.location.href = href; }, 200);
         });
     });
 
@@ -45,10 +45,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const projectsGrid = document.getElementById('projectsGrid');
     if (projectsGrid) {
         const icons = {
-            'layout': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>',
-            'file': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><polyline points="9 15 12 12 15 15"></polyline></svg>',
-            'shopping-bag': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>',
-            'archive': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>'
+            'layout': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>',
+            'file': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><polyline points="9 15 12 12 15 15"></polyline></svg>',
+            'shopping-bag': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>',
+            'archive': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>'
         };
         const tagIcons = {
             'react': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2"></circle><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(0 12 12)"></ellipse><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"></ellipse><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)"></ellipse></svg>',
@@ -56,10 +56,10 @@ document.addEventListener('DOMContentLoaded', () => {
             'js': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>',
             'html': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>',
             'css': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path></svg>',
-            'figma': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v10"></path><path d="M9 22a3 3 0 1 0 3-3V5a3 3 0 1 0-3 3"></path></svg>',
             'python': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>',
             'windows': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>',
             'exe': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>',
+            'security': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>',
             'default': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>'
         };
         function getTagIcon(tagName) {
@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let allProjects = [];
         let currentFilters = { category: 'all', tag: 'all', search: '' };
         const fallbackProjects = [
-            { "title": "VoidForge", "category": "website", "description": "Генератор аудио-сайтов.", "tags": ["HTML", "JavaScript"], "type": "link", "link": "voidforge.html", "buttonText": "Открыть", "icon": "layout", "color": "#8b5cf6" }
+            { "title": "VoidForge", "category": "website", "description": "Генератор аудио-сайтов.", "tags": ["HTML", "JavaScript"], "type": "link", "link": "voidforge.html", "buttonText": "Открыть", "icon": "layout", "color": "#ccff00" }
         ];
         function sanitizeURL(url) {
             try {
@@ -79,10 +79,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } catch (e) {}
             return '#';
-        }
-        function getColorClass(colorHex) {
-            const map = { '#2563eb': 'color-blue', '#8b5cf6': 'color-purple', '#10b981': 'color-green', '#f59e0b': 'color-orange' };
-            return map[colorHex] || 'color-blue';
         }
         fetch('projects.json')
             .then(response => { if (!response.ok) throw new Error('Network error'); return response.json(); })
@@ -133,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (projects.length === 0) {
                 const empty = document.createElement('p');
                 empty.style.cssText = 'grid-column:1/-1;text-align:center;color:var(--text-muted);padding:40px;';
-                empty.textContent = 'Ничего не найдено. Попробуйте изменить фильтры.';
+                empty.textContent = 'Ничего не найдено.';
                 projectsGrid.appendChild(empty);
                 return;
             }
@@ -141,7 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const card = document.createElement('div');
                 card.className = 'project-card';
                 const iconDiv = document.createElement('div');
-                iconDiv.className = 'project-icon ' + getColorClass(project.color);
+                iconDiv.className = 'project-icon';
                 iconDiv.innerHTML = icons[project.icon] || icons['file'];
                 const titleEl = document.createElement('h3');
                 titleEl.textContent = String(project.title || '');
@@ -161,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 const isDownload = project.type === 'download';
                 const linkEl = document.createElement('a');
-                linkEl.className = 'action-btn ' + (isDownload ? 'btn-outline' : 'btn-primary');
+                linkEl.className = 'action-btn';
                 linkEl.href = sanitizeURL(project.link);
                 if (isDownload) {
                     linkEl.setAttribute('download', '');
@@ -170,10 +166,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     linkEl.setAttribute('target', '_blank');
                     linkEl.setAttribute('rel', 'noopener noreferrer');
                 }
-                linkEl.appendChild(document.createTextNode(String(project.buttonText || 'Открыть') + ' '));
+                linkEl.appendChild(document.createTextNode(String(project.buttonText || 'Открыть')));
                 const btnIcon = isDownload
-                    ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>'
-                    : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>';
+                    ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>'
+                    : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>';
                 linkEl.insertAdjacentHTML('beforeend', btnIcon);
                 card.appendChild(iconDiv);
                 card.appendChild(titleEl);
@@ -200,19 +196,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- 4. Обработка формы контактов (Formcarry AJAX) ---
+    // --- 4. Обработка формы контактов ---
     const contactForm = document.getElementById('contactForm');
     if (contactForm) {
-        const fileInput = document.getElementById('fileInput');
-        const fileNameEl = document.getElementById('fileName');
-        if (fileInput && fileNameEl) {
-            fileInput.addEventListener('change', () => {
-                fileNameEl.textContent = fileInput.files.length
-                    ? fileInput.files[0].name
-                    : 'Файл не выбран';
-            });
-        }
-
         contactForm.addEventListener('submit', async function (e) {
             e.preventDefault();
             const submitBtn = this.querySelector('.submit-btn');
@@ -234,11 +220,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.status === 'success') {
                     alert('Сообщение успешно отправлено! Я свяжусь с вами.');
                     this.reset();
-                    if (fileNameEl) fileNameEl.textContent = 'Файл не выбран';
                 } else if (data.code === 422) {
-                    alert('Проверьте правильность заполнения полей.');
+                    alert('Ошибка валидации. Проверьте поля.');
                 } else {
-                    alert('Ошибка при отправке: ' + (data.message || 'Неизвестная ошибка'));
+                    alert('Ошибка: ' + (data.message || 'Неизвестная ошибка Formcarry'));
                 }
             } catch (error) {
                 alert('Ошибка сети. Проверьте подключение к интернету.');
@@ -246,6 +231,45 @@ document.addEventListener('DOMContentLoaded', () => {
                 submitBtn.disabled = false;
                 submitBtn.textContent = originalText;
             }
+        });
+    }
+
+    // --- 5. Мобильное меню (боковая панель) ---
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileNav = document.getElementById('mobileNav');
+    const menuBackdrop = document.createElement('div');
+    menuBackdrop.className = 'menu-backdrop';
+    document.body.appendChild(menuBackdrop);
+
+    if (mobileMenuBtn && mobileNav) {
+        const toggleMenu = () => {
+            const isActive = mobileNav.classList.toggle('active');
+            menuBackdrop.classList.toggle('active', isActive);
+            document.body.style.overflow = isActive ? 'hidden' : '';
+        };
+        mobileMenuBtn.addEventListener('click', toggleMenu);
+        menuBackdrop.addEventListener('click', toggleMenu);
+        mobileNav.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileNav.classList.remove('active');
+                menuBackdrop.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        });
+    }
+
+    // --- 6. Магнитный эффект для кнопок ---
+    if (window.matchMedia("(pointer: fine)").matches) {
+        document.querySelectorAll('.btn, .project-card').forEach(el => {
+            el.addEventListener('mousemove', (e) => {
+                const rect = el.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                el.style.transform = `translate(${x * 0.05}px, ${y * 0.05}px)`;
+            });
+            el.addEventListener('mouseleave', () => {
+                el.style.transform = '';
+            });
         });
     }
 });

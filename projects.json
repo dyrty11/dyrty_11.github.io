@@ -3,22 +3,33 @@
     "title": "VoidForge",
     "category": "website",
     "description": "Интерактивный сайт генератор для soundtag",
-    "tags": ["HTML", "CSS", "JavaScript", "File API"],
+    "tags": ["HTML", "CSS", "JavaScript"],
     "type": "link",
     "link": "voidforge.html",
     "buttonText": "Открыть генератор",
     "icon": "layout",
-    "color": "#8b5cf6"
+    "color": "#ccff00"
   },
   {
     "title": "FilePilot",
     "category": "file",
-    "description": "FilePilot — это десктопное приложение (EXE) для Windows. Наводит порядок в файлах: поиск по содержимому (PDF, DOCX, код), поиск дубликатов, умная автосортировка. 100% приватность, без облаков.",
+    "description": "Десктопное приложение (EXE) для Windows: поиск по содержимому, поиск дубликатов и умная автосортировка. Полная приватность.",
     "tags": ["Python", "Windows", "EXE"],
-    "type": "download",
+    "type": "link",
     "link": "https://pomf2.lain.la/f/ff7rdfxg.7z",
     "buttonText": "Скачать .7z (EXE)",
     "icon": "file",
     "color": "#0ea5e9"
+  },
+  {
+    "title": "JSON Formatter",
+    "category": "website",
+    "description": "Утилита для валидации, форматирования и минификации JSON-данных. Работает полностью офлайн.",
+    "tags": ["JavaScript", "Developer Tools"],
+    "type": "link",
+    "link": "json-formatter.html",
+    "buttonText": "Открыть утилиту",
+    "icon": "layout",
+    "color": "#ccff00"
   }
 ]
