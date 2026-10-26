@@ -41,20 +41,43 @@ body.menu-open { overflow: hidden; }
 body.page-exit .page-wrapper { opacity: 0; transition: opacity 0.2s ease; }
 
 /* =========================================
-   АНИМАЦИЯ ПУНКТИРНЫХ РАМОК
+   АНИМАЦИЯ РАМКИ ПО ЧАСОВОЙ СТРЕЛКЕ
    ========================================= */
-@keyframes dashMove {
-    from { background-position: 0 0; }
-    to { background-position: 28px 28px; }
-}
 .animated-dashed {
+    position: relative;
     border: none !important;
-    background-image: repeating-linear-gradient(45deg, var(--border) 0, var(--border) 10px, transparent 10px, transparent 20px);
-    background-size: 28px 28px;
-    animation: dashMove 2s linear infinite;
 }
-.animated-dashed:hover {
-    background-image: repeating-linear-gradient(45deg, var(--accent) 0, var(--accent) 10px, transparent 10px, transparent 20px);
+
+.animated-dashed::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    /* 4 слоя: top / bottom / left / right */
+    background-image:
+        linear-gradient(90deg, var(--border) 50%, transparent 50%),
+        linear-gradient(90deg, var(--border) 50%, transparent 50%),
+        linear-gradient(0deg,  var(--border) 50%, transparent 50%),
+        linear-gradient(0deg,  var(--border) 50%, transparent 50%);
+    background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+    background-size:   12px 1px, 12px 1px, 1px 12px, 1px 12px;
+    background-position: 0 0, 0 100%, 0 0, 100% 0;
+    animation: borderMarch 0.8s linear infinite;
+}
+
+.animated-dashed:hover::after {
+    background-image:
+        linear-gradient(90deg, var(--accent) 50%, transparent 50%),
+        linear-gradient(90deg, var(--accent) 50%, transparent 50%),
+        linear-gradient(0deg,  var(--accent) 50%, transparent 50%),
+        linear-gradient(0deg,  var(--accent) 50%, transparent 50%);
+}
+
+/* Верх: пунктир идёт вправо → Правый: вниз ↓
+   Низ: влево ←              Левый: вверх ↑  = по часовой */
+@keyframes borderMarch {
+    from { background-position: 0 0,      0 100%,    0 0,      100% 0; }
+    to   { background-position: 12px 0,  -12px 100%, 0 -12px,  100% 12px; }
 }
 
 /* =========================================

@@ -63,7 +63,37 @@
         .token-hint { font-size: 11px; color: var(--text-muted); margin-top: 8px; line-height: 1.5; }
         .status-badge { display: inline-block; padding: 4px 8px; font-size: 10px; text-transform: uppercase; border: 1px solid var(--border); color: var(--text-muted); margin-top: 10px; }
         .status-badge.connected { border-color: var(--accent); color: var(--accent); }
-
+        /* Анимация рамки по часовой стрелке (как на остальных страницах) */
+        .animated-dashed {
+            position: relative;
+            border: none !important;
+        }
+        .animated-dashed::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(90deg, var(--border) 50%, transparent 50%),
+                linear-gradient(90deg, var(--border) 50%, transparent 50%),
+                linear-gradient(0deg,  var(--border) 50%, transparent 50%),
+                linear-gradient(0deg,  var(--border) 50%, transparent 50%);
+            background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+            background-size:   12px 1px, 12px 1px, 1px 12px, 1px 12px;
+            background-position: 0 0, 0 100%, 0 0, 100% 0;
+            animation: borderMarch 0.8s linear infinite;
+        }
+        .animated-dashed:hover::after {
+            background-image:
+                linear-gradient(90deg, var(--accent) 50%, transparent 50%),
+                linear-gradient(90deg, var(--accent) 50%, transparent 50%),
+                linear-gradient(0deg,  var(--accent) 50%, transparent 50%),
+                linear-gradient(0deg,  var(--accent) 50%, transparent 50%);
+        }
+        @keyframes borderMarch {
+            from { background-position: 0 0,      0 100%,    0 0,      100% 0; }
+            to   { background-position: 12px 0,  -12px 100%, 0 -12px,  100% 12px; }
+        }
         /* Панель инструментов */
         .toolbar {
             display: flex; justify-content: space-between; align-items: center;
@@ -204,7 +234,7 @@
 
         <div class="stats" id="stats"></div>
 
-        <div class="token-section">
+        <div class="token-section animated-dashed">
             <label>GitHub Personal Access Token (fine-grained, Contents: Read & Write)</label>
             <input type="password" id="tokenInput" placeholder="github_pat_...">
             <div class="token-hint">
