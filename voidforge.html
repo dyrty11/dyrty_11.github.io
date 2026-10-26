@@ -20,8 +20,26 @@
         .section { margin-bottom: 25px; }
         .section-title { font-size: 0.8em; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 10px; }
         .section-title::before { content: '> '; color: var(--accent); }
-        .file-upload-area { border: 1px dashed var(--border); padding: 30px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--bg); }
-        .file-upload-area:hover { border-color: var(--accent); }
+        
+        .file-upload-area {
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--bg);
+            border: none;
+            background-image: repeating-linear-gradient(45deg, var(--border) 0, var(--border) 10px, transparent 10px, transparent 20px);
+            background-size: 28px 28px;
+            animation: dashMove 2s linear infinite;
+        }
+        .file-upload-area:hover {
+            background-image: repeating-linear-gradient(45deg, var(--accent) 0, var(--accent) 10px, transparent 10px, transparent 20px);
+        }
+        @keyframes dashMove {
+            from { background-position: 0 0; }
+            to { background-position: 28px 28px; }
+        }
+        
         .file-upload-area .upload-icon { font-size: 24px; display: block; margin-bottom: 10px; }
         .file-upload-area .upload-text { font-size: 0.9em; color: var(--text-muted); }
         .file-upload-area .file-name { font-size: 0.8em; color: var(--accent); margin-top: 10px; word-break: break-all; }
@@ -123,9 +141,9 @@
                 });
             }
             function setupDragDrop(zone, input, handler) {
-                zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = 'var(--accent)'; });
-                zone.addEventListener('dragleave', () => { zone.style.borderColor = 'var(--border)'; });
-                zone.addEventListener('drop', e => { e.preventDefault(); zone.style.borderColor = 'var(--border)'; const f = e.dataTransfer.files[0]; if (f) handler(f); });
+                zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.background = 'rgba(204,255,0,0.05)'; });
+                zone.addEventListener('dragleave', () => { zone.style.background = ''; });
+                zone.addEventListener('drop', e => { e.preventDefault(); zone.style.background = ''; const f = e.dataTransfer.files[0]; if (f) handler(f); });
                 input.addEventListener('change', function() { if (this.files[0]) handler(this.files[0]); });
             }
             async function handleImage(file) {

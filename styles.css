@@ -41,7 +41,24 @@ body.menu-open { overflow: hidden; }
 body.page-exit .page-wrapper { opacity: 0; transition: opacity 0.2s ease; }
 
 /* =========================================
-   ШАПКА (z-index 1002 - поверх всего)
+   АНИМАЦИЯ ПУНКТИРНЫХ РАМОК
+   ========================================= */
+@keyframes dashMove {
+    from { background-position: 0 0; }
+    to { background-position: 28px 28px; }
+}
+.animated-dashed {
+    border: none !important;
+    background-image: repeating-linear-gradient(45deg, var(--border) 0, var(--border) 10px, transparent 10px, transparent 20px);
+    background-size: 28px 28px;
+    animation: dashMove 2s linear infinite;
+}
+.animated-dashed:hover {
+    background-image: repeating-linear-gradient(45deg, var(--accent) 0, var(--accent) 10px, transparent 10px, transparent 20px);
+}
+
+/* =========================================
+   ШАПКА (z-index 1002)
    ========================================= */
 header {
     position: fixed; top: 0; left: 0; width: 100%;
@@ -195,7 +212,7 @@ nav.desktop-nav a:hover, nav.desktop-nav a.active { color: var(--accent); }
 .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--accent); }
 .form-group textarea { resize: vertical; min-height: 120px; }
 
-.file-disabled-notice { display: flex; align-items: center; gap: 10px; padding: 12px 15px; border: 1px dashed var(--text-muted); color: var(--text-muted); font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; background: rgba(255, 255, 255, 0.02); cursor: not-allowed; }
+.file-disabled-notice { display: flex; align-items: center; gap: 10px; padding: 12px 15px; color: var(--text-muted); font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; background: rgba(255, 255, 255, 0.02); cursor: not-allowed; }
 .file-disabled-notice svg { color: var(--accent); }
 .file-hint { font-size: 11px; color: var(--text-muted); margin-top: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
 

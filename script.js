@@ -51,7 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
             'archive': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>'
         };
         
-        // ТОЛЬКО РЕАЛЬНЫЕ ИКОНКИ. Если тег неизвестен — иконки не будет.
         const tagIcons = {
             'react': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2"></circle><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(0 12 12)"></ellipse><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"></ellipse><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)"></ellipse></svg>',
             'javascript': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>',
@@ -259,8 +258,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 5. Мобильное меню (Боковая панель) ---
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     const mobileNav = document.getElementById('mobileNav');
-    
-    // Создаем подложку
     const menuBackdrop = document.createElement('div');
     menuBackdrop.className = 'menu-backdrop';
     document.body.appendChild(menuBackdrop);
