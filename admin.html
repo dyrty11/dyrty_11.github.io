@@ -61,6 +61,34 @@
         .token-section label { display: block; font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
         .token-section input { width: 100%; padding: 10px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 14px; }
         .token-hint { font-size: 11px; color: var(--text-muted); margin-top: 8px; line-height: 1.5; }
+        /* Подсказки тегов */
+.tag-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 8px;
+}
+.tag-suggestion {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    padding: 4px 8px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+}
+.tag-suggestion:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+.tag-suggestion.used {
+    opacity: 0.35;
+    cursor: default;
+    pointer-events: none;
+}
         .status-badge { display: inline-block; padding: 4px 8px; font-size: 10px; text-transform: uppercase; border: 1px solid var(--border); color: var(--text-muted); margin-top: 10px; }
         .status-badge.connected { border-color: var(--accent); color: var(--accent); }
         /* Анимация рамки по часовой стрелке (как на остальных страницах) */
@@ -149,7 +177,13 @@
             transition: all 0.2s;
         }
         .project-item.dragging { opacity: 0.4; }
-        .project-item.drag-over { border-color: var(--accent); border-style: dashed; }
+        .project-item.drag-over::after {
+    background-image:
+        linear-gradient(90deg, var(--accent) 50%, transparent 50%),
+        linear-gradient(90deg, var(--accent) 50%, transparent 50%),
+        linear-gradient(0deg,  var(--accent) 50%, transparent 50%),
+        linear-gradient(0deg,  var(--accent) 50%, transparent 50%);
+}
         
         .project-header {
             display: flex; justify-content: space-between; align-items: center;
@@ -263,16 +297,17 @@
             </div>
         </div>
 
-        <div class="stats" id="stats"></div>
+        <div class="stats animated-dashed" id="stats"></div>
 
         <div class="token-section animated-dashed">
             <label>GitHub Personal Access Token (fine-grained, Contents: Read & Write)</label>
             <input type="password" id="tokenInput" placeholder="github_pat_...">
             <div class="token-hint">
-                Токен хранится только в localStorage вашего браузера. Он отправляется только на api.github.com.
-            </div>
-            <span class="status-badge" id="tokenStatus">Не подключено</span>
-        </div>
+    Токен хранится только в localStorage вашего браузера. Он отправляется только на api.github.com.
+    <br>
+    <a href="https://github.com/settings/tokens" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">Создать токен →</a>
+    (fine-grained, права <b>Contents: Read &amp; Write</b>, доступ к репозиторию <b>dyrty11/dyrty_11.github.io</b>)
+</div>
 
         <div class="toolbar">
             <input type="text" id="searchAdmin" placeholder="🔍 Поиск по названию, описанию, тегам...">
@@ -412,58 +447,107 @@
 
             // ====== GITHUB API ======
             async function fetchFile() {
-                const token = tokenInput.value.trim();
-                if (!token) { toast('Введите токен'); return; }
-                log('Загрузка projects.json...');
-                try {
-                    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                    const data = await res.json();
-                    fileSha = data.sha;
-                    const base64Clean = data.content.replace(/\s/g, '');
-                    const content = decodeURIComponent(escape(atob(base64Clean)));
-                    projects = JSON.parse(content);
-                    markSaved();
-                    render();
-                    log('Файл загружен. Проектов: ' + projects.length, 'success');
-                    toast('Файл загружен!');
-                } catch (e) {
-                    log('Ошибка загрузки: ' + e.message, 'error');
-                }
+    const token = tokenInput.value.replace(/[\s\u200B-\u200D\uFEFF]/g, '');
+    if (!token) { toast('Введите токен'); return; }
+    
+    log('Проверка токена...');
+    try {
+        const userRes = await fetch('https://api.github.com/user', {
+            headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json' }
+        });
+        if (userRes.status === 401) {
+            const msg = 'HTTP 401: токен недействителен. Причины: 1) токен отозван или истёк; 2) у токена нет прав Contents: Read & Write; 3) у токена нет доступа к репозиторию ' + REPO_OWNER + '/' + REPO_NAME + '. Создайте новый: https://github.com/settings/tokens';
+            log(msg, 'error');
+            toast('Токен недействителен (401)');
+            return;
+        }
+    } catch (e) { /* сетевая ошибка pre-check — не критично */ }
+    
+    log('Загрузка projects.json...');
+    try {
+        const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/vnd.github+json',
+                'X-GitHub-Api-Version': '2022-11-28'
             }
+        });
+        if (!res.ok) {
+            let serverMsg = '';
+            try { const j = await res.json(); serverMsg = j.message || ''; } catch (e) {}
+            if (res.status === 401) {
+                throw new Error(`HTTP 401: токен недействителен или не имеет прав. Проверьте: 1) токен не отозван и не истёк; 2) у него есть доступ Contents: Read & Write к ${REPO_OWNER}/${REPO_NAME}; 3) у него есть доступ именно к этому репозиторию. Создать новый: https://github.com/settings/tokens`);
+            }
+            if (res.status === 403) {
+                throw new Error(`HTTP 403: доступ запрещён. Проверьте права токена (Contents: Read & Write). ${serverMsg}`);
+            }
+            if (res.status === 404) {
+                throw new Error(`HTTP 404: файл ${FILE_PATH} не найден в ${REPO_OWNER}/${REPO_NAME}. Проверьте, что репозиторий, файл и доступ у токена существуют. ${serverMsg}`);
+            }
+            throw new Error(`HTTP ${res.status}${serverMsg ? ': ' + serverMsg : ''}`);
+        }
+        const data = await res.json();
+        fileSha = data.sha;
+        const base64Clean = data.content.replace(/\s/g, '');
+        const content = decodeURIComponent(escape(atob(base64Clean)));
+        projects = JSON.parse(content);
+        markSaved();
+        render();
+        log('Файл загружен. Проектов: ' + projects.length, 'success');
+        toast('Файл загружен!');
+    } catch (e) {
+        log('Ошибка загрузки: ' + e.message, 'error');
+    }
+}
 
             async function saveFile() {
-                const token = tokenInput.value.trim();
-                if (!token) { toast('Введите токен'); return; }
-                if (!fileSha) { toast('Сначала загрузите файл с GitHub'); return; }
-                
-                const errors = validate();
-                if (errors.length > 0) {
-                    toast('Исправьте ошибки: ' + errors[0]);
-                    log('Валидация не пройдена: ' + errors.join('; '), 'error');
-                    return;
-                }
-                
-                log('Сохранение на GitHub...');
-                const content = btoa(unescape(encodeURIComponent(JSON.stringify(projects, null, 2))));
-                try {
-                    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
-                        method: 'PUT',
-                        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ message: 'Update projects.json via admin v2', content, sha: fileSha })
-                    });
-                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                    const data = await res.json();
-                    fileSha = data.content.sha;
-                    markSaved();
-                    log('Сохранено! GitHub Pages обновится через 1–2 минуты.', 'success');
-                    toast('Сохранено на GitHub!');
-                } catch (e) {
-                    log('Ошибка сохранения: ' + e.message, 'error');
-                }
+    const token = tokenInput.value.replace(/[\s\u200B-\u200D\uFEFF]/g, '');
+    if (!token) { toast('Введите токен'); return; }
+    if (!fileSha) { toast('Сначала загрузите файл с GitHub'); return; }
+    
+    const errors = validate();
+    if (errors.length > 0) {
+        toast('Исправьте ошибки: ' + errors[0]);
+        log('Валидация не пройдена: ' + errors.join('; '), 'error');
+        return;
+    }
+    
+    log('Сохранение на GitHub...');
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(projects, null, 2))));
+    try {
+        const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/vnd.github+json',
+                'X-GitHub-Api-Version': '2022-11-28'
+            },
+            body: JSON.stringify({ message: 'Update projects.json via admin v2', content, sha: fileSha })
+        });
+        if (!res.ok) {
+            let serverMsg = '';
+            try { const j = await res.json(); serverMsg = j.message || ''; } catch (e) {}
+            if (res.status === 401) {
+                throw new Error(`HTTP 401: токен недействителен или не имеет прав. Создайте новый: https://github.com/settings/tokens`);
             }
+            if (res.status === 409) {
+                throw new Error(`HTTP 409: конфликт версий. Файл был изменён извне. Перезагрузите его с GitHub. ${serverMsg}`);
+            }
+            if (res.status === 422) {
+                throw new Error(`HTTP 422: неверные данные. ${serverMsg}`);
+            }
+            throw new Error(`HTTP ${res.status}${serverMsg ? ': ' + serverMsg : ''}`);
+        }
+        const data = await res.json();
+        fileSha = data.content.sha;
+        markSaved();
+        log('Сохранено! GitHub Pages обновится через 1–2 минуты.', 'success');
+        toast('Сохранено на GitHub!');
+    } catch (e) {
+        log('Ошибка сохранения: ' + e.message, 'error');
+    }
+}
 
             function validate() {
                 const errors = [];
@@ -475,122 +559,143 @@
             }
 
             // ====== RENDER ======
-            function render() {
-                listEl.innerHTML = '';
-                let visibleCount = 0;
+            function getAllTags() {
+    const set = new Set();
+    projects.forEach(p => {
+        if (Array.isArray(p.tags)) p.tags.forEach(t => {
+            const s = String(t || '').trim();
+            if (s) set.add(s);
+        });
+    });
+    return Array.from(set).sort((a, b) => a.localeCompare(b, 'ru'));
+}
 
-                projects.forEach((proj, index) => {
-                    if (searchFilter) {
-                        const haystack = `${proj.title || ''} ${proj.description || ''} ${(proj.tags || []).join(' ')}`.toLowerCase();
-                        if (!haystack.includes(searchFilter)) return;
-                    }
-                    visibleCount++;
+function render() {
+    listEl.innerHTML = '';
+    let visibleCount = 0;
+    const allTags = getAllTags();
 
-                    const item = document.createElement('div');
-                    item.className = 'project-item';
-                    item.draggable = true;
-                    item.dataset.index = index;
+    projects.forEach((proj, index) => {
+        if (searchFilter) {
+            const haystack = `${proj.title || ''} ${proj.description || ''} ${(proj.tags || []).join(' ')}`.toLowerCase();
+            if (!haystack.includes(searchFilter)) return;
+        }
+        visibleCount++;
 
-                    const iconSVG = ICON_SVGS[proj.icon] || ICON_SVGS['layout'];
+        const item = document.createElement('div');
+        item.className = 'project-item animated-dashed';
+        item.draggable = true;
+        item.dataset.index = index;
 
-                    const colorSwatches = PRESET_COLORS.map(c =>
-                        `<div class="color-swatch ${c === proj.color ? 'active' : ''}" style="background:${c}" data-color="${c}" data-index="${index}" title="${c}"></div>`
-                    ).join('');
+        const iconSVG = ICON_SVGS[proj.icon] || ICON_SVGS['layout'];
+        const currentTags = Array.isArray(proj.tags) ? proj.tags : [];
 
-                    item.innerHTML = `
-                        <div class="project-header">
-                            <div style="display:flex;align-items:center;gap:10px;">
-                                <span class="drag-handle" title="Перетащите для изменения порядка">☰</span>
-                                <span class="project-number">#${index + 1}</span>
-                            </div>
-                            <div class="project-actions">
-                                <button class="icon-btn" data-action="duplicate" data-index="${index}" title="Дублировать">⧉</button>
-                                <button class="icon-btn danger" data-action="delete" data-index="${index}" title="Удалить">✕</button>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Название</label>
-                            <input type="text" class="field-title" value="${escapeHtml(proj.title || '')}" data-index="${index}">
-                        </div>
-                        <div class="grid-2">
-                            <div class="form-group">
-                                <label>Категория</label>
-                                <select class="field-category" data-index="${index}">
-                                    <option value="website" ${proj.category === 'website' ? 'selected' : ''}>Веб-сайт</option>
-                                    <option value="file" ${proj.category === 'file' ? 'selected' : ''}>Файл</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Тип ссылки</label>
-                                <select class="field-type" data-index="${index}">
-                                    <option value="link" ${proj.type === 'link' ? 'selected' : ''}>Ссылка (открыть)</option>
-                                    <option value="download" ${proj.type === 'download' ? 'selected' : ''}>Скачать</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Описание</label>
-                            <textarea class="field-desc" rows="2" data-index="${index}">${escapeHtml(proj.description || '')}</textarea>
-                        </div>
-                        <div class="grid-2">
-                            <div class="form-group">
-                                <label>Ссылка (URL или путь)</label>
-                                <input type="text" class="field-link" value="${escapeHtml(proj.link || '')}" data-index="${index}">
-                            </div>
-                            <div class="form-group">
-                                <label>Текст кнопки</label>
-                                <input type="text" class="field-btnText" value="${escapeHtml(proj.buttonText || 'Открыть')}" data-index="${index}">
-                            </div>
-                        </div>
-                        <div class="grid-3">
-                            <div class="form-group">
-                                <label>Теги (через запятую)</label>
-                                <input type="text" class="field-tags" value="${escapeHtml((proj.tags || []).join(', '))}" data-index="${index}">
-                            </div>
-                            <div class="form-group">
-                                <label>Иконка</label>
-                                <div class="icon-row">
-                                    <div class="icon-preview" data-preview="${index}">${iconSVG}</div>
-                                    <select class="field-icon" data-index="${index}">
-                                        <option value="layout" ${proj.icon === 'layout' ? 'selected' : ''}>Макет</option>
-                                        <option value="file" ${proj.icon === 'file' ? 'selected' : ''}>Файл</option>
-                                        <option value="shopping-bag" ${proj.icon === 'shopping-bag' ? 'selected' : ''}>Магазин</option>
-                                        <option value="archive" ${proj.icon === 'archive' ? 'selected' : ''}>Архив</option>
-                                        <option value="react" ${proj.icon === 'react' ? 'selected' : ''}>React</option>
-                                        <option value="javascript" ${proj.icon === 'javascript' ? 'selected' : ''}>JavaScript</option>
-                                        <option value="python" ${proj.icon === 'python' ? 'selected' : ''}>Python</option>
-                                        <option value="windows" ${proj.icon === 'windows' ? 'selected' : ''}>Windows</option>
-                                        <option value="exe" ${proj.icon === 'exe' ? 'selected' : ''}>EXE</option>
-                                        <option value="security" ${proj.icon === 'security' ? 'selected' : ''}>Безопасность</option>
-                                        <option value="tools" ${proj.icon === 'tools' ? 'selected' : ''}>Инструменты</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label>Цвет</label>
-                                <div class="color-row">
-                                    ${colorSwatches}
-                                    <input type="text" class="field-color color-input" value="${escapeHtml(proj.color || '#ccff00')}" data-index="${index}" maxlength="7">
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    listEl.appendChild(item);
-                });
+        const tagSuggestions = allTags.length
+            ? allTags.map(t => {
+                const used = currentTags.includes(t);
+                return `<button type="button" class="tag-suggestion${used ? ' used' : ''}" data-tag="${escapeHtml(t)}" data-index="${index}">${escapeHtml(t)}</button>`;
+            }).join('')
+            : '<span style="font-size:10px;color:var(--text-muted);">Пока нет тегов в проектах</span>';
 
-                if (visibleCount === 0 && projects.length > 0) {
-                    listEl.innerHTML = '<p style="text-align:center;padding:30px;color:var(--text-muted);">Ничего не найдено</p>';
-                } else if (projects.length === 0) {
-                    listEl.innerHTML = '<p style="text-align:center;padding:30px;color:var(--text-muted);">Список пуст. Нажмите "+ Добавить проект" или "Загрузить из GitHub"</p>';
-                }
+        const colorSwatches = PRESET_COLORS.map(c =>
+            `<div class="color-swatch ${c === proj.color ? 'active' : ''}" style="background:${c}" data-color="${c}" data-index="${index}" title="${c}"></div>`
+        ).join('');
 
-                updateStats();
-                bindEvents();
-            }
+        item.innerHTML = `
+            <div class="project-header">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <span class="drag-handle" title="Перетащите для изменения порядка">☰</span>
+                    <span class="project-number">#${index + 1}</span>
+                </div>
+                <div class="project-actions">
+                    <button class="icon-btn" data-action="duplicate" data-index="${index}" title="Дублировать">⧉</button>
+                    <button class="icon-btn danger" data-action="delete" data-index="${index}" title="Удалить">✕</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Название</label>
+                <input type="text" class="field-title" value="${escapeHtml(proj.title || '')}" data-index="${index}">
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Категория</label>
+                    <select class="field-category" data-index="${index}">
+                        <option value="website" ${proj.category === 'website' ? 'selected' : ''}>Веб-сайт</option>
+                        <option value="file" ${proj.category === 'file' ? 'selected' : ''}>Файл</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Тип ссылки</label>
+                    <select class="field-type" data-index="${index}">
+                        <option value="link" ${proj.type === 'link' ? 'selected' : ''}>Ссылка (открыть)</option>
+                        <option value="download" ${proj.type === 'download' ? 'selected' : ''}>Скачать</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Описание</label>
+                <textarea class="field-desc" rows="2" data-index="${index}">${escapeHtml(proj.description || '')}</textarea>
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Ссылка (URL или путь)</label>
+                    <input type="text" class="field-link" value="${escapeHtml(proj.link || '')}" data-index="${index}">
+                </div>
+                <div class="form-group">
+                    <label>Текст кнопки</label>
+                    <input type="text" class="field-btnText" value="${escapeHtml(proj.buttonText || 'Открыть')}" data-index="${index}">
+                </div>
+            </div>
+            <div class="grid-3">
+                <div class="form-group">
+                    <label>Теги (через запятую)</label>
+                    <input type="text" class="field-tags" value="${escapeHtml(currentTags.join(', '))}" data-index="${index}">
+                    <div class="tag-suggestions">${tagSuggestions}</div>
+                </div>
+                <div class="form-group">
+                    <label>Иконка</label>
+                    <div class="icon-row">
+                        <div class="icon-preview" data-preview="${index}">${iconSVG}</div>
+                        <select class="field-icon" data-index="${index}">
+                            <option value="layout" ${proj.icon === 'layout' ? 'selected' : ''}>Макет</option>
+                            <option value="file" ${proj.icon === 'file' ? 'selected' : ''}>Файл</option>
+                            <option value="shopping-bag" ${proj.icon === 'shopping-bag' ? 'selected' : ''}>Магазин</option>
+                            <option value="archive" ${proj.icon === 'archive' ? 'selected' : ''}>Архив</option>
+                            <option value="react" ${proj.icon === 'react' ? 'selected' : ''}>React</option>
+                            <option value="javascript" ${proj.icon === 'javascript' ? 'selected' : ''}>JavaScript</option>
+                            <option value="python" ${proj.icon === 'python' ? 'selected' : ''}>Python</option>
+                            <option value="windows" ${proj.icon === 'windows' ? 'selected' : ''}>Windows</option>
+                            <option value="exe" ${proj.icon === 'exe' ? 'selected' : ''}>EXE</option>
+                            <option value="security" ${proj.icon === 'security' ? 'selected' : ''}>Безопасность</option>
+                            <option value="tools" ${proj.icon === 'tools' ? 'selected' : ''}>Инструменты</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Цвет</label>
+                    <div class="color-row">
+                        ${colorSwatches}
+                        <input type="text" class="field-color color-input" value="${escapeHtml(proj.color || '#ccff00')}" data-index="${index}" maxlength="7">
+                    </div>
+                </div>
+            </div>
+        `;
+        listEl.appendChild(item);
+    });
 
-            function escapeHtml(s) {
-                return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-            }
+    if (visibleCount === 0 && projects.length > 0) {
+        listEl.innerHTML = '<p style="text-align:center;padding:30px;color:var(--text-muted);">Ничего не найдено</p>';
+    } else if (projects.length === 0) {
+        listEl.innerHTML = '<p style="text-align:center;padding:30px;color:var(--text-muted);">Список пуст. Нажмите "+ Добавить проект" или "Загрузить из GitHub"</p>';
+    }
+
+    updateStats();
+    bindEvents();
+}
+
+function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
 
             // ====== СОБЫТИЯ ======
             function bindEvents() {
@@ -622,14 +727,52 @@
                 });
 
                 listEl.querySelectorAll('.field-tags').forEach(el => {
-                    el.addEventListener('input', (e) => {
-                        const idx = parseInt(e.target.dataset.index);
-                        if (!isNaN(idx) && projects[idx]) {
-                            projects[idx].tags = e.target.value.split(',').map(s => s.trim()).filter(s => s);
-                            markUnsaved();
-                        }
-                    });
-                });
+    el.addEventListener('input', (e) => {
+        const idx = parseInt(e.target.dataset.index);
+        if (!isNaN(idx) && projects[idx]) {
+            projects[idx].tags = e.target.value.split(',').map(s => s.trim()).filter(s => s);
+            markUnsaved();
+            const currentTags = projects[idx].tags;
+            listEl.querySelectorAll(`.tag-suggestion[data-index="${idx}"]`).forEach(s => {
+                if (currentTags.includes(s.dataset.tag)) s.classList.add('used');
+                else s.classList.remove('used');
+            });
+        }
+    });
+});
+
+listEl.querySelectorAll('.field-tags').forEach(el => {
+    el.addEventListener('input', (e) => {
+        const idx = parseInt(e.target.dataset.index);
+        if (!isNaN(idx) && projects[idx]) {
+            projects[idx].tags = e.target.value.split(',').map(s => s.trim()).filter(s => s);
+            markUnsaved();
+            const currentTags = projects[idx].tags;
+            listEl.querySelectorAll(`.tag-suggestion[data-index="${idx}"]`).forEach(s => {
+                if (currentTags.includes(s.dataset.tag)) s.classList.add('used');
+                else s.classList.remove('used');
+            });
+        }
+    });
+});
+
+listEl.querySelectorAll('.tag-suggestion').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const tag = btn.dataset.tag;
+        const idx = parseInt(btn.dataset.index);
+        if (!isNaN(idx) && projects[idx]) {
+            if (!Array.isArray(projects[idx].tags)) projects[idx].tags = [];
+            if (!projects[idx].tags.includes(tag)) {
+                projects[idx].tags.push(tag);
+                const input = listEl.querySelector(`.field-tags[data-index="${idx}"]`);
+                if (input) input.value = projects[idx].tags.join(', ');
+                btn.classList.add('used');
+                markUnsaved();
+            }
+        }
+    });
+});
 
                 listEl.querySelectorAll('.color-swatch').forEach(sw => {
                     sw.addEventListener('click', (e) => {

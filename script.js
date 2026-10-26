@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             projects.forEach(project => {
                 const card = document.createElement('div');
-                card.className = 'project-card';
+                card.className = 'project-card animated-dashed';
                 const iconDiv = document.createElement('div');
                 iconDiv.className = 'project-icon';
                 iconDiv.innerHTML = icons[project.icon] || icons['file'];
