@@ -20,8 +20,43 @@
         .section { margin-bottom: 25px; }
         .section-title { font-size: 0.8em; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 10px; }
         .section-title::before { content: '> '; color: var(--accent); }
-        .file-upload-area { border: 1px dashed var(--border); padding: 30px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--bg); }
-        .file-upload-area:hover { border-color: var(--accent); }
+        
+        .file-upload-area {
+     padding: 30px;
+     text-align: center;
+     cursor: pointer;
+     transition: all 0.2s;
+     background: var(--bg);
+     border: none;
+     position: relative;
+ }
+ .file-upload-area::after {
+     content: '';
+     position: absolute;
+     inset: 0;
+     pointer-events: none;
+     background-image:
+         linear-gradient(90deg, var(--border) 50%, transparent 50%),
+         linear-gradient(90deg, var(--border) 50%, transparent 50%),
+         linear-gradient(0deg,  var(--border) 50%, transparent 50%),
+         linear-gradient(0deg,  var(--border) 50%, transparent 50%);
+     background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+     background-size:   12px 1px, 12px 1px, 1px 12px, 1px 12px;
+     background-position: 0 0, 0 100%, 0 0, 100% 0;
+     animation: borderMarch 0.8s linear infinite;
+ }
+ .file-upload-area:hover::after {
+     background-image:
+         linear-gradient(90deg, var(--accent) 50%, transparent 50%),
+         linear-gradient(90deg, var(--accent) 50%, transparent 50%),
+         linear-gradient(0deg,  var(--accent) 50%, transparent 50%),
+         linear-gradient(0deg,  var(--accent) 50%, transparent 50%);
+  }
+@keyframes borderMarch {
+     from { background-position: 0 0,      0 100%,    0 0,      100% 0; }
+     to   { background-position: 12px 0,  -12px 100%, 0 -12px,  100% 12px; }
+ }
+        
         .file-upload-area .upload-icon { font-size: 24px; display: block; margin-bottom: 10px; }
         .file-upload-area .upload-text { font-size: 0.9em; color: var(--text-muted); }
         .file-upload-area .file-name { font-size: 0.8em; color: var(--accent); margin-top: 10px; word-break: break-all; }
@@ -123,9 +158,9 @@
                 });
             }
             function setupDragDrop(zone, input, handler) {
-                zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = 'var(--accent)'; });
-                zone.addEventListener('dragleave', () => { zone.style.borderColor = 'var(--border)'; });
-                zone.addEventListener('drop', e => { e.preventDefault(); zone.style.borderColor = 'var(--border)'; const f = e.dataTransfer.files[0]; if (f) handler(f); });
+                zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.background = 'rgba(204,255,0,0.05)'; });
+                zone.addEventListener('dragleave', () => { zone.style.background = ''; });
+                zone.addEventListener('drop', e => { e.preventDefault(); zone.style.background = ''; const f = e.dataTransfer.files[0]; if (f) handler(f); });
                 input.addEventListener('change', function() { if (this.files[0]) handler(this.files[0]); });
             }
             async function handleImage(file) {

@@ -50,7 +50,12 @@ document.addEventListener('DOMContentLoaded', () => {
             'shopping-bag': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>',
             'archive': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>'
         };
+<<<<<<< HEAD
                 const tagIcons = {
+=======
+        
+        const tagIcons = {
+>>>>>>> work-detached
             'react': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2"></circle><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(0 12 12)"></ellipse><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"></ellipse><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)"></ellipse></svg>',
             'javascript': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>',
             'js': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>',
@@ -63,15 +68,18 @@ document.addEventListener('DOMContentLoaded', () => {
             'tools': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>',
             'developer tools': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>'
         };
+        
         function getTagIcon(tagName) {
             const key = String(tagName).toLowerCase();
-            return tagIcons[key] || tagIcons['default'];
+            return tagIcons[key] || ''; 
         }
+        
         let allProjects = [];
         let currentFilters = { category: 'all', tag: 'all', search: '' };
         const fallbackProjects = [
             { "title": "VoidForge", "category": "website", "description": "Генератор аудио-сайтов.", "tags": ["HTML", "JavaScript"], "type": "link", "link": "voidforge.html", "buttonText": "Открыть", "icon": "layout", "color": "#ccff00" }
         ];
+        
         function sanitizeURL(url) {
             try {
                 const u = new URL(url, window.location.href);
@@ -81,10 +89,12 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (e) {}
             return '#';
         }
+        
         fetch('projects.json')
             .then(response => { if (!response.ok) throw new Error('Network error'); return response.json(); })
             .then(data => { allProjects = Array.isArray(data) ? data : []; buildTagFilters(); applyFilters(); })
             .catch(() => { allProjects = fallbackProjects; buildTagFilters(); applyFilters(); });
+        
         function buildTagFilters() {
             const tagFiltersContainer = document.getElementById('tagFilters');
             if (!tagFiltersContainer) return;
@@ -97,8 +107,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const btn = document.createElement('button');
                 btn.className = 'tag-filter-btn' + (isActive ? ' active' : '');
                 btn.setAttribute('data-tag', tagValue);
-                if (tagValue !== 'all') btn.innerHTML = getTagIcon(tagValue);
-                btn.appendChild(document.createTextNode((tagValue === 'all' ? '' : ' ') + label));
+                const iconSvg = tagValue !== 'all' ? getTagIcon(tagValue) : '';
+                if (iconSvg) {
+                    btn.innerHTML = iconSvg;
+                    btn.appendChild(document.createTextNode(' ' + label));
+                } else {
+                    btn.textContent = label;
+                }
                 return btn;
             };
             tagFiltersContainer.appendChild(makeFilterBtn('Все теги', 'all', true));
@@ -112,6 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             });
         }
+        
         function applyFilters() {
             const filtered = allProjects.filter(project => {
                 const title = String(project.title || '');
@@ -125,6 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             renderProjects(filtered);
         }
+        
         function renderProjects(projects) {
             projectsGrid.innerHTML = '';
             if (projects.length === 0) {
@@ -151,8 +168,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         const tag = String(tagRaw);
                         const tagSpan = document.createElement('span');
                         tagSpan.className = 'tag';
-                        tagSpan.innerHTML = getTagIcon(tag);
-                        tagSpan.appendChild(document.createTextNode(' ' + tag));
+                        const iconSvg = getTagIcon(tag);
+                        if (iconSvg) {
+                            tagSpan.innerHTML = iconSvg;
+                            tagSpan.appendChild(document.createTextNode(' ' + tag));
+                        } else {
+                            tagSpan.textContent = tag;
+                        }
                         tagsDiv.appendChild(tagSpan);
                     });
                 }
@@ -180,6 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 projectsGrid.appendChild(card);
             });
         }
+        
         document.querySelectorAll('.tab-btn').forEach(button => {
             button.addEventListener('click', () => {
                 document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -188,6 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 applyFilters();
             });
         });
+        
         const searchInput = document.getElementById('searchInput');
         if (searchInput) {
             searchInput.addEventListener('input', (e) => {
@@ -235,7 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 5. Мобильное меню (исправленная логика) ---
+    // --- 5. Мобильное меню (Боковая панель) ---
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     const mobileNav = document.getElementById('mobileNav');
     const menuBackdrop = document.createElement('div');
