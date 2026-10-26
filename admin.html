@@ -30,7 +30,6 @@
         h1 span { color: var(--accent); }
         .subtitle { color: var(--text-muted); font-size: 0.85em; margin-bottom: 20px; }
 
-        /* Тумблер */
         .theme-switch {
             width: 50px; height: 26px; background: var(--bg); border: 1px solid var(--border);
             cursor: pointer; display: flex; align-items: center; position: relative; padding: 2px;
@@ -47,23 +46,16 @@
         [data-theme="dark"] .theme-switch .moon-icon { fill: #000; }
         [data-theme="light"] .theme-switch .sun-icon { fill: #000; }
 
-        /* Анимация рамки по часовой стрелке */
-        .animated-dashed {
-            position: relative;
-            border: none !important;
-        }
+        .animated-dashed { position: relative; border: none !important; }
         .animated-dashed::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
+            content: ''; position: absolute; inset: 0; pointer-events: none;
             background-image:
                 linear-gradient(90deg, var(--border) 50%, transparent 50%),
                 linear-gradient(90deg, var(--border) 50%, transparent 50%),
                 linear-gradient(0deg,  var(--border) 50%, transparent 50%),
                 linear-gradient(0deg,  var(--border) 50%, transparent 50%);
             background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
-            background-size:   12px 1px, 12px 1px, 1px 12px, 1px 12px;
+            background-size: 12px 1px, 12px 1px, 1px 12px, 1px 12px;
             background-position: 0 0, 0 100%, 0 0, 100% 0;
             animation: borderMarch 0.8s linear infinite;
         }
@@ -79,7 +71,6 @@
             to   { background-position: 12px 0,  -12px 100%, 0 -12px,  100% 12px; }
         }
 
-        /* Статистика */
         .stats {
             display: flex; gap: 20px; flex-wrap: wrap;
             background: var(--surface); border: 1px solid var(--border);
@@ -88,7 +79,6 @@
         .stats span { color: var(--text-muted); }
         .stats strong { color: var(--accent); font-size: 1.2em; margin-left: 5px; }
 
-        /* Токен */
         .token-section { background: var(--surface); border: 1px solid var(--border); padding: 20px; margin-bottom: 20px; }
         .token-section label { display: block; font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
         .token-section input { width: 100%; padding: 10px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 14px; }
@@ -97,7 +87,6 @@
         .status-badge { display: inline-block; padding: 4px 8px; font-size: 10px; text-transform: uppercase; border: 1px solid var(--border); color: var(--text-muted); margin-top: 10px; }
         .status-badge.connected { border-color: var(--accent); color: var(--accent); }
 
-        /* Панель инструментов */
         .toolbar {
             display: flex; justify-content: space-between; align-items: center;
             gap: 15px; margin-bottom: 20px; flex-wrap: wrap;
@@ -108,17 +97,11 @@
             font-family: 'IBM Plex Mono', monospace; font-size: 14px;
         }
         .toolbar input:focus { outline: none; border-color: var(--accent); }
+        .unsaved-badge { color: #ff9800; font-size: 12px; text-transform: uppercase; font-weight: bold; padding: 8px 12px; border: 1px solid #ff9800; }
 
-        .unsaved-badge {
-            color: #ff9800; font-size: 12px; text-transform: uppercase;
-            font-weight: bold; padding: 8px 12px; border: 1px solid #ff9800;
-        }
-
-        /* Карточка проекта */
         .project-item {
             background: var(--surface); border: 1px solid var(--border);
-            padding: 20px; margin-bottom: 15px; position: relative;
-            transition: all 0.2s;
+            padding: 20px; margin-bottom: 15px; position: relative; transition: all 0.2s;
         }
         .project-item.dragging { opacity: 0.4; }
         .project-item.drag-over::after {
@@ -129,20 +112,13 @@
                 linear-gradient(0deg,  var(--accent) 50%, transparent 50%);
         }
 
-        .project-header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--border);
-        }
-        .project-number {
-            font-family: 'Space Grotesk', sans-serif; font-size: 1.3em;
-            font-weight: 700; color: var(--accent);
-        }
+        .project-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+        .project-number { font-family: 'Space Grotesk', sans-serif; font-size: 1.3em; font-weight: 700; color: var(--accent); }
         .project-actions { display: flex; gap: 8px; }
 
         .icon-btn {
-            background: transparent; border: 1px solid var(--border);
-            color: var(--text-muted); width: 32px; height: 32px;
-            cursor: pointer; font-size: 14px; transition: all 0.2s;
+            background: transparent; border: 1px solid var(--border); color: var(--text-muted);
+            width: 32px; height: 32px; cursor: pointer; font-size: 14px; transition: all 0.2s;
             display: flex; align-items: center; justify-content: center;
         }
         .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
@@ -150,7 +126,6 @@
         .drag-handle { cursor: grab; color: var(--text-muted); font-size: 18px; padding: 5px; }
         .drag-handle:active { cursor: grabbing; }
 
-        /* Поля */
         .form-group { margin-bottom: 12px; }
         .form-group label { display: block; font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 5px; }
         .form-group input, .form-group select, .form-group textarea {
@@ -164,56 +139,29 @@
         .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
         .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 15px; }
 
-        /* Подсказки тегов */
-        .tag-suggestions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            margin-top: 8px;
-        }
+        .tag-suggestions { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
         .tag-suggestion {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 10px;
-            padding: 4px 8px;
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text-muted);
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            transition: all 0.2s;
+            font-family: 'IBM Plex Mono', monospace; font-size: 10px; padding: 4px 8px;
+            background: transparent; border: 1px solid var(--border); color: var(--text-muted);
+            cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.2s;
         }
-        .tag-suggestion:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-        .tag-suggestion.used {
-            opacity: 0.35;
-            cursor: default;
-            pointer-events: none;
-        }
+        .tag-suggestion:hover { border-color: var(--accent); color: var(--accent); }
+        .tag-suggestion.used { opacity: 0.35; cursor: default; pointer-events: none; }
 
-        /* Иконка превью */
         .icon-row { display: flex; gap: 10px; align-items: center; }
         .icon-preview {
             width: 40px; height: 40px; flex-shrink: 0;
             border: 1px solid var(--border); background: var(--bg);
-            display: flex; align-items: center; justify-content: center;
-            color: var(--accent);
+            display: flex; align-items: center; justify-content: center; color: var(--accent);
         }
         .icon-preview svg { width: 24px; height: 24px; }
 
-        /* Палитра цветов */
         .color-row { display: flex; gap: 8px; align-items: center; }
-        .color-swatch {
-            width: 24px; height: 24px; cursor: pointer;
-            border: 2px solid var(--border); transition: transform 0.2s;
-        }
+        .color-swatch { width: 24px; height: 24px; cursor: pointer; border: 2px solid var(--border); transition: transform 0.2s; }
         .color-swatch:hover { transform: scale(1.15); }
         .color-swatch.active { border-color: var(--text); }
         .color-input { flex: 1; }
 
-        /* Кнопки */
         .btn {
             padding: 12px 24px; background: transparent; border: 1px solid var(--border);
             color: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 13px;
@@ -235,12 +183,8 @@
         .log.success { border-color: var(--accent); color: var(--accent); }
 
         .hint { font-size: 12px; color: var(--text-muted); margin-top: 20px; line-height: 1.6; }
-        .hint kbd {
-            background: var(--surface); border: 1px solid var(--border);
-            padding: 2px 6px; font-family: 'IBM Plex Mono', monospace; font-size: 11px;
-        }
+        .hint kbd { background: var(--surface); border: 1px solid var(--border); padding: 2px 6px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; }
 
-        /* Тост уведомления */
         .toast {
             position: fixed; bottom: 20px; right: 20px; z-index: 9999;
             background: var(--surface); border: 1px solid var(--accent); color: var(--text);
@@ -305,7 +249,7 @@
         <div class="log" id="log">Готов к работе.</div>
 
         <div class="hint">
-            <strong>Быстрые команды:</strong> <kbd>Ctrl+S</kbd> — сохранить на GitHub. <kbd>Shift+Click</kbd> — тоже.<br>
+            <strong>Быстрые команды:</strong> <kbd>Ctrl+S</kbd> — сохранить на GitHub.<br>
             <strong>Порядок:</strong> перетаскивайте карточки за ручку <strong>☰</strong> слева, чтобы менять порядок проектов.
         </div>
     </div>
@@ -331,6 +275,25 @@
             };
 
             const PRESET_COLORS = ['#ccff00', '#0ea5e9', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444'];
+
+            // ====== РАСШИРЕННЫЙ СПИСОК ТЕГОВ ======
+            const PRESET_TAGS = [
+                // Языки
+                'HTML', 'CSS', 'JavaScript', 'TypeScript', 'Python', 'Java', 'C++', 'C#', 'Go', 'Rust', 'PHP', 'Ruby', 'Swift', 'Kotlin',
+                // Фронтенд
+                'React', 'Vue', 'Angular', 'Svelte', 'Next.js', 'Nuxt', 'Tailwind CSS', 'SASS', 'Webpack', 'Vite',
+                // Бэкенд
+                'Node.js', 'Express', 'Django', 'Flask', 'FastAPI', 'Spring', 'Laravel', 'ASP.NET',
+                // Базы данных
+                'SQL', 'PostgreSQL', 'MySQL', 'MongoDB', 'Redis', 'SQLite', 'Firebase',
+                // DevOps / Инфраструктура
+                'Docker', 'Kubernetes', 'AWS', 'Azure', 'Google Cloud', 'Linux', 'Windows', 'macOS', 'CI/CD', 'Nginx',
+                // Инструменты
+                'Git', 'GitHub', 'VS Code', 'Figma', 'Postman', 'Jira', 'Notion',
+                // Категории
+                'Web', 'Mobile', 'Desktop', 'API', 'CLI', 'Bot', 'Parser', 'Automation', 'GameDev', 'AI', 'ML',
+                'Security', 'Tools', 'Testing', 'Design', 'UI/UX', 'Performance', 'Open Source', 'Productivity'
+            ];
 
             let projects = [];
             let fileSha = null;
@@ -435,12 +398,11 @@
                         headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json' }
                     });
                     if (userRes.status === 401) {
-                        const msg = 'HTTP 401: токен недействителен. Причины: 1) токен отозван или истёк; 2) у токена нет прав Contents: Read & Write; 3) у токена нет доступа к репозиторию ' + REPO_OWNER + '/' + REPO_NAME + '. Создайте новый: https://github.com/settings/tokens';
-                        log(msg, 'error');
+                        log('HTTP 401: токен недействителен. Создайте новый: https://github.com/settings/tokens', 'error');
                         toast('Токен недействителен (401)');
                         return;
                     }
-                } catch (e) { /* сетевая ошибка pre-check — не критично */ }
+                } catch (e) { /* pre-check не критичен */ }
 
                 log('Загрузка projects.json...');
                 try {
@@ -455,13 +417,13 @@
                         let serverMsg = '';
                         try { const j = await res.json(); serverMsg = j.message || ''; } catch (e) {}
                         if (res.status === 401) {
-                            throw new Error(`HTTP 401: токен недействителен или не имеет прав. Проверьте: 1) токен не отозван и не истёк; 2) у него есть доступ Contents: Read & Write к ${REPO_OWNER}/${REPO_NAME}; 3) у него есть доступ именно к этому репозиторию. Создать новый: https://github.com/settings/tokens`);
+                            throw new Error(`HTTP 401: токен недействителен или не имеет прав. Создайте новый: https://github.com/settings/tokens`);
                         }
                         if (res.status === 403) {
-                            throw new Error(`HTTP 403: доступ запрещён. Проверьте права токена (Contents: Read & Write). ${serverMsg}`);
+                            throw new Error(`HTTP 403: доступ запрещён. Проверьте права токена: Contents → Read and write, Repository access → дyrty11/dyrty_11.github.io. ${serverMsg}`);
                         }
                         if (res.status === 404) {
-                            throw new Error(`HTTP 404: файл ${FILE_PATH} не найден в ${REPO_OWNER}/${REPO_NAME}. Проверьте, что репозиторий, файл и доступ у токена существуют. ${serverMsg}`);
+                            throw new Error(`HTTP 404: файл ${FILE_PATH} не найден. Проверьте, что репозиторий и файл существуют, и у токена есть к ним доступ. ${serverMsg}`);
                         }
                         throw new Error(`HTTP ${res.status}${serverMsg ? ': ' + serverMsg : ''}`);
                     }
@@ -510,6 +472,9 @@
                         if (res.status === 401) {
                             throw new Error(`HTTP 401: токен недействителен или не имеет прав. Создайте новый: https://github.com/settings/tokens`);
                         }
+                        if (res.status === 403) {
+                            throw new Error(`HTTP 403: токену не хватает прав на запись. Проверьте: 1) Contents → Read and write; 2) Repository access → выбран репозиторий ${REPO_OWNER}/${REPO_NAME}; 3) Resource owner → ${REPO_OWNER}. ${serverMsg}`);
+                        }
                         if (res.status === 409) {
                             throw new Error(`HTTP 409: конфликт версий. Файл был изменён извне. Перезагрузите его с GitHub. ${serverMsg}`);
                         }
@@ -539,7 +504,7 @@
 
             // ====== RENDER ======
             function getAllTags() {
-                const set = new Set();
+                const set = new Set(PRESET_TAGS);
                 projects.forEach(p => {
                     if (Array.isArray(p.tags)) p.tags.forEach(t => {
                         const s = String(t || '').trim();
@@ -569,12 +534,10 @@
                     const iconSVG = ICON_SVGS[proj.icon] || ICON_SVGS['layout'];
                     const currentTags = Array.isArray(proj.tags) ? proj.tags : [];
 
-                    const tagSuggestions = allTags.length
-                        ? allTags.map(t => {
-                            const used = currentTags.includes(t);
-                            return `<button type="button" class="tag-suggestion${used ? ' used' : ''}" data-tag="${escapeHtml(t)}" data-index="${index}">${escapeHtml(t)}</button>`;
-                        }).join('')
-                        : '<span style="font-size:10px;color:var(--text-muted);">Пока нет тегов в проектах</span>';
+                    const tagSuggestions = allTags.map(t => {
+                        const used = currentTags.includes(t);
+                        return `<button type="button" class="tag-suggestion${used ? ' used' : ''}" data-tag="${escapeHtml(t)}" data-index="${index}">${escapeHtml(t)}</button>`;
+                    }).join('');
 
                     const colorSwatches = PRESET_COLORS.map(c =>
                         `<div class="color-swatch ${c === proj.color ? 'active' : ''}" style="background:${c}" data-color="${c}" data-index="${index}" title="${c}"></div>`
