@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 — Page not found</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%23ccff00%22>⬡</text></svg>">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none';">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="theme-init.js"></script>
+    <style>
+        .error-wrapper {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .error-code {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(120px, 25vw, 280px);
+            font-weight: 700;
+            line-height: 0.85;
+            letter-spacing: -8px;
+            color: transparent;
+            -webkit-text-stroke: 2px var(--text-main);
+            position: relative;
+            user-select: none;
+            margin-bottom: 10px;
+        }
+        .error-code span {
+            color: var(--accent);
+            -webkit-text-stroke: 0;
+        }
+        .error-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(20px, 3vw, 28px);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+        .error-desc {
+            font-size: 14px;
+            color: var(--text-muted);
+            max-width: 420px;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+        .error-desc code {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 2px 6px;
+            font-size: 12px;
+            color: var(--accent);
+        }
+        .error-nav {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+        .error-nav .btn { padding: 12px 24px; }
+        .error-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            max-width: 700px;
+            width: 100%;
+        }
+        .error-grid a {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+            padding: 20px;
+            background: var(--card-bg);
+            color: var(--text-main);
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .error-grid a:hover { background: var(--bg-color); }
+        .error-grid .grid-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+        }
+        .error-grid .grid-path {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 13px;
+            color: var(--accent);
+        }
+        .error-hint {
+            margin-top: 40px;
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        @media (max-width: 600px) {
+            .error-code { letter-spacing: -4px; }
+            .error-desc { font-size: 13px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="error-wrapper">
+        <div class="error-code">4<span>0</span>4</div>
+        <h1 class="error-title">// Page not found</h1>
+        <p class="error-desc">
+            Запрошенный путь не существует или был перемещён.<br>
+            Проверьте URL или вернитесь на главную.
+        </p>
+        <div class="error-nav">
+            <a href="index.html" class="btn btn-primary">На главную</a>
+            <a href="projects.html" class="btn">Проекты</a>
+        </div>
+        <div class="error-grid animated-dashed">
+            <a href="index.html">
+                <span class="grid-label">Раздел</span>
+                <span class="grid-path">/index.html</span>
+            </a>
+            <a href="projects.html">
+                <span class="grid-label">Раздел</span>
+                <span class="grid-path">/projects.html</span>
+            </a>
+            <a href="services.html">
+                <span class="grid-label">Раздел</span>
+                <span class="grid-path">/services.html</span>
+            </a>
+            <a href="contacts.html">
+                <span class="grid-label">Раздел</span>
+                <span class="grid-path">/contacts.html</span>
+            </a>
+        </div>
+        <div class="error-hint">error_code = 404 · not_found</div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

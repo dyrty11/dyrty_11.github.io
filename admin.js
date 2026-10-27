@@ -4,8 +4,8 @@
     const FILE_PATH = 'projects.json';
     const STORAGE_KEY = 'gh_admin_token';
 
-    // User site: https://dyrty11.github.io/ (без имени репо в пути)
-    const SITE_URL = `https://${REPO_OWNER}.github.io/projects.html`;
+        // Project-site: https://dyrty11.github.io/dyrty_11.github.io/
+    const SITE_URL = `https://${REPO_OWNER}.github.io/${REPO_NAME}/projects.html`;
 
     const LIMITS = {
         MAX_COUNT: 200,
@@ -145,10 +145,11 @@
         updateTokenStatus('checking');
         try {
             // Шаг 1 — токен в принципе валиден?
-            const userRes = await fetch('https://api.github.com/user', {
+                        const userRes = await fetch('https://api.github.com/user', {
                 headers: {
                     'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/vnd.github+json'
+                    'Accept': 'application/vnd.github+json',
+                    'X-GitHub-Api-Version': '2022-11-28'
                 },
                 signal
             });
@@ -236,7 +237,7 @@
             } else if (lastValidationResult.ok && lastValidationResult.warning) {
                 updateTokenStatus('warning', 'Read only');
             } else {
-                updateTokenStatus('error', 'Недействителен');
+                updateTokenStatus('error', lastValidationResult.reason || 'Недействителен');
             }
             return;
         }
@@ -245,7 +246,8 @@
         tokenCheckTimeout = setTimeout(() => checkToken(token), 700);
     }
 
-    async function ensureTokenValid(token) {
+        async function ensureTokenValid(token) {
+        if (tokenCheckTimeout) { clearTimeout(tokenCheckTimeout); tokenCheckTimeout = null; }
         if (lastValidatedToken === token && lastValidationResult) {
             return lastValidationResult;
         }
@@ -339,18 +341,17 @@
     }
 
     // ====== GITHUB API ======
-        async function fetchFile() {
+    let loading = false;
+    async function fetchFile() {
+        if (loading) return;
         if (hasUnsavedChanges && !confirm('Есть несохранённые изменения. Загрузить с GitHub и потерять их?')) return;
 
         const token = tokenInput.value.replace(/[\s\u200B-\u200D\uFEFF]/g, '');
         if (!token) { toast('Введите токен'); return; }
 
-        const validation = await ensureTokenValid(token);
-        if (!validation || !validation.ok) {
-            log('Токен не прошёл проверку: ' + (validation && validation.reason ? validation.reason : 'неизвестно'), 'error');
-            toast('Токен недействителен');
-            return;
-        }
+        loading = true;
+        const loadBtnEl = document.getElementById('loadBtn');
+        if (loadBtnEl) loadBtnEl.disabled = true;
 
         log('Загрузка projects.json...');
         try {
@@ -378,8 +379,11 @@
             render();
             log('Файл загружен. Проектов: ' + projects.length, 'success');
             toast('Файл загружен!');
-        } catch (e) {
+                } catch (e) {
             log('Ошибка загрузки: ' + e.message, 'error');
+        } finally {
+            loading = false;
+            if (loadBtnEl) loadBtnEl.disabled = false;
         }
     }
 
