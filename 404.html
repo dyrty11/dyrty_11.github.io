@@ -5,9 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>404 — Page not found</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%23ccff00%22>⬡</text></svg>">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none';">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Абсолютный путь, так как 404 может открыться на любом /a/b/c -->
+    <script src="/dyrty_11.github.io/theme-init.js"></script>
+    
     <style>
         :root {
             --bg: #050505; --surface: #0a0a0a; --border: #333;
@@ -29,16 +35,9 @@
             transition: background 0.3s, color 0.3s;
         }
         
-        /* Рамка */
-        .animated-dashed {
-            position: relative;
-            border: none !important;
-        }
+        .animated-dashed { position: relative; border: none !important; }
         .animated-dashed::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
+            content: ''; position: absolute; inset: 0; pointer-events: none;
             background-image:
                 linear-gradient(90deg, var(--border) 50%, transparent 50%),
                 linear-gradient(90deg, var(--border) 50%, transparent 50%),
@@ -61,132 +60,59 @@
             to   { background-position: 12px 0, -12px 100%, 0 -12px, 100% 12px; }
         }
 
-        /* Основная обертка */
         .wrapper {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 20px;
-            text-align: center;
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 40px 20px; text-align: center;
         }
 
         .error-code {
             font-family: 'Space Grotesk', sans-serif;
             font-size: clamp(120px, 25vw, 280px);
-            font-weight: 700;
-            line-height: 0.85;
-            letter-spacing: -8px;
-            color: transparent;
-            -webkit-text-stroke: 2px var(--text);
-            position: relative;
-            user-select: none;
-            margin-bottom: 20px;
+            font-weight: 700; line-height: 0.85; letter-spacing: -8px;
+            color: transparent; -webkit-text-stroke: 2px var(--text);
+            position: relative; user-select: none; margin-bottom: 20px;
         }
-        .error-code span {
-            color: var(--accent);
-            -webkit-text-stroke: 0;
-        }
+        .error-code span { color: var(--accent); -webkit-text-stroke: 0; }
         .error-title {
             font-family: 'Space Grotesk', sans-serif;
             font-size: clamp(20px, 3vw, 32px);
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 15px;
+            font-weight: 700; text-transform: uppercase;
+            letter-spacing: 2px; margin-bottom: 15px;
         }
         .error-desc {
-            font-size: 14px;
-            color: var(--text-muted);
-            max-width: 480px;
-            line-height: 1.6;
-            margin-bottom: 40px;
+            font-size: 14px; color: var(--text-muted);
+            max-width: 480px; line-height: 1.6; margin-bottom: 40px;
         }
         
-        /* Кнопки */
-        .error-nav {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-bottom: 50px;
-        }
+        .error-nav { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; margin-bottom: 50px; }
         .btn {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 13px;
-            font-weight: 500;
-            text-transform: uppercase;
-            padding: 16px 32px;
-            border: 1px solid var(--border);
-            background: transparent;
-            color: var(--text);
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.2s;
+            font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500;
+            text-transform: uppercase; padding: 16px 32px; border: 1px solid var(--border);
+            background: transparent; color: var(--text); cursor: pointer;
+            text-decoration: none; transition: all 0.2s;
         }
-        .btn:hover {
-            background: var(--accent);
-            color: #000;
-            border-color: var(--accent);
-        }
-        .btn-primary {
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-        .btn-primary:hover {
-            background: var(--accent);
-            color: #000;
-        }
+        .btn:hover { background: var(--accent); color: #000; border-color: var(--accent); }
+        .btn-primary { border-color: var(--accent); color: var(--accent); }
+        .btn-primary:hover { background: var(--accent); color: #000; }
 
-        /* Сетка */
         .error-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1px;
-            background: var(--border);
-            border: 1px solid var(--border);
-            max-width: 600px;
-            width: 100%;
+            display: grid; grid-template-columns: repeat(2, 1fr);
+            gap: 1px; background: var(--border); border: 1px solid var(--border);
+            max-width: 600px; width: 100%;
         }
         .error-grid a {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 8px;
-            padding: 25px;
-            background: var(--surface);
-            color: var(--text);
-            text-decoration: none;
-            transition: background 0.2s;
+            display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
+            padding: 25px; background: var(--surface); color: var(--text);
+            text-decoration: none; transition: background 0.2s;
         }
         .error-grid a:hover { background: var(--bg); }
-        .grid-label {
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-        }
-        .grid-path {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 14px;
-            color: var(--accent);
-        }
+        .grid-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); }
+        .grid-path { font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: var(--accent); }
         
-        .error-hint {
-            margin-top: 40px;
-            font-size: 11px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
+        .error-hint { margin-top: 40px; font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; }
         
-        /* Тумблер */
-        .theme-toggle-wrap {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-        }
+        .theme-toggle-wrap { position: absolute; top: 20px; right: 20px; }
         .theme-switch {
             width: 50px; height: 26px; background: var(--bg); border: 1px solid var(--border);
             cursor: pointer; display: flex; align-items: center; position: relative; padding: 2px;
@@ -210,14 +136,6 @@
             .theme-toggle-wrap { top: 15px; right: 15px; }
         }
     </style>
-    <script>
-        // Загружаем тему до отрисовки, чтобы не было вспышки белого
-        (function() {
-            var t = 'dark';
-            try { t = localStorage.getItem('theme') || 'dark'; } catch (e) {}
-            document.documentElement.setAttribute('data-theme', t);
-        })();
-    </script>
 </head>
 <body>
     <div class="theme-toggle-wrap">
@@ -263,17 +181,7 @@
         <div class="error-hint">error_code = 404 · not_found</div>
     </div>
 
-    <script>
-        // Простой тумблер темы
-        const toggle = document.getElementById('themeToggle');
-        if (toggle) {
-            toggle.addEventListener('click', () => {
-                const cur = document.documentElement.getAttribute('data-theme');
-                const next = cur === 'dark' ? 'light' : 'dark';
-                document.documentElement.setAttribute('data-theme', next);
-                try { localStorage.setItem('theme', next); } catch (e) {}
-            });
-        }
-    </script>
+    <!-- Абсолютный путь для скрипта тумблера -->
+    <script src="/dyrty_11.github.io/404.js" defer></script>
 </body>
 </html>

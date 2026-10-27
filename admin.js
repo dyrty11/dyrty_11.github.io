@@ -212,7 +212,9 @@
             lastValidatedToken = token;
             lastValidationResult = { ok: false, reason: safeReason(e) };
             updateTokenStatus('error', 'Сеть');
-            log('Не удалось проверить токен: ' + safeReason(e), 'error');
+                        log('Не удалось проверить токен: ' + safeReason(e), 'error');
+        } finally {
+            tokenCheckAbort = null;
         }
     }
 
@@ -349,9 +351,18 @@
         const token = tokenInput.value.replace(/[\s\u200B-\u200D\uFEFF]/g, '');
         if (!token) { toast('Введите токен'); return; }
 
-        loading = true;
+                loading = true;
         const loadBtnEl = document.getElementById('loadBtn');
         if (loadBtnEl) loadBtnEl.disabled = true;
+
+        const validation = await ensureTokenValid(token);
+        if (!validation || !validation.ok) {
+            log('Токен не прошёл проверку: ' + (validation && validation.reason ? validation.reason : 'неизвестно'), 'error');
+            toast('Токен недействителен');
+            loading = false;
+            if (loadBtnEl) loadBtnEl.disabled = false;
+            return;
+        }
 
         log('Загрузка projects.json...');
         try {
@@ -483,6 +494,9 @@
 
             if (p.color && !/^#[0-9a-fA-F]{6}$/.test(String(p.color))) {
                 errors.push(`#${n}: цвет должен быть в формате #RRGGBB`);
+            }
+                        if (p.icon && !Object.prototype.hasOwnProperty.call(ICON_SVGS, p.icon)) {
+                errors.push(`#${n}: неверная иконка`);
             }
 
             if (Array.isArray(p.tags)) {
