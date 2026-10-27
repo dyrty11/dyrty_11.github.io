@@ -4,6 +4,20 @@
     const FILE_PATH = 'projects.json';
     const STORAGE_KEY = 'gh_admin_token';
 
+    // User site: https://dyrty11.github.io/ (без имени репо в пути)
+    const SITE_URL = `https://${REPO_OWNER}.github.io/projects.html`;
+
+    const LIMITS = {
+        MAX_COUNT: 200,
+        title: 120,
+        description: 2000,
+        link: 500,
+        buttonText: 40,
+        tag: 40,
+        tagsCount: 20,
+        importFileSize: 5 * 1024 * 1024
+    };
+
     const ICON_SVGS = {
         'layout': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>',
         'file': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><polyline points="9 15 12 12 15 15"></polyline></svg>',
@@ -31,13 +45,12 @@
         'Security', 'Tools', 'Testing', 'Design', 'UI/UX', 'Performance', 'Open Source', 'Productivity'
     ];
 
-    const ICON_LIMIT = { MAX_COUNT: 200, MAX_FIELD: 2000 };
-
     let projects = [];
     let fileSha = null;
     let hasUnsavedChanges = false;
     let searchFilter = '';
     let draggedIndex = null;
+    let saving = false;
 
     const listEl = document.getElementById('projectsList');
     const tokenInput = document.getElementById('tokenInput');
@@ -59,8 +72,6 @@
     });
 
     // ====== ТОКЕН ======
-    // Храним токен в sessionStorage (живёт до закрытия вкладки). При миграции
-    // со старой версии localStorage — переносим и сразу удаляем из localStorage.
     function getStoredToken() {
         let t = null;
         try { t = sessionStorage.getItem(STORAGE_KEY); } catch (e) {}
@@ -175,6 +186,8 @@
 
     // ====== GITHUB API ======
     async function fetchFile() {
+        if (hasUnsavedChanges && !confirm('Есть несохранённые изменения. Загрузить с GitHub и потерять их?')) return;
+
         const token = tokenInput.value.replace(/[\s\u200B-\u200D\uFEFF]/g, '');
         if (!token) { toast('Введите токен'); return; }
 
@@ -202,7 +215,7 @@
             if (!res.ok) {
                 let serverMsg = '';
                 try { const j = await res.json(); serverMsg = j.message || ''; } catch (e) {}
-                if (res.status === 401) throw new Error(`HTTP 401: токен недействителен или не имеет прав. Создайте новый: https://github.com/settings/tokens`);
+                if (res.status === 401) throw new Error(`HTTP 401: токен недействителен. Создайте новый.`);
                 if (res.status === 403) throw new Error(`HTTP 403: доступ запрещён. Проверьте: Contents → Read and write, Repository access → ${REPO_OWNER}/${REPO_NAME}. ${serverMsg}`);
                 if (res.status === 404) throw new Error(`HTTP 404: файл ${FILE_PATH} не найден. ${serverMsg}`);
                 throw new Error(`HTTP ${res.status}${serverMsg ? ': ' + serverMsg : ''}`);
@@ -210,7 +223,7 @@
             const data = await res.json();
             fileSha = data.sha;
             const parsed = JSON.parse(b64decode(data.content || ''));
-            if (!Array.isArray(parsed)) throw new Error('projects.json должен быть массивом (а не объектом/строкой)');
+            if (!Array.isArray(parsed)) throw new Error('projects.json должен быть массивом');
             projects = parsed;
             markSaved();
             render();
@@ -222,20 +235,24 @@
     }
 
     async function saveFile() {
-        const token = tokenInput.value.replace(/[\s\u200B-\u200D\uFEFF]/g, '');
-        if (!token) { toast('Введите токен'); return; }
-        if (!fileSha) { toast('Сначала загрузите файл с GitHub'); return; }
-
-        const errors = validate();
-        if (errors.length > 0) {
-            toast('Исправьте ошибки: ' + errors[0]);
-            log('Валидация не пройдена: ' + errors.join('; '), 'error');
-            return;
-        }
-
-        log('Сохранение на GitHub...');
-        const content = b64encode(JSON.stringify(projects, null, 2));
+        if (saving) return;
+        saving = true;
+        const saveBtn = document.getElementById('saveBtn');
+        if (saveBtn) saveBtn.disabled = true;
         try {
+            const token = tokenInput.value.replace(/[\s\u200B-\u200D\uFEFF]/g, '');
+            if (!token) { toast('Введите токен'); return; }
+            if (!fileSha) { toast('Сначала загрузите файл с GitHub'); return; }
+
+            const errors = validate();
+            if (errors.length > 0) {
+                toast('Исправьте ошибки: ' + errors[0]);
+                log('Валидация не пройдена: ' + errors.join('; '), 'error');
+                return;
+            }
+
+            log('Сохранение на GitHub...');
+            const content = b64encode(JSON.stringify(projects, null, 2));
             const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
                 method: 'PUT',
                 headers: {
@@ -262,30 +279,57 @@
             toast('Сохранено на GitHub!');
         } catch (e) {
             log('Ошибка сохранения: ' + e.message, 'error');
+        } finally {
+            saving = false;
+            if (saveBtn) saveBtn.disabled = false;
         }
     }
 
     function validate() {
         const errors = [];
-        if (projects.length > ICON_LIMIT.MAX_COUNT) {
-            errors.push(`слишком много проектов (${projects.length} > ${ICON_LIMIT.MAX_COUNT})`);
+        if (projects.length > LIMITS.MAX_COUNT) {
+            errors.push(`слишком много проектов (${projects.length} > ${LIMITS.MAX_COUNT})`);
         }
         projects.forEach((p, i) => {
-            if (!p.title || !String(p.title).trim()) errors.push(`#${i+1}: пустое название`);
-            if (!p.link || !String(p.link).trim()) {
-                errors.push(`#${i+1}: пустая ссылка`);
+            const n = i + 1;
+            const title = p.title == null ? '' : String(p.title);
+            const link = p.link == null ? '' : String(p.link);
+            const desc = p.description == null ? '' : String(p.description);
+            const btnText = p.buttonText == null ? '' : String(p.buttonText);
+
+            if (!title.trim()) errors.push(`#${n}: пустое название`);
+            else if (title.length > LIMITS.title) errors.push(`#${n}: название > ${LIMITS.title} симв.`);
+
+            if (!link.trim()) {
+                errors.push(`#${n}: пустая ссылка`);
+            } else if (link.length > LIMITS.link) {
+                errors.push(`#${n}: ссылка > ${LIMITS.link} симв.`);
             } else {
                 try {
-                    const u = new URL(String(p.link), window.location.href);
+                    const u = new URL(link, window.location.href);
                     if (!['http:', 'https:', 'mailto:'].includes(u.protocol)) {
-                        errors.push(`#${i+1}: недопустимая схема URL (только http/https/mailto)`);
+                        errors.push(`#${n}: недопустимая схема URL (только http/https/mailto)`);
                     }
                 } catch (e) {
-                    errors.push(`#${i+1}: некорректный URL`);
+                    errors.push(`#${n}: некорректный URL`);
                 }
             }
-            if (p.description && String(p.description).length > ICON_LIMIT.MAX_FIELD) {
-                errors.push(`#${i+1}: описание слишком длинное (${ICON_LIMIT.MAX_FIELD} символов макс.)`);
+
+            if (desc.length > LIMITS.description) errors.push(`#${n}: описание > ${LIMITS.description} симв.`);
+            if (btnText.length > LIMITS.buttonText) errors.push(`#${n}: текст кнопки > ${LIMITS.buttonText} симв.`);
+
+            if (p.category && !['website', 'file'].includes(p.category)) errors.push(`#${n}: неверная категория`);
+            if (p.type && !['link', 'download'].includes(p.type)) errors.push(`#${n}: неверный тип ссылки`);
+
+            if (p.color && !/^#[0-9a-fA-F]{6}$/.test(String(p.color))) {
+                errors.push(`#${n}: цвет должен быть в формате #RRGGBB`);
+            }
+
+            if (Array.isArray(p.tags)) {
+                if (p.tags.length > LIMITS.tagsCount) errors.push(`#${n}: тегов > ${LIMITS.tagsCount}`);
+                p.tags.forEach(t => {
+                    if (String(t).length > LIMITS.tag) errors.push(`#${n}: тег "${String(t).slice(0,20)}…" слишком длинный (>${LIMITS.tag})`);
+                });
             }
         });
         return errors;
@@ -348,7 +392,7 @@
                 </div>
                 <div class="form-group">
                     <label>Название</label>
-                    <input type="text" class="field-title" value="${escapeHtml(proj.title || '')}" data-index="${index}">
+                    <input type="text" class="field-title" maxlength="${LIMITS.title}" value="${escapeHtml(proj.title || '')}" data-index="${index}">
                 </div>
                 <div class="grid-2">
                     <div class="form-group">
@@ -368,16 +412,16 @@
                 </div>
                 <div class="form-group">
                     <label>Описание</label>
-                    <textarea class="field-desc" rows="2" data-index="${index}">${escapeHtml(proj.description || '')}</textarea>
+                    <textarea class="field-desc" rows="2" maxlength="${LIMITS.description}" data-index="${index}">${escapeHtml(proj.description || '')}</textarea>
                 </div>
                 <div class="grid-2">
                     <div class="form-group">
                         <label>Ссылка (URL или путь)</label>
-                        <input type="text" class="field-link" value="${escapeHtml(proj.link || '')}" data-index="${index}">
+                        <input type="text" class="field-link" maxlength="${LIMITS.link}" value="${escapeHtml(proj.link || '')}" data-index="${index}">
                     </div>
                     <div class="form-group">
                         <label>Текст кнопки</label>
-                        <input type="text" class="field-btnText" value="${escapeHtml(proj.buttonText || 'Открыть')}" data-index="${index}">
+                        <input type="text" class="field-btnText" maxlength="${LIMITS.buttonText}" value="${escapeHtml(proj.buttonText || 'Открыть')}" data-index="${index}">
                     </div>
                 </div>
                 <div class="grid-3">
@@ -409,7 +453,7 @@
                         <label>Цвет</label>
                         <div class="color-row">
                             ${colorSwatches}
-                            <input type="text" class="field-color color-input" value="${escapeHtml(proj.color || '#ccff00')}" data-index="${index}" maxlength="7">
+                            <input type="text" class="field-color color-input" value="${escapeHtml(proj.color || '#ccff00')}" data-index="${index}" maxlength="7" pattern="^#[0-9a-fA-F]{6}$">
                         </div>
                     </div>
                 </div>
@@ -463,7 +507,7 @@
             el.addEventListener('input', (e) => {
                 const idx = parseInt(e.target.dataset.index);
                 if (!isNaN(idx) && projects[idx]) {
-                    projects[idx].tags = e.target.value.split(',').map(s => s.trim()).filter(s => s);
+                    projects[idx].tags = e.target.value.split(',').map(s => s.trim()).filter(s => s).slice(0, LIMITS.tagsCount);
                     markUnsaved();
                     const currentTags = projects[idx].tags;
                     listEl.querySelectorAll(`.tag-suggestion[data-index="${idx}"]`).forEach(s => {
@@ -482,6 +526,10 @@
                 if (!isNaN(idx) && projects[idx]) {
                     if (!Array.isArray(projects[idx].tags)) projects[idx].tags = [];
                     if (!projects[idx].tags.includes(tag)) {
+                        if (projects[idx].tags.length >= LIMITS.tagsCount) {
+                            toast(`Максимум ${LIMITS.tagsCount} тегов на проект`);
+                            return;
+                        }
                         projects[idx].tags.push(tag);
                         const input = listEl.querySelector(`.field-tags[data-index="${idx}"]`);
                         if (input) input.value = projects[idx].tags.join(', ');
@@ -515,6 +563,7 @@
                         render();
                     }
                 } else if (action === 'duplicate') {
+                    if (projects.length >= LIMITS.MAX_COUNT) { toast(`Максимум ${LIMITS.MAX_COUNT} проектов`); return; }
                     const copy = JSON.parse(JSON.stringify(projects[idx]));
                     copy.title = (copy.title || 'Проект') + ' (копия)';
                     projects.splice(idx + 1, 0, copy);
@@ -559,6 +608,7 @@
 
     // ====== КНОПКИ ======
     document.getElementById('addBtn').addEventListener('click', () => {
+        if (projects.length >= LIMITS.MAX_COUNT) { toast(`Максимум ${LIMITS.MAX_COUNT} проектов`); return; }
         projects.push({
             title: 'Новый проект',
             category: 'website',
@@ -595,11 +645,17 @@
     document.getElementById('importFile').addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
+        if (file.size > LIMITS.importFileSize) {
+            alert(`Файл больше ${Math.round(LIMITS.importFileSize / 1024 / 1024)} МБ`);
+            e.target.value = '';
+            return;
+        }
         const reader = new FileReader();
         reader.onload = (ev) => {
             try {
                 const data = JSON.parse(ev.target.result);
                 if (!Array.isArray(data)) throw new Error('Это не массив JSON');
+                if (data.length > LIMITS.MAX_COUNT) throw new Error(`Слишком много проектов (${data.length} > ${LIMITS.MAX_COUNT})`);
                 if (confirm(`Импортировать ${data.length} проектов? Текущие будут заменены.`)) {
                     projects = data;
                     markUnsaved();
@@ -616,7 +672,7 @@
     });
 
     document.getElementById('viewSiteBtn').addEventListener('click', () => {
-        window.open(`https://${REPO_OWNER}.github.io/${REPO_NAME}/projects.html`, '_blank', 'noopener');
+        window.open(SITE_URL, '_blank', 'noopener');
     });
 
     document.getElementById('searchAdmin').addEventListener('input', (e) => {
