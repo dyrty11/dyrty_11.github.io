@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JSON Formatter — P.</title>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; object-src 'none'; base-uri 'none'; form-action 'none';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; object-src 'none'; base-uri 'none'; form-action 'none';">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
@@ -13,29 +13,6 @@
         * { margin: 0; padding: 0; box-sizing: border-box; border-radius: 0 !important; }
         body { font-family: 'IBM Plex Mono', monospace; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
         .container { width: 100%; max-width: 1000px; background: var(--surface); border: 1px solid var(--border); padding: 40px; }
-            .container.animated-dashed {
-        position: relative;
-        border: none !important;
-    }
-    .container.animated-dashed::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-        background-image:
-            linear-gradient(90deg, var(--border) 50%, transparent 50%),
-            linear-gradient(90deg, var(--border) 50%, transparent 50%),
-            linear-gradient(0deg,  var(--border) 50%, transparent 50%),
-            linear-gradient(0deg,  var(--border) 50%, transparent 50%);
-        background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
-        background-size:   12px 1px, 12px 1px, 1px 12px, 1px 12px;
-        background-position: 0 0, 0 100%, 0 0, 100% 0;
-        animation: borderMarch 0.8s linear infinite;
-    }
-    @keyframes borderMarch {
-        from { background-position: 0 0,      0 100%,    0 0,      100% 0; }
-        to   { background-position: 12px 0,  -12px 100%, 0 -12px,  100% 12px; }
-    }
         .header { margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
         h1 { font-family: 'Space Grotesk', sans-serif; font-size: 2.5em; text-transform: uppercase; letter-spacing: -1px; }
         h1 span { color: var(--accent); }
@@ -59,7 +36,7 @@
     </style>
 </head>
 <body>
-    <div class="container animated-dashed">
+    <div class="container">
         <div class="header">
             <h1>JSON <span>Formatter</span></h1>
             <p class="subtitle">Валидация, форматирование и минификация JSON в браузере.</p>
@@ -83,32 +60,6 @@
         <div class="status" id="status"></div>
         <a href="index.html" class="back-link">← Назад в портфолио</a>
     </div>
-    <script>
-        (function() {
-            const inputArea = document.getElementById('inputArea'); const outputArea = document.getElementById('outputArea');
-            const formatBtn = document.getElementById('formatBtn'); const minifyBtn = document.getElementById('minifyBtn');
-            const copyBtn = document.getElementById('copyBtn'); const clearBtn = document.getElementById('clearBtn'); const status = document.getElementById('status');
-            function showStatus(message, type) { status.textContent = message; status.className = 'status ' + type; }
-            function clearStatus() { status.textContent = ''; status.className = 'status'; }
-            function processJSON(minify = false) {
-                const raw = inputArea.value.trim();
-                if (!raw) { showStatus('Введите JSON для обработки.', 'error'); return; }
-                try {
-                    const parsed = JSON.parse(raw);
-                    let result;
-                    if (minify) { result = JSON.stringify(parsed); showStatus('Успешно сжато!', 'success'); }
-                    else { result = JSON.stringify(parsed, null, 4); showStatus('Успешно отформатировано!', 'success'); }
-                    outputArea.value = result;
-                } catch (error) { outputArea.value = ''; showStatus('Ошибка: ' + error.message, 'error'); }
-            }
-            formatBtn.addEventListener('click', () => processJSON(false));
-            minifyBtn.addEventListener('click', () => processJSON(true));
-            copyBtn.addEventListener('click', () => {
-                if (!outputArea.value) { showStatus('Нечего копировать.', 'error'); return; }
-                navigator.clipboard.writeText(outputArea.value).then(() => { showStatus('Скопировано в буфер обмена!', 'success'); setTimeout(clearStatus, 2000); }).catch(() => { showStatus('Не удалось скопировать.', 'error'); });
-            });
-            clearBtn.addEventListener('click', () => { inputArea.value = ''; outputArea.value = ''; clearStatus(); });
-        })();
-    </script>
+    <script src="json-formatter.js" defer></script>
 </body>
 </html>

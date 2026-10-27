@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         function getTagIcon(tagName) {
             const key = String(tagName).toLowerCase();
-            return tagIcons[key] || ''; 
+            return Object.prototype.hasOwnProperty.call(tagIcons, key) ? tagIcons[key] : '';
         }
         
         let allProjects = [];
@@ -152,7 +152,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 card.className = 'project-card animated-dashed';
                 const iconDiv = document.createElement('div');
                 iconDiv.className = 'project-icon';
-                iconDiv.innerHTML = icons[project.icon] || icons['file'];
+                const iconKey = Object.prototype.hasOwnProperty.call(icons, project.icon) ? project.icon : 'file';
+                iconDiv.innerHTML = icons[iconKey];
                 const titleEl = document.createElement('h3');
                 titleEl.textContent = String(project.title || '');
                 const descEl = document.createElement('p');
