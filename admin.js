@@ -71,7 +71,12 @@
         try { localStorage.setItem('admin_theme', next); } catch (e) {}
     });
 
-    // ====== ТОКЕН ======
+        // ====== ТОКЕН ======
+    let lastValidatedToken = null;
+    let lastValidationResult = null;
+    let tokenCheckTimeout = null;
+    let tokenCheckAbort = null;
+
     function getStoredToken() {
         let t = null;
         try { t = sessionStorage.getItem(STORAGE_KEY); } catch (e) {}
@@ -97,26 +102,170 @@
         try { sessionStorage.removeItem(STORAGE_KEY); } catch (e) {}
         try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
     }
-    function updateTokenStatus(hasToken) {
+
+    function updateTokenStatus(state, extra) {
         if (!tokenStatus) return;
-        if (hasToken) {
-            tokenStatus.textContent = 'Подключено';
-            tokenStatus.classList.add('connected');
-        } else {
-            tokenStatus.textContent = 'Не подключено';
-            tokenStatus.classList.remove('connected');
+        tokenStatus.className = 'status-badge';
+        switch (state) {
+            case 'connected':
+                tokenStatus.textContent = '✓ Подключено' + (extra ? ' (' + extra + ')' : '');
+                tokenStatus.classList.add('connected');
+                break;
+            case 'checking':
+                tokenStatus.textContent = 'Проверка...';
+                tokenStatus.classList.add('checking');
+                break;
+            case 'warning':
+                tokenStatus.textContent = '⚠ ' + (extra || 'Ограниченные права');
+                tokenStatus.classList.add('warning');
+                break;
+            case 'error':
+                tokenStatus.textContent = '✗ ' + (extra || 'Не подключено');
+                tokenStatus.classList.add('error');
+                break;
+            default:
+                tokenStatus.textContent = 'Не подключено';
         }
     }
 
+    async function checkToken(token) {
+        if (tokenCheckAbort) {
+            try { tokenCheckAbort.abort(); } catch (e) {}
+        }
+        tokenCheckAbort = new AbortController();
+        const signal = tokenCheckAbort.signal;
+
+        // Никогда не показываем токен: ни в статусе, ни в логах, ни в консоли.
+        const safeReason = function(e) {
+            if (!e) return 'неизвестная ошибка';
+            if (e.name === 'AbortError') return 'отменено';
+            return 'сетевая ошибка';
+        };
+
+        updateTokenStatus('checking');
+        try {
+            // Шаг 1 — токен в принципе валиден?
+            const userRes = await fetch('https://api.github.com/user', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/vnd.github+json'
+                },
+                signal
+            });
+            if (userRes.status === 401) {
+                lastValidatedToken = token;
+                lastValidationResult = { ok: false, reason: 'Токен недействителен (401)' };
+                updateTokenStatus('error', 'Недействителен');
+                log('Токен недействителен (401). Создайте новый: https://github.com/settings/tokens', 'error');
+                return;
+            }
+            if (!userRes.ok) {
+                lastValidatedToken = token;
+                lastValidationResult = { ok: false, reason: `HTTP ${userRes.status}` };
+                updateTokenStatus('error', 'Ошибка ' + userRes.status);
+                return;
+            }
+            const user = await userRes.json();
+            const login = user && user.login ? String(user.login) : '';
+
+            // Шаг 2 — есть ли доступ к репозиторию?
+            const repoRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/vnd.github+json',
+                    'X-GitHub-Api-Version': '2022-11-28'
+                },
+                signal
+            });
+            if (repoRes.status === 404) {
+                lastValidatedToken = token;
+                lastValidationResult = { ok: false, reason: `Нет доступа к ${REPO_OWNER}/${REPO_NAME}` };
+                updateTokenStatus('error', 'Нет доступа к репо');
+                log(`Токен действителен, но нет доступа к ${REPO_OWNER}/${REPO_NAME}. Проверьте Repository access в настройках токена.`, 'error');
+                return;
+            }
+            if (!repoRes.ok) {
+                lastValidatedToken = token;
+                lastValidationResult = { ok: false, reason: `HTTP ${repoRes.status}` };
+                updateTokenStatus('error', 'Ошибка ' + repoRes.status);
+                return;
+            }
+            const repo = await repoRes.json();
+            const perms = (repo && repo.permissions) || {};
+
+            // Шаг 3 — право на запись (Contents: Read & Write)
+            if (!perms.push) {
+                lastValidatedToken = token;
+                lastValidationResult = { ok: true, user: login, warning: 'read-only' };
+                updateTokenStatus('warning', 'Read only');
+                log('Токен действителен, но права на запись не подтверждены. Сохранение может не сработать (403). Нужно Contents: Read and write.', 'error');
+                return;
+            }
+
+            lastValidatedToken = token;
+            lastValidationResult = { ok: true, user: login };
+            updateTokenStatus('connected', login);
+            log('Токен действителен. Доступ к репозиторию подтверждён.', 'success');
+        } catch (e) {
+            if (e && e.name === 'AbortError') return;
+            lastValidatedToken = token;
+            lastValidationResult = { ok: false, reason: safeReason(e) };
+            updateTokenStatus('error', 'Сеть');
+            log('Не удалось проверить токен: ' + safeReason(e), 'error');
+        }
+    }
+
+    function scheduleTokenCheck() {
+        if (tokenCheckTimeout) clearTimeout(tokenCheckTimeout);
+        const token = tokenInput.value.replace(/[\s\u200B-\u200D\uFEFF]/g, '');
+
+        if (!token) {
+            if (tokenCheckAbort) {
+                try { tokenCheckAbort.abort(); } catch (e) {}
+            }
+            lastValidatedToken = null;
+            lastValidationResult = null;
+            updateTokenStatus('empty');
+            return;
+        }
+
+        // Кэш: если токен тот же и результат известен — не спамим API
+        if (token === lastValidatedToken && lastValidationResult) {
+            if (lastValidationResult.ok && !lastValidationResult.warning) {
+                updateTokenStatus('connected', lastValidationResult.user);
+            } else if (lastValidationResult.ok && lastValidationResult.warning) {
+                updateTokenStatus('warning', 'Read only');
+            } else {
+                updateTokenStatus('error', 'Недействителен');
+            }
+            return;
+        }
+
+        updateTokenStatus('checking');
+        tokenCheckTimeout = setTimeout(() => checkToken(token), 700);
+    }
+
+    async function ensureTokenValid(token) {
+        if (lastValidatedToken === token && lastValidationResult) {
+            return lastValidationResult;
+        }
+        await checkToken(token);
+        return lastValidationResult || { ok: false, reason: 'неизвестно' };
+    }
+
+    // Инициализация
     const storedToken = getStoredToken();
     if (storedToken) {
         tokenInput.value = storedToken;
-        updateTokenStatus(true);
+        updateTokenStatus('checking');
+        setTimeout(() => scheduleTokenCheck(), 200);
+    } else {
+        updateTokenStatus('empty');
     }
+
     tokenInput.addEventListener('input', () => {
-        const v = tokenInput.value;
-        setStoredToken(v);
-        updateTokenStatus(!!v);
+        setStoredToken(tokenInput.value);
+        scheduleTokenCheck();
     });
 
     const forgetBtn = document.getElementById('forgetTokenBtn');
@@ -125,7 +274,12 @@
             if (!confirm('Забыть токен? Придётся вводить заново.')) return;
             clearStoredToken();
             tokenInput.value = '';
-            updateTokenStatus(false);
+            lastValidatedToken = null;
+            lastValidationResult = null;
+            if (tokenCheckAbort) {
+                try { tokenCheckAbort.abort(); } catch (e) {}
+            }
+            updateTokenStatus('empty');
             toast('Токен удалён');
         });
     }
@@ -185,23 +339,18 @@
     }
 
     // ====== GITHUB API ======
-    async function fetchFile() {
+        async function fetchFile() {
         if (hasUnsavedChanges && !confirm('Есть несохранённые изменения. Загрузить с GitHub и потерять их?')) return;
 
         const token = tokenInput.value.replace(/[\s\u200B-\u200D\uFEFF]/g, '');
         if (!token) { toast('Введите токен'); return; }
 
-        log('Проверка токена...');
-        try {
-            const userRes = await fetch('https://api.github.com/user', {
-                headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json' }
-            });
-            if (userRes.status === 401) {
-                log('HTTP 401: токен недействителен. Создайте новый: https://github.com/settings/tokens', 'error');
-                toast('Токен недействителен (401)');
-                return;
-            }
-        } catch (e) {}
+        const validation = await ensureTokenValid(token);
+        if (!validation || !validation.ok) {
+            log('Токен не прошёл проверку: ' + (validation && validation.reason ? validation.reason : 'неизвестно'), 'error');
+            toast('Токен недействителен');
+            return;
+        }
 
         log('Загрузка projects.json...');
         try {
@@ -240,9 +389,16 @@
         const saveBtn = document.getElementById('saveBtn');
         if (saveBtn) saveBtn.disabled = true;
         try {
-            const token = tokenInput.value.replace(/[\s\u200B-\u200D\uFEFF]/g, '');
+                        const token = tokenInput.value.replace(/[\s\u200B-\u200D\uFEFF]/g, '');
             if (!token) { toast('Введите токен'); return; }
             if (!fileSha) { toast('Сначала загрузите файл с GitHub'); return; }
+
+            const validation = await ensureTokenValid(token);
+            if (!validation || !validation.ok) {
+                log('Токен не прошёл проверку: ' + (validation && validation.reason ? validation.reason : 'неизвестно'), 'error');
+                toast('Токен недействителен');
+                return;
+            }
 
             const errors = validate();
             if (errors.length > 0) {
