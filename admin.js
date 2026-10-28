@@ -178,8 +178,8 @@
     function log(msg, type = '') { logEl.textContent = msg; logEl.className = 'log ' + type; }
     function toast(msg) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 2500); }
 
-    function markUnsaved() { if (!hasUnsavedChanges) { hasUnsavedChanges = true; unsavedBadge.style.display = 'inline-block'; } }
-    function markSaved() { hasUnsavedChanges = false; unsavedBadge.style.display = 'none'; }
+    function markUnsaved() { if (!hasUnsavedChanges) { hasUnsavedChanges = true; unsavedBadge.classList.remove('hidden'); } }
+    function markSaved() { hasUnsavedChanges = false; unsavedBadge.classList.add('hidden'); }
     window.addEventListener('beforeunload', (e) => { if (hasUnsavedChanges) { e.preventDefault(); e.returnValue = ''; } });
 
     function updateStats() {
@@ -327,7 +327,7 @@
 
             item.innerHTML = `
                 <div class="project-header">
-                    <div style="display:flex;align-items:center;gap:10px;"><span class="drag-handle">☰</span><span class="project-number">#${index + 1}</span></div>
+                    <div class="flex-row"><span class="drag-handle">☰</span><span class="project-number">#${index + 1}</span></div>
                     <div class="project-actions"><button class="icon-btn" data-action="duplicate" data-index="${index}" title="Дублировать">⧉</button><button class="icon-btn danger" data-action="delete" data-index="${index}" title="Удалить">✕</button></div>
                 </div>
                 <div class="form-group"><label>Название</label><input type="text" class="field-title" maxlength="${LIMITS.title}" value="${escapeHtml(proj.title || '')}" data-index="${index}"></div>
@@ -346,7 +346,7 @@
                         <label>Иконка</label>
                         <div class="icon-row"><div class="icon-preview" data-preview="${index}">${displayIcon}</div>
                         <select class="field-icon" data-index="${index}"><option value="layout" ${proj.icon === 'layout' ? 'selected' : ''}>Макет</option><option value="file" ${proj.icon === 'file' ? 'selected' : ''}>Файл</option><option value="shopping-bag" ${proj.icon === 'shopping-bag' ? 'selected' : ''}>Магазин</option><option value="archive" ${proj.icon === 'archive' ? 'selected' : ''}>Архив</option><option value="react" ${proj.icon === 'react' ? 'selected' : ''}>React</option><option value="javascript" ${proj.icon === 'javascript' ? 'selected' : ''}>JavaScript</option><option value="python" ${proj.icon === 'python' ? 'selected' : ''}>Python</option><option value="windows" ${proj.icon === 'windows' ? 'selected' : ''}>Windows</option><option value="exe" ${proj.icon === 'exe' ? 'selected' : ''}>EXE</option><option value="security" ${proj.icon === 'security' ? 'selected' : ''}>Безопасность</option><option value="tools" ${proj.icon === 'tools' ? 'selected' : ''}>Инструменты</option></select></div>
-                        <div class="custom-icon-upload"><input type="file" class="field-customIconFile" accept="image/*" data-index="${index}" style="display:none;" id="customIconFile_${index}"><label for="customIconFile_${index}">📁 Загрузить иконку</label>${proj.customIcon ? `<button class="icon-btn danger" data-action="removeCustomIcon" data-index="${index}" title="Сбросить">✕</button>` : ''}</div>
+                        <div class="custom-icon-upload"><input type="file" class="field-customIconFile hidden" accept="image/*" data-index="${index}" id="customIconFile_${index}"><label for="customIconFile_${index}">📁 Загрузить иконку</label>${proj.customIcon ? `<button class="icon-btn danger" data-action="removeCustomIcon" data-index="${index}" title="Сбросить">✕</button>` : ''}</div>
                     </div>
                     <div class="form-group"><label>Цвет</label><div class="color-row">${colorSwatches}<input type="text" class="field-color color-input" value="${escapeHtml(proj.color || '#ccff00')}" data-index="${index}" maxlength="7" pattern="^#[0-9a-fA-F]{6}$"></div></div>
                 </div>
@@ -354,8 +354,8 @@
             listEl.appendChild(item);
         });
 
-        if (visibleCount === 0 && projects.length > 0) listEl.innerHTML = '<p style="text-align:center;padding:30px;color:var(--text-muted);">Ничего не найдено</p>';
-        else if (projects.length === 0) listEl.innerHTML = '<p style="text-align:center;padding:30px;color:var(--text-muted);">Список пуст.</p>';
+        if (visibleCount === 0 && projects.length > 0) listEl.innerHTML = '<p class="empty-msg">Ничего не найдено</p>';
+        else if (projects.length === 0) listEl.innerHTML = '<p class="empty-msg">Список пуст.</p>';
         updateStats(); bindEvents();
     }
 
