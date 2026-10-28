@@ -1,8 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    function escapeHtml(s) {
-        return String(s).replace(/[&<>"'`]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c]));
-    }
-
     // --- 1. Переключение темы ---
     const themeToggle = document.getElementById('themeToggle');
     const htmlElement = document.documentElement;
@@ -116,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
         function sanitizeURL(url) {
             try {
                 const u = new URL(url, window.location.href);
-                if (['http:', 'https:', 'mailto:'].includes(u.protocol)) {
+                if (['http:', 'https:'].includes(u.protocol)) {
                     return u.href;
                 }
             } catch (e) {}
@@ -188,7 +184,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const card = document.createElement('div');
                 card.className = 'project-card animated-dashed';
                 
-                // Безопасная отрисовка иконки (без innerHTML для пользовательских данных)
                 const iconDiv = document.createElement('div');
                 iconDiv.className = 'project-icon';
                 if (project.customIcon && /^data:image\/(png|jpe?g|gif|webp);base64,[A-Za-z0-9+/=]+$/.test(project.customIcon)) {
@@ -196,13 +191,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     img.src = project.customIcon;
                     img.className = 'custom-project-icon';
                     img.alt = '';
-                    iconDiv.appendChild(img);
-                } else if (project.iconUrl && /^https?:\/\//i.test(project.iconUrl)) {
-                    const img = document.createElement('img');
-                    img.src = project.iconUrl;
-                    img.className = 'custom-project-icon';
-                    img.alt = '';
-                    img.addEventListener('error', () => { img.style.display = 'none'; });
                     iconDiv.appendChild(img);
                 } else {
                     const iconKey = Object.prototype.hasOwnProperty.call(icons, project.icon) ? project.icon : 'file';

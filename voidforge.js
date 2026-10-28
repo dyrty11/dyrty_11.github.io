@@ -96,7 +96,7 @@
     function generateNonce() {
         const array = new Uint8Array(16);
         crypto.getRandomValues(array);
-        return btoa(String.fromCharCode(...array));
+        return Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
     function generateSite() {
@@ -112,9 +112,11 @@
         generatedInfo.classList.add('visible');
     }
 
-    function buildSite(imgSrc, audioSrc, mime, nonce) {
+            function buildSite(imgSrc, audioSrc, mime, nonce) {
         const allowedMimes = ['audio/mpeg', 'audio/ogg', 'audio/wav', 'audio/x-m4a', 'audio/mp4'];
         if (!allowedMimes.includes(mime)) throw new Error('Invalid audio MIME');
+        if (!imgSrc || !imgSrc.startsWith('data:image/')) throw new Error('Invalid image source');
+        if (!imgSrc || !imgSrc.startsWith('data:image/')) throw new Error('Invalid image source');
         const csp = "default-src 'none'; img-src data:; media-src data:; style-src 'unsafe-inline'; script-src 'nonce-" + nonce + "'; base-uri 'none'; form-action 'none';";
         return [
             '<!DOCTYPE html>', '<html lang="ru">', '<head>', '<meta charset="UTF-8">', '<meta name="viewport" content="width=device-width,initial-scale=1.0">',

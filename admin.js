@@ -16,7 +16,6 @@
         maxIconSize: 300 * 1024
     };
 
-    // Строгий паттерн для Base64-изображений (без возможности инъекции HTML)
     const SAFE_ICON_REGEX = /^data:image\/(png|jpe?g|gif|webp);base64,[A-Za-z0-9+/=]+$/;
 
     const ICON_SVGS = {
@@ -54,7 +53,6 @@
     let saving = false;
     let loading = false;
 
-    // Безопасное хранение токена (только в памяти)
     let memoryToken = '';
     let lastValidatedToken = null;
     let lastValidationResult = null;
@@ -79,7 +77,7 @@
         try { localStorage.setItem('admin_theme', next); } catch (e) {}
     });
 
-    // ====== ТОКЕН (Только в памяти) ======
+    // ====== ТОКЕН ======
     function updateTokenStatus(state, extra) {
         if (!tokenStatus) return;
         tokenStatus.className = 'status-badge';
@@ -315,7 +313,6 @@
             const parsed = JSON.parse(b64decode(data.content || ''));
             if (!Array.isArray(parsed)) throw new Error('projects.json должен быть массивом');
             
-            // Валидация данных ПЕРЕД рендером
             const oldProjects = projects;
             projects = parsed;
             const errors = validate();
@@ -416,7 +413,7 @@
             } else {
                 try {
                     const u = new URL(link, window.location.href);
-                    if (!['http:', 'https:', 'mailto:'].includes(u.protocol)) {
+                    if (!['http:', 'https:'].includes(u.protocol)) {
                         errors.push(`#${n}: недопустимая схема URL`);
                     }
                 } catch (e) {
@@ -438,22 +435,12 @@
                 errors.push(`#${n}: неверная иконка`);
             }
 
-            // Строгая проверка кастомной иконки
             if (p.customIcon) {
                 const iconStr = String(p.customIcon);
                 if (iconStr.length > LIMITS.maxIconSize) {
                     errors.push(`#${n}: иконка слишком большая`);
                 } else if (!SAFE_ICON_REGEX.test(iconStr)) {
                     errors.push(`#${n}: неверный формат кастомной иконки`);
-                }
-            }
-
-            if (p.iconUrl) {
-                try {
-                    const u = new URL(p.iconUrl);
-                    if (!['http:', 'https:'].includes(u.protocol)) errors.push(`#${n}: URL иконки должен быть http/https`);
-                } catch (e) {
-                    errors.push(`#${n}: некорректный URL иконки`);
                 }
             }
 
@@ -502,12 +489,9 @@
             const iconSVG = getIcon(proj.icon);
             const currentTags = Array.isArray(proj.tags) ? proj.tags : [];
             
-            // Безопасная отрисовка иконки
             let displayIcon = iconSVG;
             if (proj.customIcon && SAFE_ICON_REGEX.test(proj.customIcon)) {
                 displayIcon = `<img src="${escapeHtml(proj.customIcon)}" alt="">`;
-            } else if (proj.iconUrl && /^https?:\/\//i.test(proj.iconUrl)) {
-                displayIcon = `<img src="${escapeHtml(proj.iconUrl)}" alt="">`;
             }
 
             const tagSuggestions = allTags.map(t => {
@@ -590,9 +574,8 @@
                         </div>
                         <div class="custom-icon-upload">
                             <input type="file" class="field-customIconFile" accept="image/*" data-index="${index}" style="display:none;" id="customIconFile_${index}">
-                            <label for="customIconFile_${index}">📁 Загрузить</label>
-                            ${proj.customIcon || proj.iconUrl ? `<button class="icon-btn danger" data-action="removeCustomIcon" data-index="${index}" title="Сбросить">✕</button>` : ''}
-                            <input type="text" class="field-iconUrl" placeholder="или URL..." value="${escapeHtml(proj.iconUrl || '')}" data-index="${index}">
+                            <label for="customIconFile_${index}">📁 Загрузить иконку</label>
+                            ${proj.customIcon ? `<button class="icon-btn danger" data-action="removeCustomIcon" data-index="${index}" title="Сбросить">✕</button>` : ''}
                         </div>
                     </div>
                     <div class="form-group">
@@ -642,8 +625,7 @@
                         markUnsaved();
                         if (f.key === 'icon') {
                             delete projects[idx].customIcon;
-                            delete projects[idx].iconUrl;
-                            render(); // перерисовка сбросит превью и кнопку сброса
+                            render();
                         }
                     }
                 });
@@ -664,32 +646,11 @@
                     const idx = parseInt(e.target.dataset.index);
                     if (!isNaN(idx) && projects[idx]) {
                         projects[idx].customIcon = ev.target.result;
-                        delete projects[idx].iconUrl;
                         markUnsaved();
                         render();
                     }
                 };
                 reader.readAsDataURL(file);
-            });
-        });
-
-        listEl.querySelectorAll('.field-iconUrl').forEach(input => {
-            input.addEventListener('input', (e) => {
-                const idx = parseInt(e.target.dataset.index);
-                if (!isNaN(idx) && projects[idx]) {
-                    const val = e.target.value.trim();
-                    if (val && /^https?:\/\//i.test(val)) {
-                        projects[idx].iconUrl = val;
-                        delete projects[idx].customIcon;
-                        markUnsaved();
-                        const preview = listEl.querySelector(`[data-preview="${idx}"]`);
-                        if (preview) preview.innerHTML = `<img src="${escapeHtml(val)}" alt="">`;
-                    } else if (!val) {
-                        delete projects[idx].iconUrl;
-                        markUnsaved();
-                        render();
-                    }
-                }
             });
         });
 
@@ -748,7 +709,6 @@
                 const action = e.currentTarget.dataset.action;
                 if (action === 'removeCustomIcon') {
                     delete projects[idx].customIcon;
-                    delete projects[idx].iconUrl;
                     markUnsaved();
                     render();
                     return;
@@ -854,7 +814,6 @@
                 if (!Array.isArray(data)) throw new Error('Это не массив JSON');
                 if (data.length > LIMITS.MAX_COUNT) throw new Error(`Слишком много проектов (${data.length} > ${LIMITS.MAX_COUNT})`);
                 
-                // ВАЛИДАЦИЯ ДО ПРИМЕНЕНИЯ
                 const oldProjects = projects;
                 projects = data;
                 const errors = validate();
