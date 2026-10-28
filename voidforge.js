@@ -112,16 +112,18 @@
         generatedInfo.classList.add('visible');
     }
 
-            function buildSite(imgSrc, audioSrc, mime, nonce) {
+    function buildSite(imgSrc, audioSrc, mime, nonce) {
         const allowedMimes = ['audio/mpeg', 'audio/ogg', 'audio/wav', 'audio/x-m4a', 'audio/mp4'];
         if (!allowedMimes.includes(mime)) throw new Error('Invalid audio MIME');
         if (!imgSrc || !imgSrc.startsWith('data:image/')) throw new Error('Invalid image source');
-        if (!imgSrc || !imgSrc.startsWith('data:image/')) throw new Error('Invalid image source');
-        const csp = "default-src 'none'; img-src data:; media-src data:; style-src 'unsafe-inline'; script-src 'nonce-" + nonce + "'; base-uri 'none'; form-action 'none';";
+        
+        // Строгий CSP с nonce для стилей и скриптов
+        const csp = "default-src 'none'; img-src data:; media-src data:; style-src 'nonce-" + nonce + "'; script-src 'nonce-" + nonce + "'; base-uri 'none'; form-action 'none';";
+        
         return [
             '<!DOCTYPE html>', '<html lang="ru">', '<head>', '<meta charset="UTF-8">', '<meta name="viewport" content="width=device-width,initial-scale=1.0">',
             '<meta http-equiv="Content-Security-Policy" content="' + csp + '">', '<title>⬡ Void Page</title>',
-            '<style>',
+            '<style nonce="' + nonce + '">',
             '*{margin:0;padding:0;box-sizing:border-box;border-radius:0!important}',
             'body{background:#050505;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:"IBM Plex Mono",monospace;cursor:pointer;user-select:none;overflow:hidden;position:relative;}',
             'body::before{content:\'\';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(204,255,0,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(204,255,0,0.05) 1px,transparent 1px);background-size:40px 40px;}',

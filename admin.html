@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Online Admin v2 — P.</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <meta name="robots" content="noindex, nofollow">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.github.com; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none';">
     <script src="frame-bust.js"></script>
@@ -86,6 +87,7 @@
         .token-section input { width: 100%; padding: 10px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 14px; }
         .token-hint { font-size: 11px; color: var(--text-muted); margin-top: 8px; line-height: 1.5; }
         .token-hint a { color: var(--accent); }
+        .token-warning { color: var(--danger); font-weight: bold; margin-top: 5px; font-size: 11px; text-transform: uppercase; }
         .token-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
         .status-badge { display: inline-block; padding: 4px 8px; font-size: 10px; text-transform: uppercase; border: 1px solid var(--border); color: var(--text-muted); transition: all 0.2s; }
         .status-badge.connected { border-color: var(--accent); color: var(--accent); }
@@ -180,7 +182,6 @@
         .color-swatch.active { border-color: var(--text); }
         .color-input { flex: 1; }
 
-        /* Заменяем inline-стили для цветов на CSS классы */
         .color-swatch[data-color="#ccff00"] { background: #ccff00; }
         .color-swatch[data-color="#0ea5e9"] { background: #0ea5e9; }
         .color-swatch[data-color="#8b5cf6"] { background: #8b5cf6; }
@@ -251,6 +252,7 @@
                 <a href="https://github.com/settings/tokens" target="_blank" rel="noopener noreferrer">Создать токен →</a>
                 (fine-grained, права <b>Contents: Read &amp; Write</b>, доступ к репозиторию <b>dyrty11/dyrty_11.github.io</b>)
             </div>
+            <div class="token-warning">⚠️ Вводите токен только на этом сайте. Не используйте админку на чужих устройствах.</div>
             <div class="token-row">
                 <span class="status-badge" id="tokenStatus">Не подключено</span>
                 <button type="button" class="forget-btn" id="forgetTokenBtn">Забыть токен</button>

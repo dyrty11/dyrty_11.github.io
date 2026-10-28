@@ -33,7 +33,6 @@
     let saving = false;
     let loading = false;
 
-    let memoryToken = '';
     let lastValidatedToken = null;
     let lastValidationResult = null;
     let tokenCheckTimeout = null;
@@ -50,12 +49,14 @@
     const themeToggle = document.getElementById('themeToggle');
     const savedTheme = (function(){ try { return localStorage.getItem('admin_theme') || 'dark'; } catch(e) { return 'dark'; } })();
     document.documentElement.setAttribute('data-theme', savedTheme);
-    themeToggle.addEventListener('click', () => {
-        const cur = document.documentElement.getAttribute('data-theme');
-        const next = cur === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', next);
-        try { localStorage.setItem('admin_theme', next); } catch (e) {}
-    });
+    if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+            const cur = document.documentElement.getAttribute('data-theme');
+            const next = cur === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            try { localStorage.setItem('admin_theme', next); } catch (e) {}
+        });
+    }
 
     function updateTokenStatus(state, extra) {
         if (!tokenStatus) return;
@@ -163,12 +164,12 @@
         return lastValidationResult || { ok: false, reason: 'неизвестно' };
     }
 
-    tokenInput.addEventListener('input', () => { memoryToken = tokenInput.value; scheduleTokenCheck(); });
+    tokenInput.addEventListener('input', () => { scheduleTokenCheck(); });
     const forgetBtn = document.getElementById('forgetTokenBtn');
     if (forgetBtn) {
         forgetBtn.addEventListener('click', () => {
             if (!confirm('Забыть токен? Придётся вводить заново.')) return;
-            memoryToken = ''; tokenInput.value = ''; lastValidatedToken = null; lastValidationResult = null;
+            tokenInput.value = ''; lastValidatedToken = null; lastValidationResult = null;
             if (tokenCheckAbort) { try { tokenCheckAbort.abort(); } catch (e) {} }
             updateTokenStatus('empty'); toast('Токен удалён');
         });
