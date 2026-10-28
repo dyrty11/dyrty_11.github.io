@@ -77,6 +77,8 @@ header {
     padding: 20px 5%; background: var(--bg-color); border-bottom: 1px solid var(--border);
     z-index: 1002;
 }
+
+/* ИДЕАЛЬНЫЙ ЛОГОТИП С ШЕСТИУГОЛЬНИКОМ */
 .logo { 
     font-family: var(--font-display); 
     font-size: 24px; 
@@ -86,14 +88,21 @@ header {
     letter-spacing: -1px; 
     display: flex; 
     align-items: center; 
-    gap: 8px;
+    gap: 12px; /* Отступ между иконкой и текстом */
     transition: opacity 0.2s;
 }
 .logo:hover { opacity: 0.8; }
 .logo span { color: var(--accent); }
-.logo svg { display: block; flex-shrink: 0; }
-.footer-logo { font-size: 20px; gap: 6px; }
-.footer-logo svg { width: 20px; height: 20px; }
+.logo svg { display: block; flex-shrink: 0; width: 28px; height: 28px; }
+.footer-logo { font-size: 20px; gap: 8px; }
+.footer-logo svg { width: 22px; height: 22px; }
+
+nav.desktop-nav { display: flex; gap: 40px; }
+nav.desktop-nav a { 
+    font-size: 13px; font-weight: 500; color: var(--text-main); text-decoration: none; 
+    text-transform: uppercase; letter-spacing: 1px; transition: color 0.2s; position: relative;
+}
+nav.desktop-nav a:hover, nav.desktop-nav a.active { color: var(--accent); }
 
 .theme-switch {
     width: 50px; height: 26px; background: var(--bg-color); border: 1px solid var(--border);
@@ -158,7 +167,7 @@ header {
 .view-all:hover { color: var(--accent); border-color: var(--accent); }
 
 .projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); }
-.project-card { background: var(--card-bg); padding: 30px; display: flex; flex-direction: column; transition: background 0.3s; }
+.project-card { background: var(--card-bg); padding: 30px; display: flex; flex-direction: column; transition: background 0.3s, opacity 0.5s ease, transform 0.5s ease; }
 .project-card:hover { background: var(--bg-color); }
 .project-icon { margin-bottom: 20px; color: var(--accent); }
 .project-icon svg { width: 32px; height: 32px; }
@@ -277,13 +286,5 @@ body::before {
     transition: transform 0.1s ease-out; will-change: transform;
 }
 
-/* Безопасная анимация карточек (скрыты только когда JS активен) */
-.project-card.reveal-init {
-    opacity: 0;
-    transform: translateY(30px);
-}
-.project-card.reveal-init.visible {
-    opacity: 1;
-    transform: translateY(0);
-    transition: opacity 0.5s ease, transform 0.5s ease;
-}
+.project-card.reveal-init { opacity: 0; transform: translateY(30px); }
+.project-card.reveal-init.visible { opacity: 1; transform: translateY(0); transition: opacity 0.5s ease, transform 0.5s ease; }
