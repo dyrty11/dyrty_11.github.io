@@ -1,5 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <rect width="100" height="100" fill="#050505"/>
-  <path d="M50 12 L82 30 L82 70 L50 88 L18 70 L18 30 Z" fill="none" stroke="#ccff00" stroke-width="4"/>
-  <text x="50%" y="51%" dominant-baseline="central" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="38" fill="#ccff00">P.</text>
-</svg>
