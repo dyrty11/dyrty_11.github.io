@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Функция экранирования (была пропущена ранее)
     function escapeHtml(s) {
         return String(s).replace(/[&<>"'`]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c]));
     }
@@ -46,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- 3. Глобальная анимация появления карточек (с защитой от сбоев) ---
+    // --- 3. Глобальная анимация появления карточек ---
     let projectCardObserver = null;
     if (window.IntersectionObserver) {
         projectCardObserver = new IntersectionObserver((entries) => {
@@ -70,7 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Страховка: если observer не сработал за 1.5 сек, показываем всё принудительно
         setTimeout(() => {
             document.querySelectorAll('.project-card.reveal-init:not(.visible)').forEach(card => {
                 card.classList.add('visible');
@@ -190,12 +188,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 const card = document.createElement('div');
                 card.className = 'project-card animated-dashed';
                 
+                // Безопасная отрисовка иконки (без innerHTML для пользовательских данных)
                 const iconDiv = document.createElement('div');
                 iconDiv.className = 'project-icon';
-                if (project.customIcon) {
-                    iconDiv.innerHTML = `<img src="${project.customIcon}" alt="" class="custom-project-icon">`;
-                } else if (project.iconUrl) {
-                    iconDiv.innerHTML = `<img src="${escapeHtml(project.iconUrl)}" alt="" class="custom-project-icon" onerror="this.style.display='none'">`;
+                if (project.customIcon && /^data:image\/(png|jpe?g|gif|webp);base64,[A-Za-z0-9+/=]+$/.test(project.customIcon)) {
+                    const img = document.createElement('img');
+                    img.src = project.customIcon;
+                    img.className = 'custom-project-icon';
+                    img.alt = '';
+                    iconDiv.appendChild(img);
+                } else if (project.iconUrl && /^https?:\/\//i.test(project.iconUrl)) {
+                    const img = document.createElement('img');
+                    img.src = project.iconUrl;
+                    img.className = 'custom-project-icon';
+                    img.alt = '';
+                    img.addEventListener('error', () => { img.style.display = 'none'; });
+                    iconDiv.appendChild(img);
                 } else {
                     const iconKey = Object.prototype.hasOwnProperty.call(icons, project.icon) ? project.icon : 'file';
                     iconDiv.innerHTML = icons[iconKey];
@@ -247,7 +255,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 projectsGrid.appendChild(card);
             });
 
-            // Анимация появления для динамических карточек
             setTimeout(observeProjectCards, 50);
         }
         

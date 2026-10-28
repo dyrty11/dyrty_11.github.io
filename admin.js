@@ -2,7 +2,6 @@
     const REPO_OWNER = 'dyrty11';
     const REPO_NAME = 'dyrty_11.github.io';
     const FILE_PATH = 'projects.json';
-    const STORAGE_KEY = 'gh_admin_token';
     const SITE_URL = `https://${REPO_OWNER}.github.io/${REPO_NAME}/projects.html`;
 
     const LIMITS = {
@@ -14,8 +13,11 @@
         tag: 40,
         tagsCount: 20,
         importFileSize: 5 * 1024 * 1024,
-        maxIconSize: 200 * 1024
+        maxIconSize: 300 * 1024
     };
+
+    // Строгий паттерн для Base64-изображений (без возможности инъекции HTML)
+    const SAFE_ICON_REGEX = /^data:image\/(png|jpe?g|gif|webp);base64,[A-Za-z0-9+/=]+$/;
 
     const ICON_SVGS = {
         'layout': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>',
@@ -52,7 +54,8 @@
     let saving = false;
     let loading = false;
 
-    // Токен-чекинг
+    // Безопасное хранение токена (только в памяти)
+    let memoryToken = '';
     let lastValidatedToken = null;
     let lastValidationResult = null;
     let tokenCheckTimeout = null;
@@ -76,33 +79,7 @@
         try { localStorage.setItem('admin_theme', next); } catch (e) {}
     });
 
-    // ====== ТОКЕН ======
-    function getStoredToken() {
-        let t = null;
-        try { t = sessionStorage.getItem(STORAGE_KEY); } catch (e) {}
-        if (!t) {
-            try {
-                const legacy = localStorage.getItem(STORAGE_KEY);
-                if (legacy) {
-                    sessionStorage.setItem(STORAGE_KEY, legacy);
-                    localStorage.removeItem(STORAGE_KEY);
-                    t = legacy;
-                }
-            } catch (e) {}
-        }
-        return t;
-    }
-    function setStoredToken(v) {
-        try {
-            if (v) sessionStorage.setItem(STORAGE_KEY, v);
-            else sessionStorage.removeItem(STORAGE_KEY);
-        } catch (e) {}
-    }
-    function clearStoredToken() {
-        try { sessionStorage.removeItem(STORAGE_KEY); } catch (e) {}
-        try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
-    }
-
+    // ====== ТОКЕН (Только в памяти) ======
     function updateTokenStatus(state, extra) {
         if (!tokenStatus) return;
         tokenStatus.className = 'status-badge';
@@ -185,7 +162,7 @@
                 lastValidatedToken = token;
                 lastValidationResult = { ok: true, user: login, warning: 'read-only' };
                 updateTokenStatus('warning', 'Read only');
-                log('Токен действителен, но права на запись не подтверждены. Сохранение может не сработать (403).', 'error');
+                log('Токен действителен, но права на запись не подтверждены.', 'error');
                 return;
             }
 
@@ -231,16 +208,8 @@
         return lastValidationResult || { ok: false, reason: 'неизвестно' };
     }
 
-    const storedToken = getStoredToken();
-    if (storedToken) {
-        tokenInput.value = storedToken;
-        updateTokenStatus('checking');
-        setTimeout(() => scheduleTokenCheck(), 200);
-    } else {
-        updateTokenStatus('empty');
-    }
     tokenInput.addEventListener('input', () => {
-        setStoredToken(tokenInput.value);
+        memoryToken = tokenInput.value;
         scheduleTokenCheck();
     });
 
@@ -248,7 +217,7 @@
     if (forgetBtn) {
         forgetBtn.addEventListener('click', () => {
             if (!confirm('Забыть токен? Придётся вводить заново.')) return;
-            clearStoredToken();
+            memoryToken = '';
             tokenInput.value = '';
             lastValidatedToken = null;
             lastValidationResult = null;
@@ -345,7 +314,16 @@
             fileSha = data.sha;
             const parsed = JSON.parse(b64decode(data.content || ''));
             if (!Array.isArray(parsed)) throw new Error('projects.json должен быть массивом');
+            
+            // Валидация данных ПЕРЕД рендером
+            const oldProjects = projects;
             projects = parsed;
+            const errors = validate();
+            if (errors.length > 0) {
+                projects = oldProjects;
+                throw new Error('Ошибки в файле: ' + errors.join('; '));
+            }
+
             markSaved();
             render();
             log('Файл загружен. Проектов: ' + projects.length, 'success');
@@ -460,9 +438,16 @@
                 errors.push(`#${n}: неверная иконка`);
             }
 
-            if (p.customIcon && !String(p.customIcon).startsWith('data:image/')) {
-                errors.push(`#${n}: неверный формат кастомной иконки`);
+            // Строгая проверка кастомной иконки
+            if (p.customIcon) {
+                const iconStr = String(p.customIcon);
+                if (iconStr.length > LIMITS.maxIconSize) {
+                    errors.push(`#${n}: иконка слишком большая`);
+                } else if (!SAFE_ICON_REGEX.test(iconStr)) {
+                    errors.push(`#${n}: неверный формат кастомной иконки`);
+                }
             }
+
             if (p.iconUrl) {
                 try {
                     const u = new URL(p.iconUrl);
@@ -516,7 +501,14 @@
 
             const iconSVG = getIcon(proj.icon);
             const currentTags = Array.isArray(proj.tags) ? proj.tags : [];
-            const displayIcon = proj.customIcon ? `<img src="${proj.customIcon}" alt="">` : (proj.iconUrl ? `<img src="${escapeHtml(proj.iconUrl)}" alt="">` : iconSVG);
+            
+            // Безопасная отрисовка иконки
+            let displayIcon = iconSVG;
+            if (proj.customIcon && SAFE_ICON_REGEX.test(proj.customIcon)) {
+                displayIcon = `<img src="${escapeHtml(proj.customIcon)}" alt="">`;
+            } else if (proj.iconUrl && /^https?:\/\//i.test(proj.iconUrl)) {
+                displayIcon = `<img src="${escapeHtml(proj.iconUrl)}" alt="">`;
+            }
 
             const tagSuggestions = allTags.map(t => {
                 const used = currentTags.includes(t);
@@ -651,9 +643,7 @@
                         if (f.key === 'icon') {
                             delete projects[idx].customIcon;
                             delete projects[idx].iconUrl;
-                            const preview = listEl.querySelector(`[data-preview="${idx}"]`);
-                            if (preview) preview.innerHTML = getIcon(e.target.value);
-                            render(); // перерисовываем, чтобы обновить кнопку сброса
+                            render(); // перерисовка сбросит превью и кнопку сброса
                         }
                     }
                 });
@@ -665,7 +655,7 @@
                 const file = e.target.files[0];
                 if (!file) return;
                 if (file.size > LIMITS.maxIconSize) {
-                    alert('Файл слишком большой (макс. 200 КБ)');
+                    alert(`Файл слишком большой (макс. ${Math.round(LIMITS.maxIconSize / 1024)} КБ)`);
                     e.target.value = '';
                     return;
                 }
@@ -688,13 +678,13 @@
                 const idx = parseInt(e.target.dataset.index);
                 if (!isNaN(idx) && projects[idx]) {
                     const val = e.target.value.trim();
-                    if (val) {
+                    if (val && /^https?:\/\//i.test(val)) {
                         projects[idx].iconUrl = val;
                         delete projects[idx].customIcon;
                         markUnsaved();
                         const preview = listEl.querySelector(`[data-preview="${idx}"]`);
                         if (preview) preview.innerHTML = `<img src="${escapeHtml(val)}" alt="">`;
-                    } else {
+                    } else if (!val) {
                         delete projects[idx].iconUrl;
                         markUnsaved();
                         render();
@@ -863,12 +853,23 @@
                 const data = JSON.parse(ev.target.result);
                 if (!Array.isArray(data)) throw new Error('Это не массив JSON');
                 if (data.length > LIMITS.MAX_COUNT) throw new Error(`Слишком много проектов (${data.length} > ${LIMITS.MAX_COUNT})`);
+                
+                // ВАЛИДАЦИЯ ДО ПРИМЕНЕНИЯ
+                const oldProjects = projects;
+                projects = data;
+                const errors = validate();
+                if (errors.length > 0) {
+                    projects = oldProjects;
+                    throw new Error('Ошибки валидации: ' + errors[0]);
+                }
+
                 if (confirm(`Импортировать ${data.length} проектов? Текущие будут заменены.`)) {
-                    projects = data;
                     markUnsaved();
                     render();
                     log('Импортировано ' + data.length + ' проектов', 'success');
                     toast('Импорт завершён');
+                } else {
+                    projects = oldProjects;
                 }
             } catch (err) {
                 alert('Ошибка импорта: ' + err.message);
