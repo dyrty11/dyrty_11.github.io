@@ -34,14 +34,32 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-body.menu-open { overflow: hidden; }
+/* =========================================
+   ФОНОВАЯ СЕТКА (ТЕКСТУРА) + ПАРАЛЛАКС
+   ========================================= */
+body::before {
+    content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background-image: 
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), 
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    transform: translate(var(--mouse-x, 0px), var(--mouse-y, 0px));
+    transition: transform 0.1s ease-out;
+    will-change: transform;
+}
+[data-theme="light"] body::before {
+    background-image: 
+        linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px), 
+        linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
+}
 
+body.menu-open { overflow: hidden; }
 .page-wrapper { flex: 1; display: flex; flex-direction: column; animation: fadeIn 0.4s ease forwards; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 body.page-exit .page-wrapper { opacity: 0; transition: opacity 0.2s ease; }
 
 /* =========================================
-   АНИМАЦИЯ РАМКИ ПО ЧАСОВОЙ СТРЕЛКЕ
+   АНИМАЦИЯ РАМКИ
    ========================================= */
 .animated-dashed { position: relative; border: none !important; }
 .animated-dashed::after {
@@ -69,16 +87,20 @@ body.page-exit .page-wrapper { opacity: 0; transition: opacity 0.2s ease; }
 }
 
 /* =========================================
-   ШАПКА
+   ШАПКА (GLASSMORPHISM + ИСПРАВЛЕННЫЙ ЛОГОТИП)
    ========================================= */
 header {
     position: fixed; top: 0; left: 0; width: 100%;
     display: flex; justify-content: space-between; align-items: center;
-    padding: 20px 5%; background: var(--bg-color); border-bottom: 1px solid var(--border);
+    padding: 15px 5%; /* Уменьшили отступ, чтобы шапка была аккуратнее */
+    background: rgba(5, 5, 5, 0.85); /* Полупрозрачный фон */
+    backdrop-filter: blur(12px); /* Размытие фона (эффект стекла) */
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
     z-index: 1002;
 }
+[data-theme="light"] header { background: rgba(244, 244, 244, 0.85); }
 
-/* ИДЕАЛЬНЫЙ ЛОГОТИП С ШЕСТИУГОЛЬНИКОМ */
 .logo { 
     font-family: var(--font-display); 
     font-size: 24px; 
@@ -88,19 +110,26 @@ header {
     letter-spacing: -1px; 
     display: flex; 
     align-items: center; 
-    gap: 12px; /* Отступ между иконкой и текстом */
+    gap: 6px; /* Минимальный отступ между иконкой и текстом */
     transition: opacity 0.2s;
 }
 .logo:hover { opacity: 0.8; }
 .logo span { color: var(--accent); }
-.logo svg { display: block; flex-shrink: 0; width: 28px; height: 28px; }
-.footer-logo { font-size: 20px; gap: 8px; }
-.footer-logo svg { width: 22px; height: 22px; }
+.logo svg { display: block; flex-shrink: 0; width: 26px; height: 26px; }
 
-nav.desktop-nav { display: flex; gap: 40px; }
+.footer-logo { font-size: 20px; gap: 6px; }
+.footer-logo svg { width: 20px; height: 20px; }
+
+nav.desktop-nav { display: flex; gap: 30px; }
 nav.desktop-nav a { 
-    font-size: 13px; font-weight: 500; color: var(--text-main); text-decoration: none; 
-    text-transform: uppercase; letter-spacing: 1px; transition: color 0.2s; position: relative;
+    font-size: 13px; 
+    font-weight: 500; 
+    color: var(--text-main); 
+    text-decoration: none; 
+    text-transform: uppercase; 
+    letter-spacing: 1px; 
+    transition: color 0.2s; 
+    position: relative;
 }
 nav.desktop-nav a:hover, nav.desktop-nav a.active { color: var(--accent); }
 
@@ -147,16 +176,16 @@ nav.desktop-nav a:hover, nav.desktop-nav a.active { color: var(--accent); }
 /* =========================================
    ОСНОВНОЙ КОНТЕНТ
    ========================================= */
-.container { max-width: 1400px; margin: 0 auto; padding: 140px 5% 80px; flex: 1; width: 100%; }
+.container { max-width: 1400px; margin: 0 auto; padding: 120px 5% 80px; flex: 1; width: 100%; }
 
 .hero { display: flex; flex-direction: column; justify-content: center; min-height: 60vh; border-bottom: 1px solid var(--border); padding-bottom: 60px; margin-bottom: 60px; }
-.badge { font-size: 12px; color: var(--accent); border: 1px solid var(--accent); padding: 4px 10px; display: inline-block; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; align-self: flex-start; }
+.badge { font-size: 12px; color: var(--accent); border: 1px solid var(--accent); padding: 4px 10px; display: inline-block; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; align-self: flex-start; background: var(--bg-color); }
 .hero h1 { font-family: var(--font-display); font-size: clamp(50px, 12vw, 140px); line-height: 0.9; font-weight: 700; text-transform: uppercase; letter-spacing: -3px; margin-bottom: 30px; }
 .hero h1 span { color: transparent; -webkit-text-stroke: 2px var(--text-main); }
 .hero p { font-size: 16px; color: var(--text-muted); max-width: 500px; margin-bottom: 40px; }
 .hero-buttons { display: flex; gap: 20px; }
 
-.btn { font-family: var(--font-mono); font-size: 13px; font-weight: 500; text-transform: uppercase; padding: 16px 32px; border: 1px solid var(--border); background: transparent; color: var(--text-main); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 10px; transition: background 0.2s, color 0.2s, border-color 0.2s; position: relative; }
+.btn { font-family: var(--font-mono); font-size: 13px; font-weight: 500; text-transform: uppercase; padding: 16px 32px; border: 1px solid var(--border); background: var(--bg-color); color: var(--text-main); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 10px; transition: background 0.2s, color 0.2s, border-color 0.2s; position: relative; }
 .btn:hover { background: var(--accent); color: #000; border-color: var(--accent); }
 .btn-primary { border-color: var(--accent); color: var(--accent); }
 .btn-primary:hover { background: var(--accent); color: #000; }
@@ -188,7 +217,7 @@ nav.desktop-nav a:hover, nav.desktop-nav a.active { color: var(--accent); }
 
 .controls-container { display: flex; flex-direction: column; gap: 20px; margin-bottom: 30px; }
 .search-box { position: relative; width: 100%; max-width: 400px; }
-.search-box input { width: 100%; padding: 12px 12px 12px 40px; border: 1px solid var(--border); background: transparent; color: var(--text-main); font-family: var(--font-mono); font-size: 14px; }
+.search-box input { width: 100%; padding: 12px 12px 12px 40px; border: 1px solid var(--border); background: var(--bg-color); color: var(--text-main); font-family: var(--font-mono); font-size: 14px; }
 .search-box input:focus { outline: none; border-color: var(--accent); }
 .search-box svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--text-muted); }
 
@@ -218,17 +247,17 @@ nav.desktop-nav a:hover, nav.desktop-nav a.active { color: var(--accent); }
 .services-overlay p { font-size: 16px; max-width: 400px; font-weight: bold; }
 
 .contact-grid { display: grid; grid-template-columns: 1fr; gap: 20px; margin-bottom: 40px; max-width: 500px; }
-.contact-card { border: 1px solid var(--border); padding: 30px; text-decoration: none; color: var(--text-main); display: flex; flex-direction: column; align-items: flex-start; transition: border-color 0.3s; }
+.contact-card { border: 1px solid var(--border); padding: 30px; text-decoration: none; color: var(--text-main); display: flex; flex-direction: column; align-items: flex-start; transition: border-color 0.3s; background: var(--bg-color); }
 .contact-card:hover { border-color: var(--accent); }
 .contact-icon { color: var(--accent); margin-bottom: 15px; }
 .contact-icon svg { width: 24px; height: 24px; }
 .contact-card h3 { font-family: var(--font-display); font-size: 18px; margin-bottom: 5px; }
 .contact-card p { font-size: 13px; color: var(--text-muted); }
 
-.contact-form { border: 1px solid var(--border); padding: 40px; max-width: 800px; }
+.contact-form { border: 1px solid var(--border); padding: 40px; max-width: 800px; background: var(--bg-color); }
 .form-group { margin-bottom: 20px; }
 .form-group label { display: block; font-size: 12px; text-transform: uppercase; margin-bottom: 8px; color: var(--text-muted); }
-.form-group input, .form-group textarea { width: 100%; padding: 15px; border: 1px solid var(--border); background: var(--bg-color); color: var(--text-main); font-family: var(--font-mono); font-size: 14px; transition: border-color 0.3s; }
+.form-group input, .form-group textarea { width: 100%; padding: 15px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-main); font-family: var(--font-mono); font-size: 14px; transition: border-color 0.3s; }
 .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--accent); }
 .form-group textarea { resize: vertical; min-height: 120px; }
 
@@ -239,7 +268,7 @@ nav.desktop-nav a:hover, nav.desktop-nav a.active { color: var(--accent); }
 .submit-btn { width: 100%; padding: 16px; background: var(--accent); color: #000; border: none; font-family: var(--font-mono); font-size: 14px; font-weight: 600; text-transform: uppercase; cursor: pointer; transition: opacity 0.2s; }
 .submit-btn:hover { opacity: 0.8; }
 
-footer { border-top: 1px solid var(--border); padding: 40px 5%; display: flex; flex-direction: column; gap: 20px; }
+footer { border-top: 1px solid var(--border); padding: 40px 5%; display: flex; flex-direction: column; gap: 20px; background: var(--bg-color); }
 .footer-content { max-width: 1400px; margin: 0 auto; width: 100%; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
 .footer-links { display: flex; gap: 20px; }
 .footer-links a { font-size: 12px; color: var(--text-muted); text-decoration: none; text-transform: uppercase; }
@@ -264,7 +293,7 @@ footer { border-top: 1px solid var(--border); padding: 40px 5%; display: flex; f
 }
 
 /* =========================================
-   ФИШКИ (Курсор, Параллакс, Анимации)
+   ФИШКИ (Курсор, Анимации)
    ========================================= */
 .custom-cursor {
     position: fixed; top: 0; left: 0; width: 32px; height: 32px;
@@ -280,10 +309,6 @@ footer { border-top: 1px solid var(--border); padding: 40px 5%; display: flex; f
     position: fixed; top: 0; left: 0; width: 6px; height: 6px;
     background: var(--accent); pointer-events: none; z-index: 100000;
     transform: translate(-50%, -50%);
-}
-body::before {
-    transform: translate(var(--mouse-x, 0px), var(--mouse-y, 0px));
-    transition: transform 0.1s ease-out; will-change: transform;
 }
 
 .project-card.reveal-init { opacity: 0; transform: translateY(30px); }
