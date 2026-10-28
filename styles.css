@@ -150,7 +150,7 @@ nav.desktop-nav a:hover, nav.desktop-nav a.active { color: var(--accent); }
 .view-all:hover { color: var(--accent); border-color: var(--accent); }
 
 .projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); }
-.project-card { background: var(--card-bg); padding: 30px; display: flex; flex-direction: column; transition: background 0.3s, opacity 0.5s ease, transform 0.5s ease; }
+.project-card { background: var(--card-bg); padding: 30px; display: flex; flex-direction: column; transition: background 0.3s; }
 .project-card:hover { background: var(--bg-color); }
 .project-icon { margin-bottom: 20px; color: var(--accent); }
 .project-icon svg { width: 32px; height: 32px; }
@@ -250,42 +250,32 @@ footer { border-top: 1px solid var(--border); padding: 40px 5%; display: flex; f
    ФИШКИ (Курсор, Параллакс, Анимации)
    ========================================= */
 .custom-cursor {
-    position: fixed;
-    top: 0; left: 0;
-    width: 32px; height: 32px;
-    border: 1px solid var(--accent);
-    pointer-events: none;
-    z-index: 99999;
+    position: fixed; top: 0; left: 0; width: 32px; height: 32px;
+    border: 1px solid var(--accent); pointer-events: none; z-index: 99999;
     transition: width 0.2s, height 0.2s, background-color 0.2s;
     transform: translate(-50%, -50%);
 }
 .custom-cursor.hover {
-    width: 50px; height: 50px;
-    background: var(--accent);
-    opacity: 0.2;
-    border-color: transparent;
+    width: 50px; height: 50px; background: var(--accent);
+    opacity: 0.2; border-color: transparent;
 }
 .custom-cursor-dot {
-    position: fixed;
-    top: 0; left: 0;
-    width: 6px; height: 6px;
-    background: var(--accent);
-    pointer-events: none;
-    z-index: 100000;
+    position: fixed; top: 0; left: 0; width: 6px; height: 6px;
+    background: var(--accent); pointer-events: none; z-index: 100000;
     transform: translate(-50%, -50%);
 }
-
 body::before {
     transform: translate(var(--mouse-x, 0px), var(--mouse-y, 0px));
-    transition: transform 0.1s ease-out;
-    will-change: transform;
+    transition: transform 0.1s ease-out; will-change: transform;
 }
 
-.project-card {
+/* Безопасная анимация карточек (скрыты только когда JS активен) */
+.project-card.reveal-init {
     opacity: 0;
     transform: translateY(30px);
 }
-.project-card.visible {
+.project-card.reveal-init.visible {
     opacity: 1;
     transform: translateY(0);
+    transition: opacity 0.5s ease, transform 0.5s ease;
 }

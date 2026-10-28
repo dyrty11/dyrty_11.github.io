@@ -1,4 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Функция экранирования (была пропущена ранее)
+    function escapeHtml(s) {
+        return String(s).replace(/[&<>"'`]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c]));
+    }
+
     // --- 1. Переключение темы ---
     const themeToggle = document.getElementById('themeToggle');
     const htmlElement = document.documentElement;
@@ -41,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- 3. Глобальная анимация появления карточек (для index.html и projects.html) ---
+    // --- 3. Глобальная анимация появления карточек (с защитой от сбоев) ---
     let projectCardObserver = null;
     if (window.IntersectionObserver) {
         projectCardObserver = new IntersectionObserver((entries) => {
@@ -56,16 +61,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function observeProjectCards() {
         document.querySelectorAll('.project-card:not(.visible)').forEach((card, i) => {
+            card.classList.add('reveal-init');
             card.style.transitionDelay = `${(i % 6) * 0.08}s`;
             if (projectCardObserver) {
                 projectCardObserver.observe(card);
             } else {
-                card.classList.add('visible'); // fallback
+                card.classList.add('visible');
             }
         });
+
+        // Страховка: если observer не сработал за 1.5 сек, показываем всё принудительно
+        setTimeout(() => {
+            document.querySelectorAll('.project-card.reveal-init:not(.visible)').forEach(card => {
+                card.classList.add('visible');
+            });
+        }, 1500);
     }
 
-    // Запускаем для статических карточек на index.html
     setTimeout(observeProjectCards, 100);
 
     // --- 4. Логика динамических проектов ---
@@ -235,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 projectsGrid.appendChild(card);
             });
 
-            // Запускаем анимацию для новых карточек
+            // Анимация появления для динамических карточек
             setTimeout(observeProjectCards, 50);
         }
         
