@@ -1,4 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <rect width="100" height="100" fill="#050505"/>
-  <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="72" fill="#ffffff">P<tspan fill="#ccff00">.</tspan></text>
+    <style>
+        .bg     { fill: #050505; }
+        .stroke { stroke: #ccff00; }
+        .dot    { fill: #ccff00; }
+        
+        /* Светлая тема браузера */
+        @media (prefers-color-scheme: light) {
+            .bg     { fill: #ffffff; }
+            .stroke { stroke: #050505; }
+            .dot    { fill: #88cc00; }
+        }
+    </style>
+    
+    <rect class="bg" width="100" height="100"/>
+    <polygon class="stroke" points="50,12 83,31 83,69 50,88 17,69 17,31" fill="none" stroke-width="6" stroke-linejoin="miter"/>
 </svg>
