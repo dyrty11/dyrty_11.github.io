@@ -160,6 +160,23 @@
             display: flex; align-items: center; justify-content: center; color: var(--accent);
         }
         .icon-preview svg { width: 24px; height: 24px; }
+        
+        .icon-preview img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .custom-icon-upload {
+            margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+        }
+        .custom-icon-upload label {
+            padding: 6px 10px; border: 1px solid var(--border); color: var(--text-muted);
+            font-size: 10px; text-transform: uppercase; cursor: pointer; transition: all 0.2s;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+        .custom-icon-upload label:hover { border-color: var(--accent); color: var(--accent); }
+        .custom-icon-upload input[type="text"] {
+            flex: 1; min-width: 120px; padding: 6px 8px; background: var(--bg);
+            border: 1px solid var(--border); color: var(--text);
+            font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+        }
+        .custom-icon-upload input[type="text"]:focus { outline: none; border-color: var(--accent); }
 
         .color-row { display: flex; gap: 8px; align-items: center; }
         .color-swatch { width: 24px; height: 24px; cursor: pointer; border: 2px solid var(--border); transition: transform 0.2s; }

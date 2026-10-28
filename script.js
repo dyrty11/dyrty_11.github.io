@@ -150,10 +150,18 @@ document.addEventListener('DOMContentLoaded', () => {
             projects.forEach(project => {
                 const card = document.createElement('div');
                 card.className = 'project-card animated-dashed';
+                
                 const iconDiv = document.createElement('div');
                 iconDiv.className = 'project-icon';
-                const iconKey = Object.prototype.hasOwnProperty.call(icons, project.icon) ? project.icon : 'file';
-                iconDiv.innerHTML = icons[iconKey];
+                if (project.customIcon) {
+                    iconDiv.innerHTML = `<img src="${project.customIcon}" alt="" class="custom-project-icon">`;
+                } else if (project.iconUrl) {
+                    iconDiv.innerHTML = `<img src="${escapeHtml(project.iconUrl)}" alt="" class="custom-project-icon" onerror="this.style.display='none'">`;
+                } else {
+                    const iconKey = Object.prototype.hasOwnProperty.call(icons, project.icon) ? project.icon : 'file';
+                    iconDiv.innerHTML = icons[iconKey];
+                }
+                
                 const titleEl = document.createElement('h3');
                 titleEl.textContent = String(project.title || '');
                 const descEl = document.createElement('p');
@@ -191,6 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>'
                     : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>';
                 linkEl.insertAdjacentHTML('beforeend', btnIcon);
+                
                 card.appendChild(iconDiv);
                 card.appendChild(titleEl);
                 card.appendChild(descEl);
@@ -198,6 +207,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 card.appendChild(linkEl);
                 projectsGrid.appendChild(card);
             });
+
+            // Анимация появления карточек
+            setTimeout(() => {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('visible');
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.1 });
+                document.querySelectorAll('.project-card').forEach((card, i) => {
+                    card.style.transitionDelay = `${i * 0.08}s`;
+                    observer.observe(card);
+                });
+            }, 50);
         }
         
         document.querySelectorAll('.tab-btn').forEach(button => {
@@ -256,7 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 5. Мобильное меню (Боковая панель) ---
+    // --- 5. Мобильное меню ---
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     const mobileNav = document.getElementById('mobileNav');
     const menuBackdrop = document.createElement('div');
@@ -292,6 +317,50 @@ document.addEventListener('DOMContentLoaded', () => {
             el.addEventListener('mouseleave', () => {
                 el.style.transform = '';
             });
+        });
+    }
+
+    // --- 7. Фишки с DarkProject (Курсор, Параллакс) ---
+    if (window.matchMedia("(pointer: fine)").matches) {
+        const cursor = document.createElement('div');
+        cursor.className = 'custom-cursor';
+        document.body.appendChild(cursor);
+        const dot = document.createElement('div');
+        dot.className = 'custom-cursor-dot';
+        document.body.appendChild(dot);
+
+        let mouseX = 0, mouseY = 0;
+        let curX = 0, curY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            dot.style.transform = `translate(${mouseX}px, ${mouseY}px)`;
+
+            // Параллакс сетки
+            const px = (e.clientX / window.innerWidth - 0.5) * 10;
+            const py = (e.clientY / window.innerHeight - 0.5) * 10;
+            document.body.style.setProperty('--mouse-x', `${px}px`);
+            document.body.style.setProperty('--mouse-y', `${py}px`);
+        });
+
+        (function animate() {
+            curX += (mouseX - curX) * 0.15;
+            curY += (mouseY - curY) * 0.15;
+            cursor.style.transform = `translate(${curX}px, ${curY}px)`;
+            requestAnimationFrame(animate);
+        })();
+
+        const hoverTargets = 'a, button, .project-card, .btn, .tag-filter-btn';
+        document.body.addEventListener('mouseover', (e) => {
+            if (e.target.closest(hoverTargets)) {
+                cursor.classList.add('hover');
+            }
+        });
+        document.body.addEventListener('mouseout', (e) => {
+            if (e.target.closest(hoverTargets)) {
+                cursor.classList.remove('hover');
+            }
         });
     }
 });

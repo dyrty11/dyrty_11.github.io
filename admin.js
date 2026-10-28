@@ -3,8 +3,6 @@
     const REPO_NAME = 'dyrty_11.github.io';
     const FILE_PATH = 'projects.json';
     const STORAGE_KEY = 'gh_admin_token';
-
-        // Project-site: https://dyrty11.github.io/dyrty_11.github.io/
     const SITE_URL = `https://${REPO_OWNER}.github.io/${REPO_NAME}/projects.html`;
 
     const LIMITS = {
@@ -15,7 +13,8 @@
         buttonText: 40,
         tag: 40,
         tagsCount: 20,
-        importFileSize: 5 * 1024 * 1024
+        importFileSize: 5 * 1024 * 1024,
+        maxIconSize: 200 * 1024
     };
 
     const ICON_SVGS = {
@@ -51,6 +50,13 @@
     let searchFilter = '';
     let draggedIndex = null;
     let saving = false;
+    let loading = false;
+
+    // Токен-чекинг
+    let lastValidatedToken = null;
+    let lastValidationResult = null;
+    let tokenCheckTimeout = null;
+    let tokenCheckAbort = null;
 
     const listEl = document.getElementById('projectsList');
     const tokenInput = document.getElementById('tokenInput');
@@ -63,7 +69,6 @@
     const themeToggle = document.getElementById('themeToggle');
     const savedTheme = (function(){ try { return localStorage.getItem('admin_theme') || 'dark'; } catch(e) { return 'dark'; } })();
     document.documentElement.setAttribute('data-theme', savedTheme);
-
     themeToggle.addEventListener('click', () => {
         const cur = document.documentElement.getAttribute('data-theme');
         const next = cur === 'dark' ? 'light' : 'dark';
@@ -71,12 +76,7 @@
         try { localStorage.setItem('admin_theme', next); } catch (e) {}
     });
 
-        // ====== ТОКЕН ======
-    let lastValidatedToken = null;
-    let lastValidationResult = null;
-    let tokenCheckTimeout = null;
-    let tokenCheckAbort = null;
-
+    // ====== ТОКЕН ======
     function getStoredToken() {
         let t = null;
         try { t = sessionStorage.getItem(STORAGE_KEY); } catch (e) {}
@@ -129,13 +129,10 @@
     }
 
     async function checkToken(token) {
-        if (tokenCheckAbort) {
-            try { tokenCheckAbort.abort(); } catch (e) {}
-        }
+        if (tokenCheckAbort) { try { tokenCheckAbort.abort(); } catch (e) {} }
         tokenCheckAbort = new AbortController();
         const signal = tokenCheckAbort.signal;
 
-        // Никогда не показываем токен: ни в статусе, ни в логах, ни в консоли.
         const safeReason = function(e) {
             if (!e) return 'неизвестная ошибка';
             if (e.name === 'AbortError') return 'отменено';
@@ -144,75 +141,64 @@
 
         updateTokenStatus('checking');
         try {
-            // Шаг 1 — токен в принципе валиден?
-                        const userRes = await fetch('https://api.github.com/user', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/vnd.github+json',
-                    'X-GitHub-Api-Version': '2022-11-28'
-                },
+            const userRes = await fetch('https://api.github.com/user', {
+                headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' },
                 signal
             });
             if (userRes.status === 401) {
                 lastValidatedToken = token;
-                lastValidationResult = { ok: false, reason: 'Токен недействителен (401)' };
+                lastValidationResult = { ok: false, reason: 'Недействителен' };
                 updateTokenStatus('error', 'Недействителен');
                 log('Токен недействителен (401). Создайте новый: https://github.com/settings/tokens', 'error');
                 return;
             }
             if (!userRes.ok) {
                 lastValidatedToken = token;
-                lastValidationResult = { ok: false, reason: `HTTP ${userRes.status}` };
+                lastValidationResult = { ok: false, reason: `Ошибка ${userRes.status}` };
                 updateTokenStatus('error', 'Ошибка ' + userRes.status);
                 return;
             }
             const user = await userRes.json();
             const login = user && user.login ? String(user.login) : '';
 
-            // Шаг 2 — есть ли доступ к репозиторию?
             const repoRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/vnd.github+json',
-                    'X-GitHub-Api-Version': '2022-11-28'
-                },
+                headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' },
                 signal
             });
             if (repoRes.status === 404) {
                 lastValidatedToken = token;
-                lastValidationResult = { ok: false, reason: `Нет доступа к ${REPO_OWNER}/${REPO_NAME}` };
+                lastValidationResult = { ok: false, reason: 'Нет доступа к репо' };
                 updateTokenStatus('error', 'Нет доступа к репо');
-                log(`Токен действителен, но нет доступа к ${REPO_OWNER}/${REPO_NAME}. Проверьте Repository access в настройках токена.`, 'error');
+                log(`Токен действителен, но нет доступа к ${REPO_OWNER}/${REPO_NAME}.`, 'error');
                 return;
             }
             if (!repoRes.ok) {
                 lastValidatedToken = token;
-                lastValidationResult = { ok: false, reason: `HTTP ${repoRes.status}` };
+                lastValidationResult = { ok: false, reason: `Ошибка ${repoRes.status}` };
                 updateTokenStatus('error', 'Ошибка ' + repoRes.status);
                 return;
             }
             const repo = await repoRes.json();
             const perms = (repo && repo.permissions) || {};
 
-            // Шаг 3 — право на запись (Contents: Read & Write)
             if (!perms.push) {
                 lastValidatedToken = token;
                 lastValidationResult = { ok: true, user: login, warning: 'read-only' };
                 updateTokenStatus('warning', 'Read only');
-                log('Токен действителен, но права на запись не подтверждены. Сохранение может не сработать (403). Нужно Contents: Read and write.', 'error');
+                log('Токен действителен, но права на запись не подтверждены. Сохранение может не сработать (403).', 'error');
                 return;
             }
 
             lastValidatedToken = token;
             lastValidationResult = { ok: true, user: login };
             updateTokenStatus('connected', login);
-            log('Токен действителен. Доступ к репозиторию подтверждён.', 'success');
+            log('Токен действителен. Доступ подтверждён.', 'success');
         } catch (e) {
             if (e && e.name === 'AbortError') return;
             lastValidatedToken = token;
             lastValidationResult = { ok: false, reason: safeReason(e) };
             updateTokenStatus('error', 'Сеть');
-                        log('Не удалось проверить токен: ' + safeReason(e), 'error');
+            log('Не удалось проверить токен: ' + safeReason(e), 'error');
         } finally {
             tokenCheckAbort = null;
         }
@@ -221,43 +207,30 @@
     function scheduleTokenCheck() {
         if (tokenCheckTimeout) clearTimeout(tokenCheckTimeout);
         const token = tokenInput.value.replace(/[\s\u200B-\u200D\uFEFF]/g, '');
-
         if (!token) {
-            if (tokenCheckAbort) {
-                try { tokenCheckAbort.abort(); } catch (e) {}
-            }
+            if (tokenCheckAbort) { try { tokenCheckAbort.abort(); } catch (e) {} }
             lastValidatedToken = null;
             lastValidationResult = null;
             updateTokenStatus('empty');
             return;
         }
-
-        // Кэш: если токен тот же и результат известен — не спамим API
         if (token === lastValidatedToken && lastValidationResult) {
-            if (lastValidationResult.ok && !lastValidationResult.warning) {
-                updateTokenStatus('connected', lastValidationResult.user);
-            } else if (lastValidationResult.ok && lastValidationResult.warning) {
-                updateTokenStatus('warning', 'Read only');
-            } else {
-                updateTokenStatus('error', lastValidationResult.reason || 'Недействителен');
-            }
+            if (lastValidationResult.ok && !lastValidationResult.warning) updateTokenStatus('connected', lastValidationResult.user);
+            else if (lastValidationResult.ok && lastValidationResult.warning) updateTokenStatus('warning', 'Read only');
+            else updateTokenStatus('error', lastValidationResult.reason || 'Недействителен');
             return;
         }
-
         updateTokenStatus('checking');
         tokenCheckTimeout = setTimeout(() => checkToken(token), 700);
     }
 
-        async function ensureTokenValid(token) {
+    async function ensureTokenValid(token) {
         if (tokenCheckTimeout) { clearTimeout(tokenCheckTimeout); tokenCheckTimeout = null; }
-        if (lastValidatedToken === token && lastValidationResult) {
-            return lastValidationResult;
-        }
+        if (lastValidatedToken === token && lastValidationResult) return lastValidationResult;
         await checkToken(token);
         return lastValidationResult || { ok: false, reason: 'неизвестно' };
     }
 
-    // Инициализация
     const storedToken = getStoredToken();
     if (storedToken) {
         tokenInput.value = storedToken;
@@ -266,7 +239,6 @@
     } else {
         updateTokenStatus('empty');
     }
-
     tokenInput.addEventListener('input', () => {
         setStoredToken(tokenInput.value);
         scheduleTokenCheck();
@@ -280,9 +252,7 @@
             tokenInput.value = '';
             lastValidatedToken = null;
             lastValidationResult = null;
-            if (tokenCheckAbort) {
-                try { tokenCheckAbort.abort(); } catch (e) {}
-            }
+            if (tokenCheckAbort) { try { tokenCheckAbort.abort(); } catch (e) {} }
             updateTokenStatus('empty');
             toast('Токен удалён');
         });
@@ -316,16 +286,11 @@
         if (hasUnsavedChanges) { e.preventDefault(); e.returnValue = ''; }
     });
 
-    // ====== STATS ======
     function updateStats() {
         const total = projects.length;
         const websites = projects.filter(p => p.category === 'website').length;
         const files = projects.filter(p => p.category === 'file').length;
-        statsEl.innerHTML = `
-            <span>Всего: <strong>${total}</strong></span>
-            <span>Сайтов: <strong>${websites}</strong></span>
-            <span>Файлов: <strong>${files}</strong></span>
-        `;
+        statsEl.innerHTML = `<span>Всего: <strong>${total}</strong></span><span>Сайтов: <strong>${websites}</strong></span><span>Файлов: <strong>${files}</strong></span>`;
     }
 
     // ====== Base64 UTF-8 ======
@@ -343,7 +308,6 @@
     }
 
     // ====== GITHUB API ======
-    let loading = false;
     async function fetchFile() {
         if (loading) return;
         if (hasUnsavedChanges && !confirm('Есть несохранённые изменения. Загрузить с GitHub и потерять их?')) return;
@@ -351,7 +315,7 @@
         const token = tokenInput.value.replace(/[\s\u200B-\u200D\uFEFF]/g, '');
         if (!token) { toast('Введите токен'); return; }
 
-                loading = true;
+        loading = true;
         const loadBtnEl = document.getElementById('loadBtn');
         if (loadBtnEl) loadBtnEl.disabled = true;
 
@@ -367,11 +331,7 @@
         log('Загрузка projects.json...');
         try {
             const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/vnd.github+json',
-                    'X-GitHub-Api-Version': '2022-11-28'
-                }
+                headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' }
             });
             if (!res.ok) {
                 let serverMsg = '';
@@ -390,7 +350,7 @@
             render();
             log('Файл загружен. Проектов: ' + projects.length, 'success');
             toast('Файл загружен!');
-                } catch (e) {
+        } catch (e) {
             log('Ошибка загрузки: ' + e.message, 'error');
         } finally {
             loading = false;
@@ -404,7 +364,7 @@
         const saveBtn = document.getElementById('saveBtn');
         if (saveBtn) saveBtn.disabled = true;
         try {
-                        const token = tokenInput.value.replace(/[\s\u200B-\u200D\uFEFF]/g, '');
+            const token = tokenInput.value.replace(/[\s\u200B-\u200D\uFEFF]/g, '');
             if (!token) { toast('Введите токен'); return; }
             if (!fileSha) { toast('Сначала загрузите файл с GitHub'); return; }
 
@@ -479,7 +439,7 @@
                 try {
                     const u = new URL(link, window.location.href);
                     if (!['http:', 'https:', 'mailto:'].includes(u.protocol)) {
-                        errors.push(`#${n}: недопустимая схема URL (только http/https/mailto)`);
+                        errors.push(`#${n}: недопустимая схема URL`);
                     }
                 } catch (e) {
                     errors.push(`#${n}: некорректный URL`);
@@ -495,14 +455,27 @@
             if (p.color && !/^#[0-9a-fA-F]{6}$/.test(String(p.color))) {
                 errors.push(`#${n}: цвет должен быть в формате #RRGGBB`);
             }
-                        if (p.icon && !Object.prototype.hasOwnProperty.call(ICON_SVGS, p.icon)) {
+
+            if (p.icon && !Object.prototype.hasOwnProperty.call(ICON_SVGS, p.icon)) {
                 errors.push(`#${n}: неверная иконка`);
+            }
+
+            if (p.customIcon && !String(p.customIcon).startsWith('data:image/')) {
+                errors.push(`#${n}: неверный формат кастомной иконки`);
+            }
+            if (p.iconUrl) {
+                try {
+                    const u = new URL(p.iconUrl);
+                    if (!['http:', 'https:'].includes(u.protocol)) errors.push(`#${n}: URL иконки должен быть http/https`);
+                } catch (e) {
+                    errors.push(`#${n}: некорректный URL иконки`);
+                }
             }
 
             if (Array.isArray(p.tags)) {
                 if (p.tags.length > LIMITS.tagsCount) errors.push(`#${n}: тегов > ${LIMITS.tagsCount}`);
                 p.tags.forEach(t => {
-                    if (String(t).length > LIMITS.tag) errors.push(`#${n}: тег "${String(t).slice(0,20)}…" слишком длинный (>${LIMITS.tag})`);
+                    if (String(t).length > LIMITS.tag) errors.push(`#${n}: тег слишком длинный (>${LIMITS.tag})`);
                 });
             }
         });
@@ -543,6 +516,7 @@
 
             const iconSVG = getIcon(proj.icon);
             const currentTags = Array.isArray(proj.tags) ? proj.tags : [];
+            const displayIcon = proj.customIcon ? `<img src="${proj.customIcon}" alt="">` : (proj.iconUrl ? `<img src="${escapeHtml(proj.iconUrl)}" alt="">` : iconSVG);
 
             const tagSuggestions = allTags.map(t => {
                 const used = currentTags.includes(t);
@@ -607,7 +581,7 @@
                     <div class="form-group">
                         <label>Иконка</label>
                         <div class="icon-row">
-                            <div class="icon-preview" data-preview="${index}">${iconSVG}</div>
+                            <div class="icon-preview" data-preview="${index}">${displayIcon}</div>
                             <select class="field-icon" data-index="${index}">
                                 <option value="layout" ${proj.icon === 'layout' ? 'selected' : ''}>Макет</option>
                                 <option value="file" ${proj.icon === 'file' ? 'selected' : ''}>Файл</option>
@@ -621,6 +595,12 @@
                                 <option value="security" ${proj.icon === 'security' ? 'selected' : ''}>Безопасность</option>
                                 <option value="tools" ${proj.icon === 'tools' ? 'selected' : ''}>Инструменты</option>
                             </select>
+                        </div>
+                        <div class="custom-icon-upload">
+                            <input type="file" class="field-customIconFile" accept="image/*" data-index="${index}" style="display:none;" id="customIconFile_${index}">
+                            <label for="customIconFile_${index}">📁 Загрузить</label>
+                            ${proj.customIcon || proj.iconUrl ? `<button class="icon-btn danger" data-action="removeCustomIcon" data-index="${index}" title="Сбросить">✕</button>` : ''}
+                            <input type="text" class="field-iconUrl" placeholder="или URL..." value="${escapeHtml(proj.iconUrl || '')}" data-index="${index}">
                         </div>
                     </div>
                     <div class="form-group">
@@ -669,11 +649,57 @@
                         projects[idx][f.key] = e.target.value;
                         markUnsaved();
                         if (f.key === 'icon') {
+                            delete projects[idx].customIcon;
+                            delete projects[idx].iconUrl;
                             const preview = listEl.querySelector(`[data-preview="${idx}"]`);
                             if (preview) preview.innerHTML = getIcon(e.target.value);
+                            render(); // перерисовываем, чтобы обновить кнопку сброса
                         }
                     }
                 });
+            });
+        });
+
+        listEl.querySelectorAll('.field-customIconFile').forEach(input => {
+            input.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                if (file.size > LIMITS.maxIconSize) {
+                    alert('Файл слишком большой (макс. 200 КБ)');
+                    e.target.value = '';
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const idx = parseInt(e.target.dataset.index);
+                    if (!isNaN(idx) && projects[idx]) {
+                        projects[idx].customIcon = ev.target.result;
+                        delete projects[idx].iconUrl;
+                        markUnsaved();
+                        render();
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        listEl.querySelectorAll('.field-iconUrl').forEach(input => {
+            input.addEventListener('input', (e) => {
+                const idx = parseInt(e.target.dataset.index);
+                if (!isNaN(idx) && projects[idx]) {
+                    const val = e.target.value.trim();
+                    if (val) {
+                        projects[idx].iconUrl = val;
+                        delete projects[idx].customIcon;
+                        markUnsaved();
+                        const preview = listEl.querySelector(`[data-preview="${idx}"]`);
+                        if (preview) preview.innerHTML = `<img src="${escapeHtml(val)}" alt="">`;
+                    } else {
+                        delete projects[idx].iconUrl;
+                        markUnsaved();
+                        render();
+                    }
+                }
             });
         });
 
@@ -730,6 +756,13 @@
             btn.addEventListener('click', (e) => {
                 const idx = parseInt(e.currentTarget.dataset.index);
                 const action = e.currentTarget.dataset.action;
+                if (action === 'removeCustomIcon') {
+                    delete projects[idx].customIcon;
+                    delete projects[idx].iconUrl;
+                    markUnsaved();
+                    render();
+                    return;
+                }
                 if (action === 'delete') {
                     if (confirm(`Удалить проект "${projects[idx]?.title || ''}"?`)) {
                         projects.splice(idx, 1);
