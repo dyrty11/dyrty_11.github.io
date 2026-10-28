@@ -41,7 +41,34 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- 3. Логика проектов ---
+    // --- 3. Глобальная анимация появления карточек (для index.html и projects.html) ---
+    let projectCardObserver = null;
+    if (window.IntersectionObserver) {
+        projectCardObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    projectCardObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+    }
+
+    function observeProjectCards() {
+        document.querySelectorAll('.project-card:not(.visible)').forEach((card, i) => {
+            card.style.transitionDelay = `${(i % 6) * 0.08}s`;
+            if (projectCardObserver) {
+                projectCardObserver.observe(card);
+            } else {
+                card.classList.add('visible'); // fallback
+            }
+        });
+    }
+
+    // Запускаем для статических карточек на index.html
+    setTimeout(observeProjectCards, 100);
+
+    // --- 4. Логика динамических проектов ---
     const projectsGrid = document.getElementById('projectsGrid');
     if (projectsGrid) {
         const icons = {
@@ -208,21 +235,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 projectsGrid.appendChild(card);
             });
 
-            // Анимация появления карточек
-            setTimeout(() => {
-                const observer = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            entry.target.classList.add('visible');
-                            observer.unobserve(entry.target);
-                        }
-                    });
-                }, { threshold: 0.1 });
-                document.querySelectorAll('.project-card').forEach((card, i) => {
-                    card.style.transitionDelay = `${i * 0.08}s`;
-                    observer.observe(card);
-                });
-            }, 50);
+            // Запускаем анимацию для новых карточек
+            setTimeout(observeProjectCards, 50);
         }
         
         document.querySelectorAll('.tab-btn').forEach(button => {
@@ -243,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- 4. Обработка формы контактов (Formcarry AJAX) ---
+    // --- 5. Обработка формы контактов (Formcarry AJAX) ---
     const contactForm = document.getElementById('contactForm');
     if (contactForm) {
         contactForm.addEventListener('submit', async function (e) {
@@ -281,7 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 5. Мобильное меню ---
+    // --- 6. Мобильное меню ---
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     const mobileNav = document.getElementById('mobileNav');
     const menuBackdrop = document.createElement('div');
@@ -305,7 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 6. Магнитный эффект для кнопок ---
+    // --- 7. Магнитный эффект для кнопок ---
     if (window.matchMedia("(pointer: fine)").matches) {
         document.querySelectorAll('.btn, .project-card').forEach(el => {
             el.addEventListener('mousemove', (e) => {
@@ -320,7 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 7. Фишки с DarkProject (Курсор, Параллакс) ---
+    // --- 8. Кастомный курсор и параллакс ---
     if (window.matchMedia("(pointer: fine)").matches) {
         const cursor = document.createElement('div');
         cursor.className = 'custom-cursor';
@@ -337,7 +351,6 @@ document.addEventListener('DOMContentLoaded', () => {
             mouseY = e.clientY;
             dot.style.transform = `translate(${mouseX}px, ${mouseY}px)`;
 
-            // Параллакс сетки
             const px = (e.clientX / window.innerWidth - 0.5) * 10;
             const py = (e.clientY / window.innerHeight - 0.5) * 10;
             document.body.style.setProperty('--mouse-x', `${px}px`);
