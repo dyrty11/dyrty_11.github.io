@@ -11,7 +11,7 @@
     const btnPreview = document.getElementById('btnPreview');
     const generatedInfo = document.getElementById('generatedInfo');
     
-    // Элементы для гайда
+    // Элементы гайда
     const btnGuide = document.getElementById('btnGuide');
     const guideSection = document.getElementById('guideSection');
 
@@ -19,12 +19,31 @@
     const MAX_AUDIO_SIZE = 15 * 1024 * 1024;
     const MAX_HTML_SIZE = 40 * 1024 * 1024;
 
-    // ===== ЛОГИКА ГАЙДА =====
+    // ===== АНИМАЦИЯ ГАЙДА =====
     if (btnGuide && guideSection) {
         btnGuide.addEventListener('click', () => {
-            guideSection.classList.toggle('hidden');
+            guideSection.classList.toggle('active');
         });
     }
+
+    // ===== КНОПКИ КОПИРОВАНИЯ =====
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            const textToCopy = e.currentTarget.getAttribute('data-copy');
+            try {
+                await navigator.clipboard.writeText(textToCopy);
+                const originalText = e.currentTarget.textContent;
+                e.currentTarget.textContent = '✅';
+                e.currentTarget.style.borderColor = 'var(--accent)';
+                setTimeout(() => {
+                    e.currentTarget.textContent = originalText;
+                    e.currentTarget.style.borderColor = 'var(--border)';
+                }, 1500);
+            } catch (err) {
+                alert('Не удалось скопировать. Выделите текст вручную.');
+            }
+        });
+    });
 
     // ===== ЗАГРУЗКА ФАЙЛОВ =====
     async function checkFileSignature(file, type) {
