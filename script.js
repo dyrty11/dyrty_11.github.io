@@ -1,8 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    function escapeHtml(s) {
-        return String(s).replace(/[&<>"'`/]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;','/':'&#47;'}[c]));
-    }
-
     // --- 1. Переключение темы ---
     const themeToggle = document.getElementById('themeToggle');
     const htmlElement = document.documentElement;
@@ -78,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         function sanitizeURL(url) {
             try {
-                if (url.startsWith('//')) return '#'; // Запрет protocol-relative
+                if (url.startsWith('//')) return '#';
                 const u = new URL(url, window.location.href);
                 if (['http:', 'https:'].includes(u.protocol)) return u.href;
             } catch (e) {}
@@ -170,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (searchInput) searchInput.addEventListener('input', (e) => { currentFilters.search = e.target.value; applyFilters(); });
     }
 
-    // --- 5. Обработка формы контактов (Formcarry AJAX) с Rate Limit ---
+    // --- 5. Обработка формы контактов (Formcarry AJAX) ---
     const contactForm = document.getElementById('contactForm');
     if (contactForm) {
         contactForm.addEventListener('submit', async function (e) {
@@ -207,15 +203,20 @@ document.addEventListener('DOMContentLoaded', () => {
         mobileNav.querySelectorAll('a').forEach(link => { link.addEventListener('click', () => { mobileNav.classList.remove('active'); menuBackdrop.classList.remove('active'); document.body.classList.remove('menu-open'); }); });
     }
 
-    // --- 7. Магнитный эффект и курсор ---
+    // --- 7. Магнитный эффект (ТОЛЬКО ДЛЯ КНОПОК) ---
     if (window.matchMedia("(pointer: fine)").matches) {
-        document.querySelectorAll('.btn, .project-card').forEach(el => {
+        // Убрали .project-card из селектора, чтобы карточки не притягивались
+        document.querySelectorAll('.btn').forEach(el => {
             el.addEventListener('mousemove', (e) => {
-                const rect = el.getBoundingClientRect(); const x = e.clientX - rect.left - rect.width / 2; const y = e.clientY - rect.top - rect.height / 2;
+                const rect = el.getBoundingClientRect(); 
+                const x = e.clientX - rect.left - rect.width / 2; 
+                const y = e.clientY - rect.top - rect.height / 2;
                 el.style.transform = `translate(${x * 0.05}px, ${y * 0.05}px)`;
             });
             el.addEventListener('mouseleave', () => { el.style.transform = ''; });
         });
+        
+        // Кастомный курсор
         const cursor = document.createElement('div'); cursor.className = 'custom-cursor'; document.body.appendChild(cursor);
         const dot = document.createElement('div'); dot.className = 'custom-cursor-dot'; document.body.appendChild(dot);
         let mouseX = 0, mouseY = 0, curX = 0, curY = 0;
