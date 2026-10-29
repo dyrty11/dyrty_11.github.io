@@ -10,10 +10,23 @@
     const btnDownload = document.getElementById('btnDownload');
     const btnPreview = document.getElementById('btnPreview');
     const generatedInfo = document.getElementById('generatedInfo');
+    
+    // Элементы для гайда
+    const btnGuide = document.getElementById('btnGuide');
+    const guideSection = document.getElementById('guideSection');
+
     const MAX_IMAGE_SIZE = 8 * 1024 * 1024;
     const MAX_AUDIO_SIZE = 15 * 1024 * 1024;
     const MAX_HTML_SIZE = 40 * 1024 * 1024;
 
+    // ===== ЛОГИКА ГАЙДА =====
+    if (btnGuide && guideSection) {
+        btnGuide.addEventListener('click', () => {
+            guideSection.classList.toggle('hidden');
+        });
+    }
+
+    // ===== ЗАГРУЗКА ФАЙЛОВ =====
     async function checkFileSignature(file, type) {
         return new Promise((resolve) => {
             const reader = new FileReader();
@@ -39,6 +52,7 @@
     }
 
     function setupDragDrop(zone, input, handler) {
+        if (!zone || !input) return;
         zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.background = 'rgba(204,255,0,0.05)'; });
         zone.addEventListener('dragleave', () => { zone.style.background = ''; });
         zone.addEventListener('drop', e => { e.preventDefault(); zone.style.background = ''; const f = e.dataTransfer.files[0]; if (f) handler(f); });
@@ -59,6 +73,7 @@
             imageBase64 = e.target.result.split(',')[1];
             imagePreview.src = e.target.result;
             imagePreview.style.display = 'block';
+            imagePreview.classList.remove('hidden');
             noImagePreview.style.display = 'none';
             resetOutput();
         };
@@ -93,6 +108,7 @@
         generatedInfo.classList.remove('visible');
     }
 
+    // ===== ГЕНЕРАЦИЯ САЙТА =====
     function generateNonce() {
         const array = new Uint8Array(16);
         crypto.getRandomValues(array);
@@ -117,7 +133,6 @@
         if (!allowedMimes.includes(mime)) throw new Error('Invalid audio MIME');
         if (!imgSrc || !imgSrc.startsWith('data:image/')) throw new Error('Invalid image source');
         
-        // Строгий CSP с nonce для стилей и скриптов
         const csp = "default-src 'none'; img-src data:; media-src data:; style-src 'nonce-" + nonce + "'; script-src 'nonce-" + nonce + "'; base-uri 'none'; form-action 'none';";
         
         return [
