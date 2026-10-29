@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⬡ VoidForge — Генератор Сайтов</title>
+    <title>⬡ VoidForge — Генератор Soundtag Сайтов</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; media-src data: blob:; frame-src 'self' blob:; base-uri 'none'; form-action 'none'; object-src 'none';">
     <script src="frame-bust.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,6 +18,7 @@
             <h1>Void<span>Forge</span></h1>
             <p class="subtitle">Генератор Soundtag Сайтов</p>
         </div>
+        
         <div class="section">
             <div class="section-title">Изображение (JPEG, PNG, GIF, WebP)</div>
             <div class="file-upload-area" id="imageDropZone">
@@ -35,23 +37,84 @@
             </div>
             <input type="file" id="audioInput" accept="audio/mpeg, audio/ogg, audio/wav, audio/x-m4a, audio/mp4">
         </div>
+        
         <div class="preview-row">
             <div class="preview-mini">
                 <div class="mini-label">Превью изображения</div>
-                <img id="imagePreview" src="" alt="" style="display:none;">
+                <img id="imagePreview" src="" alt="" class="hidden">
                 <div class="no-preview" id="noImagePreview">—</div>
             </div>
             <div class="preview-mini">
                 <div class="mini-label">Статус аудио</div>
-                <div style="padding:10px 0;"><span id="audioStatus" style="font-size:0.8em;color:var(--text-muted);">Ожидание</span></div>
+                <div class="status-box"><span id="audioStatus">Ожидание</span></div>
             </div>
         </div>
+        
         <div class="btn-row">
             <button class="btn btn-generate" id="btnGenerate">⚡ Сгенерировать</button>
             <button class="btn btn-download" id="btnDownload">⬇ Скачать</button>
             <button class="btn btn-preview" id="btnPreview">◉ Предпросмотр</button>
         </div>
-        <div class="generated-info" id="generatedInfo">✓ Сайт готов! Файл сохранится как <span style="font-weight:bold;">index.html</span></div>
+        <div class="generated-info" id="generatedInfo">✓ Сайт готов! Файл сохранится как <span>index.html</span></div>
+
+        <!-- БЛОК С ГАЙДОМ ПО SOUNDTAG -->
+        <div class="guide-trigger">
+            <button class="btn btn-guide" id="btnGuide">📖 Как использовать с NFC-метками (Гайд)</button>
+        </div>
+
+        <div class="guide-section hidden" id="guideSection">
+            <h2>💀 Троллинг с помощью Soundtag</h2>
+            <p><b>Soundtag</b> — это NFC-метка, на которую записана ссылка на сайт, мгновенно воспроизводящий громкий звук. Пранкер незаметно прикладывает телефон к устройству жертвы, и через секунду раздаётся мемный или пугающий звук.</p>
+            
+            <h3>📌 Готовые ссылки для Soundtag</h3>
+            <p>Можно использовать уже существующие сайты. Просто запиши одну из этих ссылок на метку:</p>
+            <ul class="links-list">
+                <li><code>sndtag.ru/s</code> — стоны</li>
+                <li><code>sndtag.ru/t</code> — «творог»</li>
+                <li><code>sndtag.ru/m</code> — меняется по голосованию в Telegram</li>
+                <li><code>prikols1337.github.io/sberfunpay.html</code> — SberPay пранк (Funpay)</li>
+                <li><code>prikols1337.github.io/index.html</code> — SberPay пранк (пицца + сок)</li>
+            </ul>
+
+            <h3>🛠️ Как создать свою Soundtag-метку</h3>
+            <div class="guide-steps">
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <div class="step-text">
+                        <strong>Сгенерируй сайт</strong>
+                        <p>Загрузи картинку и звук, нажми «Сгенерировать» и скачай файл <code>index.html</code>.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <div class="step-text">
+                        <strong>Выложи сайт в интернет (Хостинг)</strong>
+                        <p>Чтобы NFC-метка могла открыть сайт, он должен быть онлайн. Вот два самых простых способа:</p>
+                        
+                        <p style="margin-top: 8px;"><b>Способ Б (Netlify Drop — самый быстрый и анонимный):</b> Зайди на сайт <code>app.netlify.com/drop</code>. Просто перетащи папку с файлом <code>index.html</code> в окно браузера. Через 5 секунд сайт будет онлайн, и ты получишь готовую ссылку. Регистрация не нужна (но сайт удалится через 24 часа).</p>
+
+                        <p style="margin-top: 8px;"><b>Способ А (GitHub):</b> Если у тебя есть аккаунт GitHub, создай новый репозиторий или используй существующий. Нажми «Add file» → «Create new file». Назови файл <code>troll/index.html</code> (создастся папка troll). Вставь туда весь скачанный код и нажми «Commit changes». Ссылка будет вида: <code>https://твой_ник.github.io/название_репозитория/troll/</code></p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <div class="step-text">
+                        <strong>Запиши ссылку на метку</strong>
+                        <p>Открой приложение <b>NFC Tools Pro</b> → Вкладка <b>«Записать»</b> → Добавить запись → <b>URL / URI</b> → Вставь свою ссылку → Нажми <b>«Записать»</b> и приложи телефон к метке.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">4</div>
+                    <div class="step-text">
+                        <strong>Спрячь метку</strong>
+                        <p>Приклей метку под стол в кафе, на стойку в баре или на незаметное место. Когда жертва приложит телефон — у неё внезапно заиграет звук и откроется картинка!</p>
+                    </div>
+                </div>
+            </div>
+            <div class="guide-warning">
+                ⚠️ <b>Внимание:</b> Не используй этот метод для незаконных действий, спама или порчи чужого имущества. Только безобидные пранки!
+            </div>
+        </div>
     </div>
     <script src="voidforge.js" defer></script>
 </body>
