@@ -59,60 +59,80 @@
 
         <!-- БЛОК С ГАЙДОМ ПО SOUNDTAG -->
         <div class="guide-trigger">
-            <button class="btn btn-guide" id="btnGuide">📖 Как использовать с NFC-метками (Гайд)</button>
+            <button class="btn btn-guide" id="btnGuide">📖 Гайд: Как троллить с NFC-метками</button>
         </div>
 
         <div class="guide-section hidden" id="guideSection">
-            <h2>💀 Троллинг с помощью Soundtag</h2>
-            <p><b>Soundtag</b> — это NFC-метка, на которую записана ссылка на сайт, мгновенно воспроизводящий громкий звук. Пранкер незаметно прикладывает телефон к устройству жертвы, и через секунду раздаётся мемный или пугающий звук.</p>
+            <div class="guide-header">
+                <h2>💀 Soundtag Пранки</h2>
+                <p><b>Soundtag</b> — это NFC-метка со ссылкой на сайт, который мгновенно воспроизводит громкий звук. Пранкер подходит к жертве и незаметно прикладывает метку к её телефону (или карману).</p>
+            </div>
             
-            <h3>📌 Готовые ссылки для Soundtag</h3>
-            <p>Можно использовать уже существующие сайты. Просто запиши одну из этих ссылок на метку:</p>
-            <ul class="links-list">
-                <li><code>sndtag.ru/s</code> — стоны</li>
-                <li><code>sndtag.ru/t</code> — «творог»</li>
-                <li><code>sndtag.ru/m</code> — меняется по голосованию в Telegram</li>
-                <li><code>prikols1337.github.io/sberfunpay.html</code> — SberPay пранк (Funpay)</li>
-                <li><code>prikols1337.github.io/index.html</code> — SberPay пранк (пицца + сок)</li>
-            </ul>
+            <div class="guide-alert">
+                <strong>⚠️ Важно:</strong> У жертвы должен быть включен NFC в настройках телефона (у большинства Android он включен по умолчанию, у iPhone нужно просто разблокировать экран).
+            </div>
 
-            <h3>🛠️ Как создать свою Soundtag-метку</h3>
+            <h3>📌 Готовые ссылки для записи</h3>
+            <div class="links-grid">
+                <div class="link-item"><code>sndtag.ru/s</code> <span>стоны</span></div>
+                <div class="link-item"><code>sndtag.ru/t</code> <span>«творог»</span></div>
+                <div class="link-item"><code>sndtag.ru/m</code> <span>мемы</span></div>
+                <div class="link-item"><code>prikols1337.github.io/sberfunpay.html</code> <span>SberPay (Funpay)</span></div>
+                <div class="link-item"><code>prikols1337.github.io/index.html</code> <span>SberPay (пицца)</span></div>
+            </div>
+
+            <h3>🛠️ Инструкция по созданию</h3>
             <div class="guide-steps">
                 <div class="step">
-                    <div class="step-num">1</div>
+                    <div class="step-num">01</div>
                     <div class="step-text">
-                        <strong>Сгенерируй сайт</strong>
-                        <p>Загрузи картинку и звук, нажми «Сгенерировать» и скачай файл <code>index.html</code>.</p>
+                        <strong>Сгенерируй файл</strong>
+                        <p>Загрузи картинку и звук выше, нажми «Сгенерировать» и скачай файл <code>index.html</code>.</p>
                     </div>
                 </div>
+                
                 <div class="step">
-                    <div class="step-num">2</div>
+                    <div class="step-num">02</div>
                     <div class="step-text">
-                        <strong>Выложи сайт в интернет (Хостинг)</strong>
-                        <p>Чтобы NFC-метка могла открыть сайт, он должен быть онлайн. Вот два самых простых способа:</p>
-                        
-                        <p style="margin-top: 8px;"><b>Способ Б (Netlify Drop — самый быстрый и анонимный):</b> Зайди на сайт <code>app.netlify.com/drop</code>. Просто перетащи папку с файлом <code>index.html</code> в окно браузера. Через 5 секунд сайт будет онлайн, и ты получишь готовую ссылку. Регистрация не нужна (но сайт удалится через 24 часа).</p>
-
-                        <p style="margin-top: 8px;"><b>Способ А (GitHub):</b> Если у тебя есть аккаунт GitHub, создай новый репозиторий или используй существующий. Нажми «Add file» → «Create new file». Назови файл <code>troll/index.html</code> (создастся папка troll). Вставь туда весь скачанный код и нажми «Commit changes». Ссылка будет вида: <code>https://твой_ник.github.io/название_репозитория/troll/</code></p>
+                        <strong>Залей файл в сеть (Хостинг)</strong>
+                        <p>Метка хранит только ссылку. Самый анонимный и быстрый способ:</p>
+                        <ul class="step-list">
+                            <li>Зайди на <code>app.netlify.com/drop</code></li>
+                            <li>Перетащи папку с файлом <code>index.html</code> прямо в браузер</li>
+                            <li>Получи готовую ссылку вида <code>https://random-name.netlify.app</code></li>
+                        </ul>
+                        <p><i>*Альтернатива: загрузить на GitHub Pages в папку <code>troll/</code>.</i></p>
                     </div>
                 </div>
+                
                 <div class="step">
-                    <div class="step-num">3</div>
+                    <div class="step-num">03</div>
                     <div class="step-text">
                         <strong>Запиши ссылку на метку</strong>
-                        <p>Открой приложение <b>NFC Tools Pro</b> → Вкладка <b>«Записать»</b> → Добавить запись → <b>URL / URI</b> → Вставь свою ссылку → Нажми <b>«Записать»</b> и приложи телефон к метке.</p>
+                        <p>Скачай <b>бесплатную версию NFC Tools</b>:</p>
+                        <ul class="step-list">
+                            <li><a href="https://play.google.com/store/apps/details?id=com.wakdev.wdnfc" target="_blank" rel="noopener noreferrer">NFC Tools для Android (Google Play)</a></li>
+                            <li><a href="https://itunes.apple.com/us/app/nfc-tools/id1252962749" target="_blank" rel="noopener noreferrer">NFC Tools для iOS (App Store)</a></li>
+                        </ul>
+                        <p>Открой вкладку <b>«Записать»</b> → <b>«Добавить запись»</b>:</p>
+                        <ul class="step-list">
+                            <li>Выбери <b>URL / URI</b> и вставь полученную ссылку</li>
+                            <li>Нажми <b>«Записать»</b> и приложи телефон к метке</li>
+                        </ul>
                     </div>
                 </div>
+                
                 <div class="step">
-                    <div class="step-num">4</div>
+                    <div class="step-num">04</div>
                     <div class="step-text">
-                        <strong>Спрячь метку</strong>
-                        <p>Приклей метку под стол в кафе, на стойку в баре или на незаметное место. Когда жертва приложит телефон — у неё внезапно заиграет звук и откроется картинка!</p>
+                        <strong>Иди троллить</strong>
+                        <p>Подойди к жертве (в наушниках, в толпе, в транспорте) и приложи метку к её смартфону. Звук вырвется наружу, а на экране появится картинка!</p>
                     </div>
                 </div>
             </div>
+            
             <div class="guide-warning">
-                ⚠️ <b>Внимание:</b> Не используй этот метод для незаконных действий, спама или порчи чужого имущества. Только безобидные пранки!
+                ⚠️ Используй только для безобидных пранков. Не приклеивай метки к чужому имуществу и не спамь ими.
             </div>
         </div>
     </div>
