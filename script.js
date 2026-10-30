@@ -231,3 +231,14 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.addEventListener('mouseout', (e) => { if (e.target.closest(hoverTargets)) cursor.classList.remove('hover'); });
     }
 });
+    // --- 9. Cookie Banner ---
+    if (!localStorage.getItem('cookieConsent')) {
+        const banner = document.createElement('div');
+        banner.className = 'cookie-banner';
+        banner.innerHTML = 'Этот сайт использует cookie для сохранения темы. <a href="privacy.html" style="color:inherit;text-decoration:underline;">Узнать больше</a> <button id="cookieAccept">ОК</button>';
+        document.body.appendChild(banner);
+        document.getElementById('cookieAccept').addEventListener('click', () => {
+            localStorage.setItem('cookieConsent', 'true');
+            banner.remove();
+        });
+    }
