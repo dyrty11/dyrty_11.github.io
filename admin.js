@@ -2,7 +2,7 @@
     const REPO_OWNER = 'dyrty11';
     const REPO_NAME = 'dyrty_11.github.io';
     const FILE_PATH = 'projects.json';
-    const SITE_URL = `https://dyrty11.pages.dev/projects.html`;
+    const SITE_URL = `https://${REPO_OWNER}.github.io/${REPO_NAME}/projects.html`;
 
     const LIMITS = {
         MAX_COUNT: 200, title: 120, description: 2000, link: 500, buttonText: 40, tag: 40, tagsCount: 20, importFileSize: 5 * 1024 * 1024, maxIconSize: 300 * 1024
