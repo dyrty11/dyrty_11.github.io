@@ -235,8 +235,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!localStorage.getItem('cookieConsent')) {
         const banner = document.createElement('div');
         banner.className = 'cookie-banner';
-        banner.innerHTML = 'Этот сайт использует cookie для сохранения темы. <a href="privacy.html" style="color:inherit;text-decoration:underline;">Узнать больше</a> <button id="cookieAccept">ОК</button>';
+        banner.innerHTML = `
+            <span>Этот сайт использует cookie для сохранения темы. <a href="privacy.html">Узнать больше</a></span>
+            <button id="cookieAccept">ОК</button>
+        `;
         document.body.appendChild(banner);
+        
         document.getElementById('cookieAccept').addEventListener('click', () => {
             localStorage.setItem('cookieConsent', 'true');
             banner.remove();
